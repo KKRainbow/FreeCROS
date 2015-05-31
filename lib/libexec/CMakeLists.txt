@@ -1,0 +1,2 @@
+FILE(GLOB_RECURSE SRCS ./*.cpp)
+ADD_LIBRARY(exec ${SRCS})
