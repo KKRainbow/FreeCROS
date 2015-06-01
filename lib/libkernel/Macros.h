@@ -52,4 +52,5 @@ __asm__ volatile ("inb %%dx,%%al\n" \
 _v; \
 })
 
+#define ALIGN_UP(addr,align) (align == 0?addr:(addr+align) - ((addr+align)%align))
 //////////////////////

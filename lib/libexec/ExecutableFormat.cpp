@@ -1,4 +1,3 @@
-#pragma once
 #include"Global.h"
 #include "stl/slinkedlist.h"
 #include"ExecutableFormat.h"

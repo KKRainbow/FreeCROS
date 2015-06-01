@@ -9,7 +9,7 @@ enum MemoryZoneType
 };
 class MemoryAllocator
 {
-private:
+protected:
 	MemoryZoneType allocType;
 public:
 	virtual ~MemoryAllocator(){};

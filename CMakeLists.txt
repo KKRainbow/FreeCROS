@@ -19,10 +19,9 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/lib/libkernel/${ARCHITECT})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/kernel/${ARCHITECT})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/kernel)
 
-add_executable(freecros main.cpp)
 
-install(TARGETS freecros RUNTIME DESTINATION bin)
 
 add_subdirectory(kernel)
 add_subdirectory(config)
 add_subdirectory(lib)
+add_subdirectory(test)

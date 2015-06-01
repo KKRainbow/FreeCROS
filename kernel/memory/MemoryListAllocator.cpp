@@ -18,8 +18,9 @@
 #include "MemoryListAllocator.h"
 
 MemoryListAllocator::MemoryListAllocator(addr_t _Start,size_t _Size,MemoryZoneType _Type)
-:start(_Start),size(_Size),allocType(_Type)
+:start(_Start),size(_Size)
 {
+	this->allocType = _Type;
 }
 
 MemoryListAllocator::~MemoryListAllocator()
@@ -64,7 +65,7 @@ void MemoryListAllocator::Dereserve(void* _From, size_t _Size)
 	head->type = ListHead::FREE;
 	head->size = _Size - sizeof(ListHead);
 	
-	auto leftHead = this->GetHeadFromAddress(_From,_Size);
+	auto leftHead = this->GetHeadFromAddress((addr_t)_From - 1,0);
 	auto rightHead = leftHead->next;
 	this->CheckMagic(leftHead);
 	this->CheckMagic(rightHead);
@@ -75,6 +76,7 @@ void MemoryListAllocator::Dereserve(void* _From, size_t _Size)
 
 void MemoryListAllocator::Reserve(void* _From, size_t _Size)
 {
+	if(_Size == 0)return;
 	auto head = this->GetHeadFromAddress((addr_t)_From,_Size);
 	if(head == nullptr)
 	{
@@ -86,14 +88,14 @@ void MemoryListAllocator::Reserve(void* _From, size_t _Size)
 	Assert(head->type == ListHead::FREE);
 	
 	//预留空间,左侧空间设置一个头,右侧空间设置一个头,直接把这部分空间架空
-	//左部的头重新利用已经存在的即可
-	head->size = (addr_t)_From - ((addr_t)head + sizeof(ListHead));
 	//右侧的头
 	auto rightHead = (ListHead*)((addr_t)_From + _Size);
 	*rightHead = ListHead();
 	rightHead->type = ListHead::FREE;
 	rightHead->size = (addr_t)head + sizeof(ListHead) + head->size
 		- (addr_t)rightHead - sizeof(ListHead);
+	//左部的头重新利用已经存在的即可
+	head->size = (addr_t)_From - ((addr_t)head + sizeof(ListHead));
 	
 	this->ListInsertAfter(head,rightHead);
 }
@@ -103,17 +105,20 @@ void MemoryListAllocator::Deallocate(void* _Ptr)
 	auto listHead = this->GetHeadFromAddress((addr_t)_Ptr);
 	this->CheckMagic(listHead);
 	
+	Assert(listHead->type == ListHead::OCCUPIED);
+	
 	listHead->type = ListHead::FREE;
 	this->MergeFreeHead(listHead);
 }
 
 void* MemoryListAllocator::Allocate(size_t _Size, int _Align)
 {
+	if(_Size == 0)return nullptr;
 	//暂时采用First fit
 	auto guard = (ListHead*)this->start;
 	//防止第一次执行就跳出
 	bool flag = false;
-	for(auto head = guard;head!=guard && flag == true;head = head->next)
+	for(auto head = guard;head!=guard || flag == false;head = head->next)
 	{
 		flag = true;
 		if(head->type != ListHead::FREE)continue;
@@ -121,8 +126,7 @@ void* MemoryListAllocator::Allocate(size_t _Size, int _Align)
 		addr_t availEnd = availStart + head->size;
 		
 		//把availStart按_Align向上对齐
-		addr_t realStart = (availStart + _Align) -
-			(availStart + _Align)%_Align;
+		addr_t realStart = ALIGN_UP(availStart,_Align);
 		//看现在是否还满足要求,别忘了在末尾还要追加一个Head呢
 		if(availEnd - realStart < _Size + sizeof(ListHead))continue;
 		
@@ -148,14 +152,19 @@ void MemoryListAllocator::MergeFreeHead(ListHead*& _Obj)
 		this->CheckMagic(_Obj);
 		this->CheckMagic(_Obj->next);
 		this->CheckMagic(_Obj->prev);
-		if(_Obj->next != _Obj && _Obj->next->type == ListHead::FREE)
+		//next的地址必须在Obj地址的右边,否则合并出来形状不对= =
+		if(_Obj->next != _Obj && _Obj->next->type == ListHead::FREE && 
+			(addr_t)_Obj->next > (addr_t)_Obj
+		)
 		{
 			auto sizeOfNext = _Obj->next->size;
 			this->ListRemove(_Obj->next);
 			_Obj->size += sizeof(ListHead) + sizeOfNext;
 			continue;
 		}
-		else if(_Obj->prev != _Obj && _Obj->prev->type == ListHead::FREE)
+		else if(_Obj->prev != _Obj && _Obj->prev->type == ListHead::FREE &&
+			(addr_t)_Obj->prev < (addr_t)_Obj
+		)
 		{
 			//转换为next为Free的情况.
 			_Obj = _Obj->prev;
@@ -168,22 +177,23 @@ void MemoryListAllocator::MergeFreeHead(ListHead*& _Obj)
 		}
 	}
 }
-MemoryListAllocator::ListHead* MemoryListAllocator::GetHeadFromAddress(addr_t _Addr,size_t _Size = 0)
+MemoryListAllocator::ListHead* MemoryListAllocator::GetHeadFromAddress(addr_t _Addr,size_t _Size)
 {
 	auto guard = (ListHead*)this->start;
-	auto head = nullptr;
+	auto head = (ListHead*)nullptr;
 	auto flag = false;
 	
-	for(head = guard;head!=guard && flag == true;head = head->next)
+	for(head = guard;head!=guard || flag == false;head = head->next)
 	{
 		flag = true;
 		this->CheckMagic(head);
 		if((addr_t)_Addr >= (addr_t)head && 
 			(addr_t)_Addr + _Size <= (addr_t)head + head->size + sizeof(ListHead))
 		{
-			break;
+			return head;
 		}
 	}
-	return head;
-	
+	//正常情况下绝对不会运行到这
+	Assert(false);
+	return nullptr;
 }
