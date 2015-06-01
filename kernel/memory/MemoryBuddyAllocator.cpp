@@ -20,9 +20,12 @@
 
 using namespace lr::sstl;
 MemoryBuddyAllocator::MemoryBuddyAllocator(addr_t _Start,size_t _Size,
-					   size_t _Unit,MemoryAllocator* _Alloc)
+					   size_t _Unit,MemoryAllocator* _Alloc,
+					   MemoryZoneType _Type
+  					)
 :start(_Start),size(_Size),alloc(_Alloc),unit(_Unit)
 {
+	this->allocType = _Type;
 }
 
 MemoryBuddyAllocator::~MemoryBuddyAllocator()
@@ -51,7 +54,7 @@ bool MemoryBuddyAllocator::Initialize()
 	
 	
 	//为avail数组申请空间,该数组不会超过32个元素,所以就申请32个了
-	this->avail = this->alloc->Allocate(32*sizeof(void*),0);
+	this->avail = (decltype(this->avail))this->alloc->Allocate(32*sizeof(this->avail[0]),0);
 	if(this->avail == nullptr)
 	{
 		this->alloc->Deallocate(avail);
@@ -64,9 +67,9 @@ bool MemoryBuddyAllocator::Initialize()
 	while(nextSize > 0)
 	{
 		Assert(i < 32);
-		this->avail[i++] = (addr_t*)avail;
+		this->avail[i++] = (decltype(*(this->avail)))avail;
 		
-		avail = (void*)((addr_t)avail + nextSize);
+		avail = (void*)((addr_t)avail + nextSize * sizeof(this->avail[0][0]));
 		nextSize >>= 1;
 		
 		this->availSize = i;
@@ -90,7 +93,7 @@ void MemoryBuddyAllocator::Dereserve(void* _Free, size_t _Size)
 void MemoryBuddyAllocator::Reserve(void* _From, size_t _Size)
 {
 	if(_Size == 0)return;
-	auto coord = this->GetCoordsOfAddr(_From);
+	auto coord = this->GetCoordsOfAddr((addr_t)_From);
 	
 	auto i = Get<0>(coord);
 	auto j = Get<1>(coord);
@@ -103,9 +106,9 @@ void MemoryBuddyAllocator::Reserve(void* _From, size_t _Size)
 	auto blockAddr = Get<0>(property);
 	auto blockSize = Get<1>(property);
 	
-	Assert(blockSize + blockAddr >= _From + _Size);
+	Assert(blockSize + blockAddr >= (addr_t)_From + _Size);
 	
-	auto afterSplit =  this->SplitLargeSpace(_Size,0,i,j);
+	auto afterSplit =  this->SplitLargeSpace(_Size,0,i,j,(addr_t)_From);
 	auto newi = Get<1>(afterSplit);
 	auto newj = Get<2>(afterSplit);
 	
@@ -125,11 +128,12 @@ void MemoryBuddyAllocator::Deallocate(void* _Ptr)
 
 void* MemoryBuddyAllocator::Allocate(size_t _Size, int _Align)
 {
-	if(_Size == 0)return;
-	auto coord = this->GetFirstFit(_Size,_Align);
+	if(_Size == 0)return nullptr;
+	auto coord = this->GetFirstFit(_Size,_Align,true);
 	auto resi = Get<0>(coord);
 	auto resj = Get<1>(coord);
 	
+	if(resi == -1 || resj == -1)return nullptr;
 	auto afterSplit = this->SplitLargeSpace(
 		_Size,_Align,resi,resj
 	);
@@ -158,6 +162,7 @@ lr::sstl::Tuple<int,int> MemoryBuddyAllocator::GetCoordsOfAddr(addr_t _Addr)
 		{
 			return MakeTuple(i,num);
 		}
+		currentBlockSize <<= 1;
 	}
 	return bad;
 }
@@ -178,7 +183,8 @@ MemoryBuddyAllocator::GetPropertyCorrespondToAvailElem(int _Block,int _Num)
 }
 
 lr::sstl::Tuple<addr_t,int,int>
-	MemoryBuddyAllocator::SplitLargeSpace(size_t _Size,int _Align,int _Block,int _Num)
+	MemoryBuddyAllocator::SplitLargeSpace(size_t _Size,int _Align,int _Block,
+					      int _Num,addr_t _Addr)
 {
 	auto resi = _Block;
 	auto resj = _Num;
@@ -189,7 +195,7 @@ lr::sstl::Tuple<addr_t,int,int>
 	Assert(resj >= 0);
 	Assert(resAddr != 0);
 	
-	while(resi >= 0)
+	while(resi > 0)
 	{
 		//这个空间是可以容纳的
 		//尝试对这个空间进行分割
@@ -211,6 +217,14 @@ lr::sstl::Tuple<addr_t,int,int>
 		if(leftAddr != 0)
 		{
 			leftAvail = true;
+			//如果addr不为0,还要判断是否包含这个地址范围
+			auto bsize = Get<1>(leftprop);
+			if(_Addr != 0 && (leftAddr > _Addr || Get<0>(leftprop) + bsize < 
+				_Addr + _Size)
+			)
+			{
+				leftAvail = false;
+			}
 		}
 		
 		//右边呢?
@@ -223,6 +237,13 @@ lr::sstl::Tuple<addr_t,int,int>
 			if(rightAddr != 0)
 			{
 				rightAvai = true;
+				auto bsize = Get<1>(rightprop);
+				if(_Addr != 0 && (rightAddr > _Addr || Get<0>(rightprop) + bsize < 
+					_Addr + _Size)
+				)
+				{
+					leftAvail = false;
+				}
 			}
 		}
 		
@@ -244,12 +265,9 @@ lr::sstl::Tuple<addr_t,int,int>
 			}
 			continue;
 		}
-		
-		//两个都不行的话那就只好用当前空间了
-		return MakeTuple(resAddr,resi,resj);
+		break;
 	}
-	Assert(false);//肯定不会运行到这里!!!!!
-	return MakeTuple(0,-1,-1);
+	return MakeTuple(resAddr,resi,resj);
 }
 void MemoryBuddyAllocator::MergeBuddy(int _Block,int _Num)
 {
@@ -268,11 +286,13 @@ void MemoryBuddyAllocator::MergeBuddy(int _Block,int _Num)
 		
 		auto largeI = curri + 1;
 		auto largeJ = currj >> 1;
+		if(largeI >= this->availSize)return;
+		
 		Assert(this->avail[largeI][largeJ] ==
 			INAVAILABLE);
 		
 		auto leftI = curri;
-		auto leftJ = currj & 1 == 0 ? currj:currj - 1;
+		auto leftJ = (currj & 1) == 0 ? currj:currj - 1;
 		
 		auto rightI = curri;
 		auto rightJ = currj | 1;
@@ -297,7 +317,7 @@ addr_t MemoryBuddyAllocator::CheckFit(size_t _Size,int _Align,addr_t _BAddr,size
 {
 	if(_BSize < _Size)return 0;
 	//把_BAddr向上对齐
-	addr_t realAddr = ALIGN_UP(realAddr,_Align);
+	addr_t realAddr = ALIGN_UP(_BAddr,_Align);
 	
 	if(_BAddr + _BSize - realAddr >= _Size)
 	{
@@ -306,7 +326,7 @@ addr_t MemoryBuddyAllocator::CheckFit(size_t _Size,int _Align,addr_t _BAddr,size
 	return 0;
 }
 
-lr::sstl::Tuple<int,int> MemoryBuddyAllocator::GetFirstFit(size_t _Size,int _Align)
+lr::sstl::Tuple<int,int> MemoryBuddyAllocator::GetFirstFit(size_t _Size,int _Align,bool _IsFree)
 {
 	size_t sizeOfMinUnit = this->size / this->unit;
 	//找到第一个可以容纳的
@@ -315,7 +335,9 @@ lr::sstl::Tuple<int,int> MemoryBuddyAllocator::GetFirstFit(size_t _Size,int _Ali
 	{
 		for(int j = 0;j<sizeOfMinUnit;j++)
 		{
-			if(this->avail[i][j] != INAVAILABLE)//该空间可用
+			if((_IsFree && this->avail[i][j] == AVAILABLE)
+				|| (!_IsFree && this->avail[i][j] != INAVAILABLE)
+			)//该空间可用
 			{
 				//计算属于该空间的
 				auto prop = this->GetPropertyCorrespondToAvailElem(i,j);

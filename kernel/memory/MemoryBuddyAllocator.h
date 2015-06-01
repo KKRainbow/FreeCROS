@@ -37,13 +37,14 @@ private:
 	lr::sstl::Tuple<int,int> GetCoordsOfAddr(addr_t _Addr);
 	lr::sstl::Tuple<addr_t,size_t> GetPropertyCorrespondToAvailElem(int _Block,int _Num);
 	lr::sstl::Tuple<addr_t,int,int>
-		SplitLargeSpace(size_t _Size,int _Align,int _Block,int _Num);
+		SplitLargeSpace(size_t _Size,int _Align,int _Block,int _Num,addr_t _Addr = 0);
 	void MergeBuddy(int _Block,int _Num);
 	//如果可以容纳,就返回对齐后的地址,否则返回0
 	addr_t CheckFit(size_t _Size,int _Align,addr_t _BAddr,size_t _BSize);
-	lr::sstl::Tuple<int,int> GetFirstFit(size_t _Size,int _Align);
+	lr::sstl::Tuple<int,int> GetFirstFit(size_t _Size,int _Align,bool _IsFree = false);
 public:
-	MemoryBuddyAllocator(addr_t _Start,size_t _Size,size_t _Unit,MemoryAllocator* _Alloc);
+	MemoryBuddyAllocator(addr_t _Start,size_t _Size,size_t _Unit,MemoryAllocator* _Alloc,
+					   MemoryZoneType _Type);
 	~MemoryBuddyAllocator();
 	virtual bool Deinitialize();
 	virtual bool Initialize();
@@ -52,5 +53,7 @@ public:
 	virtual void Reserve(void* _From, size_t _Size);
 	virtual void Deallocate(void* _Ptr);
 	virtual void* Allocate(size_t _Size, int _Align);
+	
+	friend void PrintList();
 };
 
