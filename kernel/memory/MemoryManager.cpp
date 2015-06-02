@@ -25,6 +25,7 @@ SINGLETON_CPP(MemoryManager)
 	Assert(this->InitInitAllocator());
 	Assert(this->MoveModulesToSafe());
 	Assert(this->ArrangeMemoryLayout());
+	//TODO Reserve的实现!!!
 }
 
 bool MemoryManager::InitInitAllocator()
@@ -155,5 +156,35 @@ MemoryAllocator* MemoryManager::OperatorNewCallback(size_t _Size)
 
 MemoryAllocator* MemoryManager::OperatorDeleteCallback(void* _Ptr)
 {
-	return this->kernelInitAllocator;
+	return this->GetProperAlloc((addr_t)_Ptr);
+}
+
+MemoryAllocator* MemoryManager::GetProperAlloc(addr_t _Addr,size_t _Size = 0)
+{
+	MemoryAllocator* allocs[] = 
+	{
+		this->kernelInitAllocator,
+		this->kernelPageAllocator,
+		this->userObjectAllocator
+	};
+	for(auto alloc : allocs)
+	{
+		addr_t start = alloc->StartAddr();
+		size_t size = alloc->Size();
+		if(_Addr>=start && _Addr+_Size <= start+size)
+			return alloc;
+	}
+	return nullptr;
+}
+void MemoryManager::Reserve(addr_t _Addr,size_t _Size)
+{
+	auto alloc = this->GetProperAlloc(_Addr,_Size);
+	if(alloc)
+		alloc->Reserve(_Addr,_Size);
+}
+void MemoryManager::Dereserve(addr_t _Addr,size_t _Size)
+{
+	auto alloc = this->GetProperAlloc(_Addr,_Size);
+	if(alloc)
+		alloc->Dereserve(_Addr,_Size);
 }

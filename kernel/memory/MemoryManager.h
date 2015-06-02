@@ -35,6 +35,7 @@ private:
 		size_t size;
 	}*modules;
 	int16_t moduleCount = 0;
+	MemoryAllocator* GetProperAlloc(addr_t _Addr,size_t _Size);
 protected:
 	MemoryAllocator* kernelInitAllocator = nullptr;
 	MemoryAllocator* kernelPageAllocator = nullptr;
@@ -42,6 +43,8 @@ protected:
 	bool InitInitAllocator();
 	bool ArrangeMemoryLayout();
 	bool MoveModulesToSafe();
+	void Reserve(addr_t _Addr,size_t _Size);
+	void Dereserve(addr_t _Addr,size_t _Size);
 public:
 	//new运算符每次执行都会调用这个函数来获取合适的Allocator
 	MemoryAllocator* OperatorNewCallback(size_t _Size);
