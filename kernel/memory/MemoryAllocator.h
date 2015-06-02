@@ -22,4 +22,7 @@ public:
 	virtual bool Initialize() = 0; //Run after constructed and before using it
 	virtual bool Deinitialize() = 0; //Run before destroy it
 	MemoryZoneType AllocType(){return this->allocType;}
+	virtual addr_t StartAddr() = 0;
+	virtual size_t Size() = 0;
+	virtual size_t FreeSize() = 0;
 };

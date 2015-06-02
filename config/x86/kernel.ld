@@ -49,22 +49,22 @@ SECTIONS
 		data = .;
 		*(.data)
 
-        CTOR_LIST = .;
+		CTOR_LIST = .;
 		KEEP (*(SORT(.ctors.*)))
 		KEEP (*(.ctors))
-        KEEP (*(.preinit_array))
-        KEEP (*(.init_array.*))
-        KEEP (*(.init_array))
+		KEEP (*(.preinit_array))
+		KEEP (*(.init_array.*))
+		KEEP (*(.init_array))
 		LONG(0)
-        CTOR_END = .;
+		CTOR_END = .;
 
-        DTOR_LIST = .;
+		DTOR_LIST = .;
 		KEEP (*(SORT(.dtors.*)))
 		KEEP (*(.dtors))
-        KEEP (*(.fini_array.*))
-        KEEP (*(.fini_array))
-        LONG(0)
-        DTOR_END = .;
+		KEEP (*(.fini_array.*))
+		KEEP (*(.fini_array))
+		LONG(0)
+		DTOR_END = .;
 		. += 4;
 
 		initStart = .;
@@ -74,11 +74,11 @@ SECTIONS
 
 		. = ALIGN(4096);
     } 
-	.eh_frame :
-	{
+    .eh_frame :
+    {
 		KEEP(*(.eh_frame))
 		binEnd = .;
-	}
+    }
     .bss : AT(phys + (bss - code) )
     {
 		bss = .;
@@ -86,9 +86,11 @@ SECTIONS
 		*(.bss.*)
 		*(COMMON)
 
-       	 . += 4;
+		. += 4;
+		kernelObjInitZoneStart = .;
 		. = 0x00400000;
-		kernelEnd = . + 0x00400000;
+		kernelObjInitZoneEnd = .;
+		kernelEnd = .;
     }
 
 }

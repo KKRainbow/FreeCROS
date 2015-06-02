@@ -82,6 +82,9 @@ public:
 	virtual void Reserve(void* _From, size_t _Size)override;
 	virtual void Deallocate(void* _Ptr)override;
 	virtual void* Allocate(size_t _Size, int _Align)override;
+	virtual addr_t StartAddr()override{return this->start;};
+	virtual size_t Size()override{return this->size;};
+	virtual size_t FreeSize()override;
 	
 	friend void PrintList();
 };

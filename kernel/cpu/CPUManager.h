@@ -15,14 +15,29 @@
  * 
  */
 
-#include "MamoryManager.h"
+#pragma once
 
-MamoryManager::MamoryManager()
+#include"Global.h"
+#include"stl/smap.h"
+
+class AddressSpace;
+class Clock;
+class HAL;
+
+class CPUManager
 {
+	SINGLETON_H(CPUManager)
+	private:
+		AddressSpace* kernelSpace;
+		Clock* clock;
+		void ClockNotify();
+	public:
+		lr::sstl::Map<int,CPU*> CPUList; 
+		HAL* GetHAL();
+		AddressSpace* GetKernelAddressSpace();
+		void Initialize();
+		CPU* GetCurrentCPU();
+		void InitAPs(void (*entry)(),size_t _StackSize);
+		void AddCPU(CPU* _CPU);
+};
 
-}
-
-MamoryManager::~MamoryManager()
-{
-
-}

@@ -7,13 +7,13 @@
 #define PAGE_UPPER_ALIGN(x) (PAGE_LOWER_ALIGN((x+(PAGE_SIZE-1))))
 
 
-#define SIGLETON_H(classname) \
+#define SINGLETON_H(classname) \
 	public:\
 		static classname* Instance();\
 	private:\
 		static classname* instance;\
 		classname();
-#define SIGLETON_CPP(classname) \
+#define SINGLETON_CPP(classname) \
 		classname* classname::instance = nullptr;\
 		classname* classname::Instance()\
 		{\

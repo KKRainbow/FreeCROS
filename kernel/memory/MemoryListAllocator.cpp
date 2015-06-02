@@ -197,3 +197,22 @@ MemoryListAllocator::ListHead* MemoryListAllocator::GetHeadFromAddress(addr_t _A
 	Assert(false);
 	return nullptr;
 }
+
+size_t MemoryListAllocator::FreeSize()
+{
+	auto guard = (ListHead*)this->start;
+	auto head = (ListHead*)nullptr;
+	auto flag = false;
+	
+	size_t freeSize = 0;;
+	for(head = guard;head!=guard || flag == false;head = head->next)
+	{
+		flag = true;
+		this->CheckMagic(head);
+		if(head->type == ListHead::FREE)
+		{
+			freeSize += head->size;
+		}
+	}
+	return head->size;
+}

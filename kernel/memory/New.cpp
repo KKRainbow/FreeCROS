@@ -1,19 +1,24 @@
-void* operator new(unsigned int size)
+#include"MemoryManager.h"
+void* operator new(unsigned int _Size)
 {
+	auto alloc = MemoryManager::Instance()->OperatorNewCallback(_Size);
+	return alloc->Allocate(_Size);
 }
-void* operator new(unsigned int size,void* p)
+void* operator new(unsigned int _Size,void* _Ptr)
 {
-	size = 0;
-	return p;
+	_Size = 0;
+	return _Ptr;
 }
-void* operator new[](unsigned int size)
+void* operator new[](unsigned int _Size)
 {
-	return operator new(size);
+	return operator new(_Size);
 }
-void* operator new[](unsigned int size,void* p)
+void* operator new[](unsigned int _Size,void* _Ptr)
 {
-	return operator new(size,p);
+	return operator new(_Size,_Ptr);
 }
-void operator delete(void* p) throw()
+void operator delete(void* _Ptr) throw()
 {
+	auto alloc = MemoryManager::Instance()->OperatorDeleteCallback(_Ptr);
+	return alloc->Deallocate(_Ptr);
 }

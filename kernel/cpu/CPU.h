@@ -14,15 +14,19 @@
  * limitations under the License.
  * 
  */
+
 #pragma once
 
-#include"Global.h"
-
-class MamoryManager
+class CPU
 {
-public:
-	addr_t kernelPageZoneStart;
-public:
-	MamoryManager();
-	~MamoryManager();
+	public:
+		enum Type{BSP,AP,UNKNOWN}type;
+		virtual void InitAsBSP() = 0;
+		virtual void InitAsAP(addr_t _Stack,size_t _StackSize) = 0;
+		virtual voifile:///home/ssj/Project/FreeCROS_Refactor/FreeCROS/kernel/cpu/CPU.hd Run() = 0;
+		virtual ~CPU(){};
+		virtual Thread* GetCurrThreadRunning() = 0;
+		virtual Type GetType() = 0;
+		virtual void StartService() = 0;
+		virtual void ExhaustCurrThread() = 0;
 };

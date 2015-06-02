@@ -355,3 +355,22 @@ lr::sstl::Tuple<int,int> MemoryBuddyAllocator::GetFirstFit(size_t _Size,int _Ali
 	}
 	return MakeTuple(-1,-1);
 }
+size_t MemoryBuddyAllocator::FreeSize()
+{
+	size_t sizeOfMinUnit = this->size / this->unit;
+	//找到第一个可以容纳的
+	size_t freeSize = 0;
+	for(int i = 0;i<this->availSize;i++)
+	{
+		for(int j = 0;j<sizeOfMinUnit;j++)
+		{
+			if(this->avail[i][j] == MemoryBuddyAllocator::AVAILABLE)//该空间可用
+			{
+				freeSize += 
+					this->size/sizeOfMinUnit;
+			}
+		}
+		sizeOfMinUnit >>= 1;
+	}
+	return freeSize;
+}
