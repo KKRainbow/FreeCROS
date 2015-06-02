@@ -22,7 +22,25 @@
 
 SINGLETON_CPP(MemoryManager)
 {
-	this->ArrangeMemoryLayout();
+	Assert(this->InitInitAllocator());
+	Assert(this->MoveModulesToSafe());
+	Assert(this->ArrangeMemoryLayout());
+}
+
+bool MemoryManager::InitInitAllocator()
+{
+	//初始化initzone,这个区域保证不会被其他关键东西占用
+	this->kernelInitAllocator = new(this->initAllocator) MemoryListAllocator(
+		(addr_t)&kernelObjInitZoneStart
+		,(addr_t)&kernelObjInitZoneEnd - (addr_t)&kernelObjInitZoneStart
+		,MemoryZoneType::KERNEL_ARBITRARY_ALLOC
+	);
+	
+	if(!this->kernelInitAllocator->Initialize())
+	{
+		return false;
+	}
+	
 }
 
 bool MemoryManager::ArrangeMemoryLayout()
@@ -61,19 +79,6 @@ bool MemoryManager::ArrangeMemoryLayout()
 		return false;
 	}
 	
-	//初始化initzone,这个区域保证不会被其他关键东西占用
-	this->kernelInitAllocator = new(this->initAllocator) MemoryListAllocator(
-		(addr_t)&kernelObjInitZoneStart
-		,(addr_t)&kernelObjInitZoneEnd - (addr_t)&kernelObjInitZoneStart
-		,MemoryZoneType::KERNEL_ARBITRARY_ALLOC
-	);
-	
-	if(!this->kernelInitAllocator->Initialize())
-	{
-		return false;
-	}
-	
-	this->MoveModulesToSafe();
 	
 	//Page和Object的比例随便写的0 0,这个比例以后慢慢调
 	addr_t objStart = (addr_t)&kernelEnd;

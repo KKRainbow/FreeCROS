@@ -39,6 +39,7 @@ protected:
 	MemoryAllocator* kernelInitAllocator = nullptr;
 	MemoryAllocator* kernelPageAllocator = nullptr;
 	MemoryAllocator* userObjectAllocator = nullptr;
+	bool InitInitAllocator();
 	bool ArrangeMemoryLayout();
 	bool MoveModulesToSafe();
 public:
@@ -47,3 +48,5 @@ public:
 	//delete的
 	MemoryAllocator* OperatorDeleteCallback(void* _Ptr);
 };
+
+extern MemoryManager globalMemoryManager;
