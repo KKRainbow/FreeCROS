@@ -129,11 +129,11 @@ bool MemoryManager::MoveModulesToSafe()
 	MultibootModule* mod = 
 		(MultibootModule*)globalMultiboot.GetMultibootInfo().modsAddress;
 	this->moduleCount = (int16_t)globalMultiboot.GetMultibootInfo().modsCount;
-	this->modules = this->kernelInitAllocator->Allocate(sizeof(Module) * this->moduleCount);
+	this->modules = (Module*)this->kernelInitAllocator->Allocate(sizeof(Module) * this->moduleCount);
 	for(int i = 0;i< this->moduleCount;i++)
 	{
 		this->modules[i].size = mod[i].modEnd-mod[i].modStart;
-		this->modules[i].addr = this->kernelInitAllocator->Allocate(
+		this->modules[i].addr = (addr_t)this->kernelInitAllocator->Allocate(
 			this->modules[i].size);
 		if(this->modules[i].addr == 0)
 		{
@@ -159,7 +159,7 @@ MemoryAllocator* MemoryManager::OperatorDeleteCallback(void* _Ptr)
 	return this->GetProperAlloc((addr_t)_Ptr);
 }
 
-MemoryAllocator* MemoryManager::GetProperAlloc(addr_t _Addr,size_t _Size = 0)
+MemoryAllocator* MemoryManager::GetProperAlloc(addr_t _Addr,size_t _Size)
 {
 	MemoryAllocator* allocs[] = 
 	{
@@ -180,15 +180,22 @@ void MemoryManager::Reserve(addr_t _Addr,size_t _Size)
 {
 	auto alloc = this->GetProperAlloc(_Addr,_Size);
 	if(alloc)
-		alloc->Reserve(_Addr,_Size);
+		alloc->Reserve((void*)_Addr,_Size);
 }
 void MemoryManager::Dereserve(addr_t _Addr,size_t _Size)
 {
 	auto alloc = this->GetProperAlloc(_Addr,_Size);
 	if(alloc)
-		alloc->Dereserve(_Addr,_Size);
+		alloc->Dereserve((void*)_Addr,_Size);
 }
 MemoryAllocator* MemoryManager::GetKernelPageAllocator()
 {
 	return this->kernelPageAllocator;
+}
+MemoryManager::MemoryManager(bool _BootInit)
+{
+	if(_BootInit == true)
+	{
+		this->instance = this;
+	}
 }

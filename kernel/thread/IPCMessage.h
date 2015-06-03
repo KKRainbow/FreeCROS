@@ -1,6 +1,6 @@
 #pragma once
 #include"Global.h"
-#include"Message.h"
+#include"Threads.h"
 
 class IPCMessage
 {

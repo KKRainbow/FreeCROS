@@ -4,6 +4,7 @@
 #include"memory/AddressSpaceManager.h"
 #include"thread/ThreadManager.h"
 #include <cpu/CPUManager.h>
+#include"HAL.h"
 
 extern addr_t stack;
 void CPUx86::Run()

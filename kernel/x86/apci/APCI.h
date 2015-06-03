@@ -38,9 +38,9 @@ class APCI:public HAL
 	public:
 		virtual bool Initialize()override;
 		virtual const char* Type()override;
-		virtual ~HALAPICMul()override;
+		virtual ~APCI()override;
 		virtual void EOI()override;
-		virtual int GetCurrentCPUID()override;file:///home/ssj/Project/FreeCROS/OS/kernel/arch/x86/AddressSpace.h
+		virtual int GetCurrentCPUID()override;
 		virtual void SetMaskOfIRQ(int _IRQ,bool _Masked)override;
 		virtual void InitAPs(void (*_Entry)(),size_t _StackSize)override;
 		virtual void InitAsAP()override;

@@ -16,6 +16,7 @@
  */
 
 #pragma once
+#include"Global.h"
 
 class Thread;
 class CPU
@@ -27,8 +28,6 @@ protected:
 	int id;
 public:
 	enum Type{BSP,AP,UNKNOWN}type;
-	virtual void InitAsBSP() = 0;
-	virtual void InitAsAP(addr_t _Stack,size_t _StackSize) = 0;
 	virtual void Run() = 0;
 	virtual ~CPU(){};
 	virtual Thread* GetCurrThreadRunning() = 0;

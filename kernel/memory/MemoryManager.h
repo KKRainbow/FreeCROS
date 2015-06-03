@@ -35,7 +35,7 @@ private:
 		size_t size;
 	}*modules;
 	int16_t moduleCount = 0;
-	MemoryAllocator* GetProperAlloc(addr_t _Addr,size_t _Size);
+	MemoryAllocator* GetProperAlloc(addr_t _Addr,size_t _Size = 0);
 protected:
 	MemoryAllocator* kernelInitAllocator = nullptr;
 	MemoryAllocator* kernelPageAllocator = nullptr;
@@ -46,6 +46,7 @@ protected:
 	void Reserve(addr_t _Addr,size_t _Size);
 	void Dereserve(addr_t _Addr,size_t _Size);
 public:
+	MemoryManager(bool _BootInit);
 	//new运算符每次执行都会调用这个函数来获取合适的Allocator
 	MemoryAllocator* OperatorNewCallback(size_t _Size);
 	//delete的

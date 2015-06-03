@@ -30,7 +30,7 @@ protected:
 public:
 	virtual ~MemoryAllocator(){};
 	
-	virtual void* Allocate(size_t _Size,int _Align) = 0;
+	virtual void* Allocate(size_t _Size,int _Align=0) = 0;
 	virtual void Deallocate(void* _Ptr) = 0;
 	virtual void Reserve(void* _From,size_t _Size) = 0;
 	virtual void Dereserve(void* _Free,size_t _Size) = 0;

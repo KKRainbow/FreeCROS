@@ -1,6 +1,6 @@
 #pragma once
 #include"Global.h"
-#include"SpinLock.h"
+#include"cpu/SpinLock.h"
 
 class Thread;
 class WaitableObj

@@ -23,13 +23,42 @@ struct PageDirEntry;
 class AddressSpaceX86 : AddressSpace
 {
 	private:
+		struct PageDirEntry
+		{
+			uint32_t Present:1;
+			uint32_t RW:1;
+			uint32_t US:1; //0 is Supervisor
+			uint32_t PWT:1;
+			uint32_t PCD:1;
+			uint32_t A:1;
+			uint32_t Ignored:1;
+			uint32_t PS:1;	//must be zero
+			uint32_t Ignored2:4;
+			uint32_t PageTableAddress:20;
+			PageDirEntry(){*(uint32_t*)this = 0;}
+		};
+		struct PageTableEntry
+		{
+			uint32_t Present:1;
+			uint32_t RW:1;
+			uint32_t US:1; //0 is Supervisor
+			uint32_t PWT:1;
+			uint32_t PCD:1;
+			uint32_t A:1;
+			uint32_t D:1;
+			uint32_t PAT:1;	//must be zero
+			uint32_t G:1;
+			uint32_t Ignored2:3;
+			uint32_t PageAddress:20;
+			PageTableEntry(){*(uint32_t*)this = 0;}
+		};
 		MemoryAllocator*  alloc;
 		PageDirEntry* cr3;
 		uint16_t* pageDirUsedCount;//Record the size of the pageTableEntries refered by it.
-
+		
 		PageDirEntry* GetPageDirEntry(addr_t _VirtAddr);
 		PageTableEntry* GetPageTableEntry(addr_t _VirtAddr);
-
+		
 		static inline int GetPageDirOffset(addr_t _VirtAddr)
 		{
 			return (_VirtAddr>>22)&0x3ff;
@@ -42,22 +71,22 @@ class AddressSpaceX86 : AddressSpace
 		{
 			return (_VirtAddr)&0xfff;
 		}
-
+		
 		static int PageFaultHandler(InterruptParams& params);
-		AddressSpace(MemoryAllocator* _Alloc,PageDirEntry* _PDE);
-	public:
-		AddressSpace(){};//必须有默认构造函数- -
-		static void GetAddressSpace();
-		virtual void SetAsCurrentSpace();
-		virtual void ChangeToCurrentSpaceMode();
-		virtual addr_t GetPhisicalAddress(addr_t _VirtAddr);
-		virtual bool VerifyVirtAddress(addr_t _VirtAddr);
-		virtual void MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser = 1,int isWritable = 1);
-		virtual void UnmapVirtAddr(addr_t _Virt);
-		virtual void SetPageWritable(addr_t _Virt,bool _Present);
-		virtual bool IfPageWritable(addr_t _Virt);
-		virtual size_t PageSize();
-		virtual addr_t GetPageDirAddr();
-		virtual void GetPageEntryProperty(addr_t _VirtAddr);
-		virtual void DisableSpaceMode();
+		AddressSpaceX86(MemoryAllocator* _Alloc,PageDirEntry* _PDE);
+public:
+	AddressSpaceX86(){};//必须有默认构造函数- -
+	static AddressSpace* GetAddressSpace();
+	virtual void SetAsCurrentSpace();
+	virtual void ChangeToCurrentSpaceMode();
+	virtual addr_t GetPhisicalAddress(addr_t _VirtAddr);
+	virtual bool VerifyVirtAddress(addr_t _VirtAddr);
+	virtual void MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser = 1,int isWritable = 1);
+	virtual void UnmapVirtAddr(addr_t _Virt);
+	virtual void SetPageWritable(addr_t _Virt,bool _Present);
+	virtual bool IfPageWritable(addr_t _Virt);
+	virtual size_t PageSize();
+	virtual addr_t GetPageDirAddr();
+	virtual void GetPageEntryProperty(addr_t _VirtAddr);
+	virtual void DisableSpaceMode();
 };

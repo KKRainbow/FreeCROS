@@ -15,7 +15,6 @@
  * 
  */
 
-#pragma once
 #include"cpu/CPUManager.h"
 #include"memory/AddressSpaceManager.h"
 #include "Clock.h"
@@ -27,7 +26,9 @@ SINGLETON_CPP(CPUManager)
 	Assert(this->hal);
 	
 	this->kernelSpace = AddressSpaceManager::Instance()->CreateAddressSpace();
-	this->AddCPU(new CPUx86(CPU::Type::BSP));
+	
+	auto bsp = new CPUx86(CPU::Type::BSP);
+	this->AddCPU(bsp);
 	//现在中断可以用了
 	
 	this->clock = Clock::Instance();
@@ -40,23 +41,23 @@ void CPUManager::EOI()
 }
 int CPUManager::RegisterIRQ(IRQHandler _Han,IRQNum _Number)
 {
-	return Interrupt::RegisterIRQ(_Han,_Number);
+	return Interrupt::Instance()->RegisterIRQ(_Han,_Number);
 }
 bool CPUManager::UnregisterIRQ(int id)
 {
-	return Interrupt::UnregisterIRQ(id);
+	return Interrupt::Instance()->UnregisterIRQ(id);
 }
-uint64_t CPUManager::GetClockCounter()
+uint64_t CPUManager::GetClockCounter()const
 {
 	return Clock::Instance()->GetCurrentCounter();
 }
-uint32_t CPUManager::GetClockPeriod()
+uint32_t CPUManager::GetClockPeriod()const
 {
 	return Clock::Instance()->GetPeriod();
 }
-void CPUManager::KernelWait(uint32_t _Us)
+void CPUManager::KernelWait(uint32_t _Us)const
 {
-	Clock::Instance()->KernelWait();
+	Clock::Instance()->KernelWait(_Us);
 }
 
 void CPUManager::InitAPs(cpu_entry_t _Entry,size_t _StackSize)

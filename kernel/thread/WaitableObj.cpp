@@ -1,5 +1,5 @@
 #include"WaitableObj.h"
-#include"CPUManger.h"
+#include"cpu/CPUManager.h"
 #include"ThreadManager.h"
 
 

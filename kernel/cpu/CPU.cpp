@@ -20,7 +20,7 @@ void CPU::SetID(int _Id)
 {
 	id = _Id;
 }
-int CPU::GetID()
+int CPU::GetID()const
 {
 	return id;
 }

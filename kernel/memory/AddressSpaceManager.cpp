@@ -33,7 +33,7 @@ AddressSpace* AddressSpaceManager::GetKernelAddressSpace()
 
 AddressSpace* AddressSpaceManager::CreateAddressSpace()
 {
-	AddressSpace* space = new AddressSpace();
+	AddressSpace* space = AddressSpaceX86::GetAddressSpace();
 	spaces.Insert(MakePair(space->GetPageDirAddr(),space));
 	return space;
 }

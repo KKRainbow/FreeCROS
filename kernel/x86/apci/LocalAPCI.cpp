@@ -19,6 +19,7 @@
 #include"cpuid.h"
 #include"stdlib.h"
 #include"string.h"
+#include"Clock.h"
 
 #define IA32_APIC_BASE_MSR 0x1B
 #define IA32_APIC_BASE_MSR_BSP 0x100 // Processor is a BSP
@@ -91,7 +92,7 @@ void LocalAPIC::CPUGetMSR(uint32_t msr, uint32_t *lo, uint32_t *hi)
 	asm volatile("rdmsr" : "=a"(*lo), "=d"(*hi) : "c"(msr));
 }
 
-void LocalAPIC::CPUSetMSR(uint32_t msr, uint32_t lo, uint32_t hi)
+void LocalAPIC::CPUSetMSR(uint32_t msr, uint32_t* lo, uint32_t* hi)
 {
 	asm volatile("wrmsr" : : "a"(lo), "d"(hi), "c"(msr));
 }
@@ -111,7 +112,7 @@ void LocalAPIC::SetAPICBaseReg(uint64_t _Addr)
 	uint32_t eax = (_Addr & 0xfffff800);
 	edx = (_Addr >> 32) & 0x0f;
 
-	CPUSetMSR(IA32_APIC_BASE_MSR, eax, edx);
+	CPUSetMSR(IA32_APIC_BASE_MSR, &eax, &edx);
 }
 
 uint64_t LocalAPIC::GetAPICBaseReg()

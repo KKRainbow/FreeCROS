@@ -1,5 +1,6 @@
 #include"Segment.h"
 #include"cpu/CPU.h"
+#include"thread/Thread.h"
 
 class CPUManager;
 

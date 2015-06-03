@@ -16,7 +16,10 @@
  */
 
 #include "APCI.h"
-#include"Log.h"
+#include"Global.h"
+#include"string.h"
+#include"LocalAPCI.h"
+#include"IOAPIC.h"
 #define RSDP_SIGNATURE 0x5253443250545232ULL
 struct ACPIRSDPStruct 
 {
@@ -87,7 +90,7 @@ struct ACPIXSDTStuct
 	uint64_t entris;
 };
 
-SIGLETON_CPP(HALAPICMul)
+SINGLETON_CPP(APCI)
 {
 
 }
@@ -121,7 +124,7 @@ const char* APCI::Type()
 	return "APIC Multiple Processor";
 }
 
-APCI::~HALAPICMul()
+APCI::~APCI()
 {
 
 }
@@ -153,12 +156,9 @@ ACPISDTHeader* APCI::FindEntry(const char* _Sig,int _N)
 
 	auto traversal = [&](char* _Entry,uint32_t _Count,uint32_t _Size,const char* _Name)->ACPISDTHeader*
 	{
-		LOG("Table Entry : 0x%x Size: %d,Count: %d\n",_Entry,_Size,_Count);
 		for(uint32_t i = 0;i<_Count;i++)
 		{
 			ACPISDTHeader* header = (ACPISDTHeader*)(*(addr_t*)_Entry);
-			LOG("Table Entry : 0x%x Sig: %c%c%c\n",*(addr_t*)_Entry
-					,header->signature[0],header->signature[1],header->signature[2]);
 			if(strncmp(_Name,header->signature,4) == 0)
 			{
 				if(Checksum(header,header->length))
@@ -175,7 +175,6 @@ ACPISDTHeader* APCI::FindEntry(const char* _Sig,int _N)
 
 	if(xsdt)
 	{
-		LOG("xsdt Table found ! addr: 0x%x\n",xsdt);
 		if(Checksum(xsdt,xsdt->header.length))
 		{
 			return traversal((char*)&xsdt->entris,
@@ -185,7 +184,6 @@ ACPISDTHeader* APCI::FindEntry(const char* _Sig,int _N)
 	}
 	if(rsdt)
 	{
-		LOG("rsdt Table found ! addr: 0x%x\n",rsdt);
 		if(Checksum(rsdt,rsdt->header.length))
 		{
 			return traversal((char*)&rsdt->entris,
@@ -206,13 +204,10 @@ void APCI::InitBSP()
 	if(madt == nullptr)
 	{
 		//应该抛出异常
-		LOG("MADT Table can not be found!\n'",1);
 		return;
 	}
 	IOAPIC = (ACPIIntrCtrlStructIOAPIC*)FindIntrCtrlStructInMADT(madt,1);
 	cpu = (ACPIIntrCtrlStructProcessor*)FindIntrCtrlStructInMADT(madt,0);		
-	LOG("I/O APIC Table : 0x%x \n",IOAPIC);
-	LOG("Processor Table : 0x%x \n",cpu);
 	
 	if(madt->flags.compatible) //应该禁用8259A
 	{
@@ -220,7 +215,7 @@ void APCI::InitBSP()
 	}
 	this->ioapic = new class IOAPIC(IOAPIC->address);	
 	ioapic->ChangeGlobalIntrBase(HAL::IRQBase,cpu->APICID);	
-	lapic.SetLocalAPICAsBSP();
+	lapic.InitAPCI();
 	//Start SMP Mode
 	SetToSMPMode();
 
@@ -286,7 +281,7 @@ void APCI::InitAPs(void (*entry)(),size_t _StackSize)
 void APCI::InitAsAP()
 {
 	LocalAPIC lapic;
-	lapic.SetLocalAPICAsAP();
+	lapic.InitAPCI();
 }
 void APCI::DisablePIC()
 {

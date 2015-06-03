@@ -55,7 +55,7 @@ class Thread
 		uint32_t& KernelCounter();
 		uint32_t& UserCounter();
 		CPUState& GetCPUState();
-		int Priority();
+		int& Priority();
 		ThreadType Type();
 		
 		void IncKernelCounter(uint32_t _Inc);

@@ -1,6 +1,7 @@
 #pragma once
 #include"Global.h"
-#include"HAL/HAL.h" 
+#include"HAL.h" 
+#include"Interrupt.h"
 //8254 PIT控制
 class Clock
 {

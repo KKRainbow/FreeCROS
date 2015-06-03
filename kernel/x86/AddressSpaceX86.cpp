@@ -17,42 +17,13 @@
 
 #include "AddressSpaceX86.h"
 
-struct PageDirEntry
-{
-	uint32_t Present:1;
-	uint32_t RW:1;
-	uint32_t US:1; //0 is Supervisor
-	uint32_t PWT:1;
-	uint32_t PCD:1;
-	uint32_t A:1;
-	uint32_t Ignored:1;
-	uint32_t PS:1;	//must be zero
-	uint32_t Ignored2:4;
-	uint32_t PageTableAddress:20;
-	PageDirEntry(){*(uint32_t*)this = 0;}
-};
-struct PageTableEntry
-{
-	uint32_t Present:1;
-	uint32_t RW:1;
-	uint32_t US:1; //0 is Supervisor
-	uint32_t PWT:1;
-	uint32_t PCD:1;
-	uint32_t A:1;
-	uint32_t D:1;
-	uint32_t PAT:1;	//must be zero
-	uint32_t G:1;
-	uint32_t Ignored2:3;
-	uint32_t PageAddress:20;
-	PageTableEntry(){*(uint32_t*)this = 0;}
-};
 
-PageDirEntry* AddressSpaceX86::GetPageDirEntry(addr_t _VirtAddr)
+AddressSpaceX86::PageDirEntry* AddressSpaceX86::GetPageDirEntry(addr_t _VirtAddr)
 {
 	PageDirEntry* entry = &cr3[GetPageDirOffset(_VirtAddr)];
 	return entry;
 }
-PageTableEntry* AddressSpaceX86::GetPageTableEntry(addr_t _VirtAddr)
+AddressSpaceX86::PageTableEntry* AddressSpaceX86::GetPageTableEntry(addr_t _VirtAddr)
 {
 	PageDirEntry* dirEntry = GetPageDirEntry(_VirtAddr);
 	if(dirEntry == nullptr||dirEntry->Present == 0)return nullptr;
@@ -177,11 +148,11 @@ addr_t AddressSpaceX86::GetPageDirAddr()
 	return (addr_t)cr3;
 }
 
-void AddressSpaceX86::GetAddressSpace()
+AddressSpace* AddressSpaceX86::GetAddressSpace()
 {
 	auto alloc = MemoryManager::Instance()->GetKernelPageAllocator();
 	
-	cr3 = (PageDirEntry*)alloc->Allocate((size_t)PAGE_SIZE,PAGE_SIZE);
+	auto cr3 = (PageDirEntry*)alloc->Allocate((size_t)PAGE_SIZE,PAGE_SIZE);
 	
 	if(!alloc || !cr3)return nullptr;
 	else

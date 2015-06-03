@@ -4,7 +4,7 @@
 
 //全局变量声明
 Multiboot globalMultiboot; //Mutiboot的所有信息都在这里获得
-MemoryManager globalMemoryManager;
+MemoryManager globalMemoryManager(true);
 
 extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 {
@@ -14,7 +14,7 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 		return 0;
 	} 
 	new(&globalMultiboot)Multiboot();
-	new(&globalMemoryManager)MemoryManager();
+	new(&globalMemoryManager)MemoryManager(true);
 	
 	auto m = CPUManager::Instance();
 	

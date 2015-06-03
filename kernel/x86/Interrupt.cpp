@@ -4,8 +4,6 @@
 #include"cpu/CPUManager.h"
 using namespace lr::sstl;
 
-Interrupt::IDTItem* Interrupt::table = nullptr; 
-
 struct IDTItem
 {
 	unsigned int offsetl:16;
@@ -31,6 +29,8 @@ struct IDTItem
 		present = 1;
 	}
 }__attribute__((packed));
+
+IDTItem* Interrupt::table = nullptr; 
 
 SINGLETON_CPP(Interrupt)
 {

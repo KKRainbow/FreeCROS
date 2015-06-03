@@ -3,6 +3,7 @@
 #include"stl/sarray.h"
 #include"stl/smap.h"
 #include"stl/stuple.h"
+#include"stl/sidgen.h"
 //Manage Interrupt table
 extern unsigned long ItrnTable;
 struct InterruptParams

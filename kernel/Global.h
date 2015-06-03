@@ -2,6 +2,7 @@
 
 #include"Macros.h"
 #include"Type.h"
+#include"Tools.h"
 
 
 extern unsigned long kernelStart;

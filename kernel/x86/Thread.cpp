@@ -1,4 +1,4 @@
-#include"Thread.h"
+#include"thread/Thread.h"
 #include"string.h"
 //Create Thread::a thread with a independent address space=
 Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threadType(_Type)
@@ -95,7 +95,7 @@ lr::Ptr<AddressSpace>& Thread::GetAddressSpace()
 	return addressSpace;
 }
 
-ThreadState*& Thread::State()
+lr::Ptr<ThreadState>& Thread::State()
 {
 	return state;
 }

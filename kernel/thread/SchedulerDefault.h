@@ -1,7 +1,7 @@
 #pragma once 
 #include"Scheduler.h"
 #include"ThreadManager.h"
-#include"CPUManger.h"
+#include"cpu/CPUManager.h"
 #include"stl/slinkedlist.h"
 
 
