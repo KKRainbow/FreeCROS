@@ -2,7 +2,7 @@
 #include"Global.h"
 #include"Interrupt.h"
 #include"stl/smap.h"
-#include"SpinLock.h"
+#include"cpu/SpinLock.h"
 #define SYSCALL_IRQ_NUM 0x80
 class SysCall
 {
