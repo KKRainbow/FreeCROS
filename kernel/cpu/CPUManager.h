@@ -39,7 +39,6 @@ class CPUManager
 	public:
 		lr::sstl::Map<int,CPU*> CPUList; 
 		HAL* GetHAL();
-		AddressSpace* GetKernelAddressSpace();
 		void Initialize();
 		CPU* GetCurrentCPU();
 		void InitAPs(cpu_entry_t _Entry,size_t _StackSize);

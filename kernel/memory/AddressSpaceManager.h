@@ -25,6 +25,8 @@ class AddressSpaceManager
 	private:
 		lr::sstl::Map<addr_t,AddressSpace*> spaces;	
 		AddressSpace* kernelSpace;
+		static int PageFaultHandler(InterruptParams& _Params);
+		void InitKernelAddressSpace();
 	public:
 		AddressSpace* CreateAddressSpace();
 		AddressSpace* GetAddressSpaceByPageDirAddr(addr_t _DirAddr);

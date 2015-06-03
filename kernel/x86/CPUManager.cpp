@@ -22,17 +22,6 @@
 
 SINGLETON_CPP(CPUManager)
 {
-	this->hal = HAL::GetProperHAL();
-	Assert(this->hal);
-	
-	this->kernelSpace = AddressSpaceManager::Instance()->CreateAddressSpace();
-	
-	auto bsp = new CPUx86(CPU::Type::BSP);
-	this->AddCPU(bsp);
-	//现在中断可以用了
-	
-	this->clock = Clock::Instance();
-	this->clock->InitPIT();
 }
 
 void CPUManager::EOI()
@@ -67,11 +56,18 @@ void CPUManager::InitAPs(cpu_entry_t _Entry,size_t _StackSize)
 
 void CPUManager::Initialize()
 {
+	this->hal = HAL::GetProperHAL();
+	Assert(this->hal);
+	this->hal->InitBSP();
+	
+	this->kernelSpace = AddressSpaceManager::Instance()->GetKernelAddressSpace();
+	
+	auto bsp = new CPUx86(CPU::Type::BSP);
+	this->AddCPU(bsp);
+	//现在中断可以用了
+	
 	this->clock = Clock::Instance();
-}
-AddressSpace* CPUManager::GetKernelAddressSpace()
-{
-	return this->kernelSpace;
+	this->clock->InitPIT();
 }
 HAL* CPUManager::GetHAL()
 {

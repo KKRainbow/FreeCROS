@@ -65,7 +65,7 @@ void CPUx86::Run()
 void CPUx86::InitPage()
 {
 	//Init Page
-	AddressSpace* kAS = CPUManager::Instance()->GetKernelAddressSpace();
+	AddressSpace* kAS = AddressSpaceManager::Instance()->GetKernelAddressSpace();
 	kAS->SetAsCurrentSpace();
 	kAS->ChangeToCurrentSpaceMode();
 }
@@ -108,6 +108,8 @@ CPUx86::CPUx86(CPU::Type _Type)
 	type = Type::BSP;
 	this->InitGDT();
 	Interrupt::Instance()->Initialize();
+	
+	//现在中断可以用了,InitPage里会调用Interrupt
 	this->InitPage();
 	//Init HAL
 	//this->manager->AddCPU(this);//这个是不是不应该有

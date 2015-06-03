@@ -19,7 +19,7 @@ class SysCall
 
 class SystemCallEntry
 {
-	SIGLETON_H(SystemCallEntry)
+	SINGLETON_H(SystemCallEntry)
 	private:
 		lr::sstl::Map<int,SysCall*> callMap;
 	public:

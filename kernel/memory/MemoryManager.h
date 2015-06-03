@@ -36,6 +36,7 @@ private:
 	}*modules;
 	int16_t moduleCount = 0;
 	MemoryAllocator* GetProperAlloc(addr_t _Addr,size_t _Size = 0);
+	uint32_t memSize = 0;
 protected:
 	MemoryAllocator* kernelInitAllocator = nullptr;
 	MemoryAllocator* kernelPageAllocator = nullptr;
@@ -52,6 +53,7 @@ public:
 	//delete的
 	MemoryAllocator* OperatorDeleteCallback(void* _Ptr);
 	MemoryAllocator* GetKernelPageAllocator();
+	uint32_t MemSize(){return this->memSize;}
 };
 
 extern MemoryManager globalMemoryManager;

@@ -5,7 +5,7 @@
 
 #define ADD_SYSTEM_CALL(name) \
 	this->callMap[SysCall##name::GetCallNum()] = new SysCall##name()
-SIGLETON_CPP(SystemCallEntry)
+SINGLETON_CPP(SystemCallEntry)
 {
 	ADD_SYSTEM_CALL(CreateThread);
 	ADD_SYSTEM_CALL(Log);
@@ -15,7 +15,7 @@ SIGLETON_CPP(SystemCallEntry)
 	ADD_SYSTEM_CALL(ReadDataFromThread);
 	ADD_SYSTEM_CALL(WriteToPhisicalAddr);
 	Interrupt::Instance()->RegisterIRQ(Call,SYSCALL_IRQ_NUM);	
-	Interrupt::Instance()->SetIRQAsSyscall(SYSCALL_IRQ_NUM,1);
+	Interrupt::Instance()->SetDPLOfIRQ(SYSCALL_IRQ_NUM,1);
 }
 int SystemCallEntry::Call(InterruptParams& params)
 {

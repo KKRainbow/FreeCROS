@@ -16,15 +16,31 @@
  */
 #include"AddressSpaceManager.h"
 #include"AddressSpaceX86.h"
+#include <cpu/CPUManager.h>
 
 using namespace lr::sstl;
 
 SINGLETON_CPP(AddressSpaceManager)
 {
-	this->kernelSpace = AddressSpaceX86::GetAddressSpace();
+	this->InitKernelAddressSpace();
 	Assert(this->kernelSpace);
+	
+	//必须保证在该类初始化时,Interrupt已经建立完毕
+	CPUManager::Instance()->RegisterIRQ(AddressSpaceManager::PageFaultHandler
+		,14
+	);
 }
 
+void AddressSpaceManager::InitKernelAddressSpace()
+{
+	this->kernelSpace = this->CreateAddressSpace();
+	Assert(this->kernelSpace);
+	auto memSize = MemoryManager::Instance()->MemSize();
+	for(addr_t a = 0;a<PAGE_UPPER_ALIGN((addr_t)memSize);a += PAGE_SIZE)
+	{
+		this->kernelSpace->MapVirtAddrToPhysAddr(a,a);
+	}
+}
 
 AddressSpace* AddressSpaceManager::GetKernelAddressSpace()
 {
@@ -76,5 +92,33 @@ void AddressSpaceManager::CopyDataFromAnotherSpace (
 		if(des%desPageSize == 0)
 			phyDes = _DesSpace.GetPhisicalAddress(des);
 	}
+}
+
+int AddressSpaceManager::PageFaultHandler(InterruptParams& _Params)
+{
+	addr_t address;
+	__asm__("movl %%cr2,%%eax\n\t":"=a"(address):);
+	AddressSpace* kas = AddressSpaceManager::Instance()->GetKernelAddressSpace();
+	AddressSpace* space = AddressSpaceManager::Instance()->GetCurrentAddressSpace();
+	if(kas == space) //Kernel Space
+	{
+		kas->MapVirtAddrToPhysAddr(address,address,0,1);
+	}
+	else //User Space 
+	{
+		if(address< 0x10000000||address>0xf0000000) //这个空间以下的应用程序都不能使用
+		{
+			space->MapVirtAddrToPhysAddr(address,address,0,1);
+		}
+		else
+		{
+			//应该是发送消息给Server,这里先这么实现把.
+			void* page = MemoryManager::Instance()->GetKernelPageAllocator()->
+				Allocate(PAGE_SIZE,PAGE_SIZE);
+			space->MapVirtAddrToPhysAddr((addr_t)page,address);
+
+		}
+	}
+	return true;
 }
 

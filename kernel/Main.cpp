@@ -14,9 +14,12 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 		return 0;
 	} 
 	new(&globalMultiboot)Multiboot();
+	globalMultiboot.SetInfoAddr(multibootAddr);
+	
 	new(&globalMemoryManager)MemoryManager(true);
 	
 	auto m = CPUManager::Instance();
+	m->Initialize();
 	
 	m->GetCurrentCPU()->StartService();
 }

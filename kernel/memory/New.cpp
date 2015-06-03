@@ -20,5 +20,5 @@ void* operator new[](unsigned int _Size,void* _Ptr)
 void operator delete(void* _Ptr) throw()
 {
 	auto alloc = MemoryManager::Instance()->OperatorDeleteCallback(_Ptr);
-	return alloc->Deallocate(_Ptr);
+	//return alloc->Deallocate(_Ptr);
 }

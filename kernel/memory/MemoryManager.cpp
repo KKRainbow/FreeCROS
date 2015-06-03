@@ -41,7 +41,7 @@ bool MemoryManager::InitInitAllocator()
 	{
 		return false;
 	}
-	
+	return true;
 }
 
 bool MemoryManager::ArrangeMemoryLayout()
@@ -74,6 +74,7 @@ bool MemoryManager::ArrangeMemoryLayout()
 		mmap = reinterpret_cast<MultibootMemoryMap*>(maddr);
 	}
 	
+	this->memSize = memHighLimit;
 	//判断是否满足最小内存需求(32MB)
 	if(memHighLimit <= (32<<20))
 	{
@@ -192,10 +193,7 @@ MemoryAllocator* MemoryManager::GetKernelPageAllocator()
 {
 	return this->kernelPageAllocator;
 }
-MemoryManager::MemoryManager(bool _BootInit)
+MemoryManager::MemoryManager(bool _BootInit):MemoryManager()
 {
-	if(_BootInit == true)
-	{
-		this->instance = this;
-	}
+	this->instance = this;
 }
