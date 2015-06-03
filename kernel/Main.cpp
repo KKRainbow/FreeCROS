@@ -1,5 +1,6 @@
 #include"Multiboot.h"
 #include"memory/MemoryManager.h"
+#include"cpu/CPUManager.h"
 
 //全局变量声明
 Multiboot globalMultiboot; //Mutiboot的所有信息都在这里获得
@@ -14,4 +15,8 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	} 
 	new(&globalMultiboot)Multiboot();
 	new(&globalMemoryManager)MemoryManager();
+	
+	auto m = CPUManager::Instance();
+	
+	m->GetCurrentCPU()->StartService();
 }

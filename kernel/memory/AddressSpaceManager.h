@@ -14,41 +14,24 @@
  * limitations under the License.
  * 
  */
-
 #pragma once
-
 #include"Global.h"
+#include"AddressSpace.h"
 #include"stl/smap.h"
-#include"Interrupt.h"
-#include"CPU.h"
 
-class AddressSpace;
-class Clock;
-class HAL;
-
-typedef void (*cpu_entry_t)();
-class CPUManager
+class AddressSpaceManager
 {
-	SINGLETON_H(CPUManager)
+	SINGLETON_H(AddressSpaceManager)
 	private:
-		friend class Clock;
+		lr::sstl::Map<addr_t,AddressSpace*> spaces;	
 		AddressSpace* kernelSpace;
-		Clock* clock;
-		void ClockNotify();
-		HAL* hal;
 	public:
-		lr::sstl::Map<int,CPU*> CPUList; 
-		HAL* GetHAL();
+		AddressSpace* CreateAddressSpace();
+		AddressSpace* GetAddressSpaceByPageDirAddr(addr_t _DirAddr);
+		AddressSpace* GetCurrentAddressSpace();
 		AddressSpace* GetKernelAddressSpace();
-		void Initialize();
-		CPU* GetCurrentCPU();
-		void InitAPs(cpu_entry_t _Entry,size_t _StackSize);
-		void AddCPU(CPU* _CPU);
-		void EOI();
-		int RegisterIRQ(IRQHandler _Han,IRQNum _Number);
-		bool UnregisterIRQ(int _Id);
-		uint64_t GetClockCounter()const;
-		uint32_t GetClockPeriod()const;
-		void KernelWait(uint32_t _Us)const;
+		void CopyDataFromAnotherSpace
+			(AddressSpace& _DesSpace,void* _Dest,
+			 AddressSpace& _SrcSpace,void* _Src
+			 ,size_t _Size);
 };
-

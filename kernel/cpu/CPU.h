@@ -17,16 +17,24 @@
 
 #pragma once
 
+class Thread;
 class CPU
 {
-	public:
-		enum Type{BSP,AP,UNKNOWN}type;
-		virtual void InitAsBSP() = 0;
-		virtual void InitAsAP(addr_t _Stack,size_t _StackSize) = 0;
-		virtual voifile:///home/ssj/Project/FreeCROS_Refactor/FreeCROS/kernel/cpu/CPU.hd Run() = 0;
-		virtual ~CPU(){};
-		virtual Thread* GetCurrThreadRunning() = 0;
-		virtual Type GetType() = 0;
-		virtual void StartService() = 0;
-		virtual void ExhaustCurrThread() = 0;
+protected:
+	friend class CPUManager;
+	addr_t kernelStackAddr;
+	size_t kernelStackSize;
+	int id;
+public:
+	enum Type{BSP,AP,UNKNOWN}type;
+	virtual void InitAsBSP() = 0;
+	virtual void InitAsAP(addr_t _Stack,size_t _StackSize) = 0;
+	virtual void Run() = 0;
+	virtual ~CPU(){};
+	virtual Thread* GetCurrThreadRunning() = 0;
+	virtual Type GetType() = 0;
+	virtual void StartService() = 0;
+	virtual void ExhaustCurrThread() = 0;
+	void SetID(int _Id){id = _Id;}
+	int GetID()const{return id;}
 };

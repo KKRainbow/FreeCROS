@@ -85,7 +85,7 @@ bool MemoryManager::ArrangeMemoryLayout()
 	addr_t objStart = (addr_t)&kernelEnd;
 	addr_t pageEnd = (addr_t)memHighLimit;
 	
-	addr_t objEnd = (pageEnd - objStart)/6 + objStart;
+	addr_t objEnd = PAGE_UPPER_ALIGN((pageEnd - objStart)/6 + objStart);
 	addr_t pageStart = objEnd;
 	
 	this->kernelPageAllocator = new
@@ -187,4 +187,8 @@ void MemoryManager::Dereserve(addr_t _Addr,size_t _Size)
 	auto alloc = this->GetProperAlloc(_Addr,_Size);
 	if(alloc)
 		alloc->Dereserve(_Addr,_Size);
+}
+MemoryAllocator* MemoryManager::GetKernelPageAllocator()
+{
+	return this->kernelPageAllocator;
 }

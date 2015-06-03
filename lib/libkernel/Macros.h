@@ -4,7 +4,7 @@
 #define PAGE_SIZE (1<<(PAGE_SHIFT))
 
 #define PAGE_LOWER_ALIGN(x) ((x)&(~(PAGE_SIZE-1)))
-#define PAGE_UPPER_ALIGN(x) (PAGE_LOWER_ALIGN((x+(PAGE_SIZE-1))))
+#define PAGE_UPPER_ALIGN(x) (PAGE_LOWER_ALIGN(((x)+(PAGE_SIZE-1))))
 
 
 #define SINGLETON_H(classname) \
@@ -53,4 +53,6 @@ _v; \
 })
 
 #define ALIGN_UP(addr,align) (align == 0?addr:(addr+align) - ((addr+align)%align))
+
+#define MAGIC_DEBUG
 //////////////////////

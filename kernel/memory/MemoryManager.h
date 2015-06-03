@@ -50,6 +50,7 @@ public:
 	MemoryAllocator* OperatorNewCallback(size_t _Size);
 	//delete的
 	MemoryAllocator* OperatorDeleteCallback(void* _Ptr);
+	MemoryAllocator* GetKernelPageAllocator();
 };
 
 extern MemoryManager globalMemoryManager;

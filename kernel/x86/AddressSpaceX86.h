@@ -1,0 +1,63 @@
+/*
+ * Copyright 2015 <copyright holder> <email>
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
+#pragma once
+#include"memory/AddressSpace.h"
+#include"memory/MemoryManager.h"
+
+struct PageDirEntry;
+class AddressSpaceX86 : AddressSpace
+{
+	private:
+		MemoryAllocator*  alloc;
+		PageDirEntry* cr3;
+		uint16_t* pageDirUsedCount;//Record the size of the pageTableEntries refered by it.
+
+		PageDirEntry* GetPageDirEntry(addr_t _VirtAddr);
+		PageTableEntry* GetPageTableEntry(addr_t _VirtAddr);
+
+		static inline int GetPageDirOffset(addr_t _VirtAddr)
+		{
+			return (_VirtAddr>>22)&0x3ff;
+		}
+		static inline int GetPageTableOffset(addr_t _VirtAddr)
+		{
+			return (_VirtAddr>>12)&0x3ff;
+		}
+		static inline int GetPageInnerOffset(addr_t _VirtAddr)
+		{
+			return (_VirtAddr)&0xfff;
+		}
+
+		static int PageFaultHandler(InterruptParams& params);
+		AddressSpace(MemoryAllocator* _Alloc,PageDirEntry* _PDE);
+	public:
+		AddressSpace(){};//必须有默认构造函数- -
+		static void GetAddressSpace();
+		virtual void SetAsCurrentSpace();
+		virtual void ChangeToCurrentSpaceMode();
+		virtual addr_t GetPhisicalAddress(addr_t _VirtAddr);
+		virtual bool VerifyVirtAddress(addr_t _VirtAddr);
+		virtual void MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser = 1,int isWritable = 1);
+		virtual void UnmapVirtAddr(addr_t _Virt);
+		virtual void SetPageWritable(addr_t _Virt,bool _Present);
+		virtual bool IfPageWritable(addr_t _Virt);
+		virtual size_t PageSize();
+		virtual addr_t GetPageDirAddr();
+		virtual void GetPageEntryProperty(addr_t _VirtAddr);
+		virtual void DisableSpaceMode();
+};
