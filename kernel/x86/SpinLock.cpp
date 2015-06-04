@@ -91,11 +91,12 @@ bool SpinLock::Try()
 		return false;
 }
 
-SpinLock::SpinLock(bool _BasicMode)
+SpinLock::SpinLock()
 {
 	lock = 0;
 	depth = 0;
 	tmplock = 0;
 	currCPU = UNLOCKED_NUM;
-	basicMode = _BasicMode;
 }
+
+bool SpinLock::basicMode = false;

@@ -86,7 +86,7 @@ SECTIONS
 		*(.bss.*)
 		*(COMMON)
 
-		. += 4;
+		. += 4096;
 		kernelObjInitZoneStart = .;
 		. = 0x01400000;
 		kernelObjInitZoneEnd = .;

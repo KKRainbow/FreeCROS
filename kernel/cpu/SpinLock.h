@@ -9,11 +9,15 @@ class SpinLock
 		char lock;
 		int depth;
 		int currCPU;
-		bool basicMode;
+		static bool basicMode;
 	public:
 		void Lock();
 		void Unlock();
 		bool Try();
-		SpinLock(bool _BasicMode = false);
+		static void SetBasicMode(bool _BasicMode)
+		{
+			SpinLock::basicMode = _BasicMode;
+		}
+		SpinLock();
 };
 

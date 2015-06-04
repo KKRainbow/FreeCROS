@@ -20,6 +20,7 @@
 #include"Global.h"
 #include"MemoryListAllocator.h"
 #include"stl/slinkedlist.h"
+#include"cpu/SpinLock.h"
 
 class AddressSpace;
 class MemoryAllocator;
@@ -37,6 +38,8 @@ private:
 	int16_t moduleCount = 0;
 	MemoryAllocator* GetProperAlloc(addr_t _Addr,size_t _Size = 0);
 	uint32_t memSize = 0;
+	
+	SpinLock lock;
 protected:
 	MemoryAllocator* kernelInitAllocator = nullptr;
 	MemoryAllocator* kernelPageAllocator = nullptr;

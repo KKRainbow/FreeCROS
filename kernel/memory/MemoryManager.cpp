@@ -150,19 +150,6 @@ bool MemoryManager::MoveModulesToSafe()
 	return true;
 }
 
-void* MemoryManager::KernelObjectAllocate(size_t _Size)
-{
-	return this->kernelInitAllocator->Allocate(_Size,0);
-}
-
-bool MemoryManager::AutoDeallocate(void* _Ptr)
-{
-	auto alloc = this->GetProperAlloc((addr_t)_Ptr);
-	if(!alloc)return false;
-	alloc->Deallocate(_Ptr);
-	return true;
-}
-
 MemoryAllocator* MemoryManager::GetProperAlloc(addr_t _Addr,size_t _Size)
 {
 	MemoryAllocator* allocs[] = 
@@ -180,24 +167,53 @@ MemoryAllocator* MemoryManager::GetProperAlloc(addr_t _Addr,size_t _Size)
 	}
 	return nullptr;
 }
-void MemoryManager::Reserve(addr_t _Addr,size_t _Size)
-{
-	auto alloc = this->GetProperAlloc(_Addr,_Size);
-	if(alloc)
-		alloc->Reserve((void*)_Addr,_Size);
-}
-void MemoryManager::Dereserve(addr_t _Addr,size_t _Size)
-{
-	auto alloc = this->GetProperAlloc(_Addr,_Size);
-	if(alloc)
-		alloc->Dereserve((void*)_Addr,_Size);
-}
-void* MemoryManager::KernelPageAllocate(size_t _Count)
-{
-	auto alloc = this->kernelPageAllocator;
-	return alloc->Allocate(_Count * PAGE_SIZE,PAGE_SIZE);
-}
 MemoryManager::MemoryManager(bool _BootInit):MemoryManager()
 {
 	this->instance = this;
+}
+//下面是需要加锁的
+void MemoryManager::Reserve(addr_t _Addr,size_t _Size)
+{
+	lock.Lock();
+	auto alloc = this->GetProperAlloc(_Addr,_Size);
+	if(alloc)
+		alloc->Reserve((void*)_Addr,_Size);
+	lock.Unlock();
+}
+void MemoryManager::Dereserve(addr_t _Addr,size_t _Size)
+{
+	lock.Lock();
+	auto alloc = this->GetProperAlloc(_Addr,_Size);
+	if(alloc)
+		alloc->Dereserve((void*)_Addr,_Size);
+	lock.Unlock();
+}
+void* MemoryManager::KernelPageAllocate(size_t _Count)
+{
+	lock.Lock();
+	auto alloc = this->kernelPageAllocator;
+	auto res =  alloc->Allocate(_Count * PAGE_SIZE,PAGE_SIZE);
+	lock.Unlock();
+	return res;
+}
+void* MemoryManager::KernelObjectAllocate(size_t _Size)
+{
+	lock.Lock();
+	auto res = this->kernelInitAllocator->Allocate(_Size,0);
+	lock.Unlock();
+	return res;
+}
+
+bool MemoryManager::AutoDeallocate(void* _Ptr)
+{
+	lock.Lock();
+	bool res = false;
+	auto alloc = this->GetProperAlloc((addr_t)_Ptr);
+	if(alloc)
+	{
+		alloc->Deallocate(_Ptr);
+		res = true;
+	}
+	lock.Unlock();
+	return true;
 }

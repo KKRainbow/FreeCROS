@@ -18,6 +18,8 @@ void test()
 }
 extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 {
+	//设置全局SpinLock
+	SpinLock::SetBasicMode(true);
 	//验证Multiboot的有效性
   	if(magic!=MULTIBOOT_BOOTLOADER_MAGIC||multibootAddr == 0)
 	{
@@ -30,6 +32,9 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	
 	auto m = CPUManager::Instance();
 	m->Initialize();
+	
+	//CPUManager正常工作后,Spinlock可以正常使用了`
+	SpinLock::SetBasicMode(false);
 	
 	LOG("Start service!!!\n",1);
 	m->GetCurrentCPU()->StartService();
