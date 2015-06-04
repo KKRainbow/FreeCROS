@@ -4,16 +4,27 @@
 Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threadType(_Type)
 {
 	this->pid = pid;
-	addressSpace = AddressSpaceManager::Instance()->CreateAddressSpace();
+	if(_Type == ThreadType::KERNEL)
+	{
+		this->addressSpace = AddressSpaceManager::Instance()->GetKernelAddressSpace();
+		
+		//如果是内核线程需要重新设置这两个值
+		this->stackSize = 16*PAGE_SIZE;
+		this->stackAddr = (addr_t)MemoryManager::Instance()->GetKernelPageAllocator()
+			->Allocate(PAGE_UPPER_ALIGN(this->stackSize));
+	}
+	else
+	{
+		this->addressSpace = AddressSpaceManager::Instance()->CreateAddressSpace();
+	}
 	childBitMap = new uint8_t[MAX_THREAD];
 	memset(childBitMap.Obj(),0,MAX_THREAD);
-	if(_Type != KERNEL)
-	{
-		cpuState.tss.regs.ebp = 
-			cpuState.tss.regs.esp =
-			cpuState.tss.esp1 =
-			cpuState.tss.esp2 = this->stackAddr + this->stackSize - 4;
-	}
+	
+	cpuState.tss.regs.ebp = 
+		cpuState.tss.regs.esp =
+		cpuState.tss.esp1 =
+		cpuState.tss.esp2 = this->stackAddr + this->stackSize - 4;
+			
 	cpuState.tss.cr3 = addressSpace->GetPageDirAddr();
 
 	if(_Father!=nullptr)

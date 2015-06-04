@@ -9,13 +9,16 @@
 
 void idle()
 {
-	for(;;);
+	int a = 0;
+	for(;;)
+	{
+	}
 }
 extern addr_t stack;
 void CPUx86::Run()
 {
 	if(!allDone)return;
-	LOG("Running!!%dd\n",Clock::Instance()->GetCurrentCounter());
+	CPUState::TSSStruct tmptss;
 	Thread* newThread;
 	ThreadManager* tman = ThreadManager::Instance();
 	//判断时间片是否用尽
@@ -27,16 +30,23 @@ void CPUx86::Run()
 	newThread = tman->GetNextThreadToExecute(this);
 	if(newThread == nullptr)
 	{
+		return;
 		//没有进程可以运行,我们就运行Idle进程,即idleThread
 		//这个进程事没有pid的.
 		if(this->idleThread == nullptr)
 		{
-			this->idleThread = tman->CreateThread(ThreadType::SERVER);
+			this->idleThread = new Thread(-1,ThreadType::KERNEL);
 			this->idleThread->SetEntry((addr_t)idle);
 		}
 		newThread = this->idleThread;
 	}
-	LOG("Switch Thread!!\n",1);
+	//必须有这个判断,防止
+	//不断切换到同一个进程会导致栈很快满了
+	if(currThread == newThread)
+	{
+		LOG("Same thread!\n",1);
+		return;
+	}
 	//Preparing for switch the thread;
 	//Set the TSS
 	if(currThread != nullptr)
@@ -46,9 +56,11 @@ void CPUx86::Run()
 	}
 	else
 	{
-		Segment::SetBase(gdt.previousTSS,
-				(addr_t)&idleThread->GetCPUState().tss);		
+		//Segment::SetBase(gdt.previousTSS,
+				//(addr_t)&idleThread->GetCPUState().tss);		
 		//Segment::SetLimit(gdt.previousTSS,sizeof(idleThread->GetCPUState().tss));
+		Segment::SetBase(gdt.previousTSS,(addr_t)&tmptss);
+		Segment::SetLimit(gdt.previousTSS,sizeof(tmptss));
 	}
 	Segment::SetBase(gdt.currentTSS,
 			(addr_t)&(newThread->GetCPUState().tss));	

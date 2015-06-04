@@ -50,6 +50,12 @@ AddressSpace* AddressSpaceManager::GetKernelAddressSpace()
 AddressSpace* AddressSpaceManager::CreateAddressSpace()
 {
 	AddressSpace* space = AddressSpaceX86::GetAddressSpace();
+	//在这里需要把内核空间映射进来,不然内核代码将无法到达
+	//会导致一切环任务就出错
+	for(addr_t i = 0;i < MemoryManager::Instance()->MemSize() + 4096;i+=PAGE_SIZE)
+	{
+		space->MapVirtAddrToPhysAddr(i,i,0);//0为位内核模式
+	}
 	spaces.Insert(MakePair(space->GetPageDirAddr(),space));
 	return space;
 }

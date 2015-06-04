@@ -103,7 +103,6 @@ void AddressSpaceX86::MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser,
 	table->Present = 1;
 	table->US = isUser;
 	table->RW = isWritable;
-	MAGIC_DEBUG;
 }
 
 void AddressSpaceX86::UnmapVirtAddr(addr_t _Virt)

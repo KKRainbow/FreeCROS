@@ -57,6 +57,10 @@ void Interrupt::UniHandler(InterruptParams& params)
 extern "C" void CHandler(InterruptParams params)
 {
 	Interrupt::UniHandler(params);
+	if(params.irqnum != 66)
+	{
+		LOG("IRQ: %d\n",params.irqnum);
+	}
 	if(params.irqnum == 13)
 	{
 		//for(;;);

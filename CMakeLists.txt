@@ -25,7 +25,7 @@ SET(ISO_DIR ${PROJECT_BINARY_DIR}/iso)
 add_subdirectory(kernel)
 add_subdirectory(config)
 add_subdirectory(lib)
-add_subdirectory(test)
+# add_subdirectory(test)
 add_subdirectory(server)
 
 

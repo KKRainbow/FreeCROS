@@ -1,19 +1,29 @@
 #include"Thread.h"
 #include"string.h"
+#include"memory/AddressSpaceManager.h"
 //Create Thread::a thread with a independent address space=
 Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threadType(_Type)
 {
 	this->pid = pid;
-	addressSpace = AddressSpaceManager::Instance()->CreateAddressSpace();
+	if(_Type == ThreadType::KERNEL)
+	{
+		addressSpace = AddressSpaceManager::Instance()->GetKernelAddressSpace();
+		this->stackSize = 10*PAGE_SIZE;
+		this->stackAddr = (addr_t)MemoryManager::Instance()->
+			GetKernelPageAllocator()->Allocate(this->stackSize,PAGE_SIZE);
+			
+	}
+	else
+	{
+		addressSpace = AddressSpaceManager::Instance()->CreateAddressSpace();
+	}
 	childBitMap = new uint8_t[MAX_THREAD];
 	memset(childBitMap.Obj(),0,MAX_THREAD);
-	if(_Type != KERNEL)
-	{
-		cpuState.tss.regs.ebp = 
-			cpuState.tss.regs.esp =
-			cpuState.tss.esp1 =
-			cpuState.tss.esp2 = this->stackAddr + this->stackSize - 4;
-	}
+	
+	cpuState.tss.regs.ebp = 
+	cpuState.tss.regs.esp =
+	cpuState.tss.esp1 =
+	cpuState.tss.esp2 = this->stackAddr + this->stackSize - 4;
 	cpuState.tss.cr3 = addressSpace->GetPageDirAddr();
 
 	if(_Father!=nullptr)

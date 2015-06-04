@@ -94,7 +94,6 @@ void LocalAPIC::CPUGetMSR(uint32_t msr, uint32_t *lo, uint32_t *hi)
 
 void LocalAPIC::CPUSetMSR(uint32_t msr, uint32_t lo, uint32_t hi)
 {
-	MAGIC_DEBUG;
 	asm volatile("wrmsr" : : "a"(lo), "d"(hi), "c"(msr));
 }
 void LocalAPIC::WriteRegister(int _Offset,uint32_t _Val)

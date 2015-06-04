@@ -30,7 +30,7 @@ class CPUState
 			uint32_t ebp;
 			uint32_t esi;
 			uint32_t edi;
-		};
+		}__attribute__((packed));
 		struct TSSStruct
 		{
 			uint32_t back_link; /* 16 high bits zero */
