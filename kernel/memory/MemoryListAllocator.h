@@ -26,15 +26,16 @@ private:
 	{
 		static const int MAGIC = 0x12345678;
 		int magic = MAGIC;
+		size_t size = 0;
+		enum{OCCUPIED,FREE = 100,RESERVE}type;
 		ListHead* prev = nullptr;
 		ListHead* next = nullptr;
-		enum{OCCUPIED,FREE,RESERVE}type;
-		
 		//这里的size是除去Head之后的!!
-		size_t size = 0;
 	};
 	addr_t start;
 	size_t size;
+	
+	ListHead guard;
 	
 	void CheckMagic(ListHead* _Head)
 	{
@@ -86,6 +87,6 @@ public:
 	virtual size_t Size()override{return this->size;};
 	virtual size_t FreeSize()override;
 	
-	friend void PrintList();
+	void PrintList();
 };
 

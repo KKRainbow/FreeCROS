@@ -16,6 +16,7 @@
  */
 
 #include "MemoryListAllocator.h"
+#include"Log.h"
 
 MemoryListAllocator::MemoryListAllocator(addr_t _Start,size_t _Size,MemoryZoneType _Type)
 :start(_Start),size(_Size)
@@ -214,5 +215,30 @@ size_t MemoryListAllocator::FreeSize()
 			freeSize += head->size;
 		}
 	}
-	return head->size;
+	return freeSize;
+}
+
+void MemoryListAllocator::PrintList()
+{
+	auto func = [&]()
+	{
+	auto guard = (ListHead*)(this->start);
+	//防止第一次执行就跳出
+	auto head = guard;
+	bool flag = false;
+	int i = 0;
+	for(head = guard;head!=guard || flag == false;head = head->next)
+	{
+		flag = true;
+		this->CheckMagic(head);
+		if(head->type == ListHead::FREE)
+		{
+			LOG("Head: 0x%x Size: %x Next: 0x%x Prev 0x%x Type:%d\n",head,head->size,head->next,head->prev,head->type);
+		}
+	}
+		
+	};
+	this->FreeSize();
+	LOG("fdsafd\n",1);
+	for(;;);
 }

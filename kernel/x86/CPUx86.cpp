@@ -5,11 +5,13 @@
 #include"thread/ThreadManager.h"
 #include <cpu/CPUManager.h>
 #include"HAL.h"
+#include "Clock.h"
 
 extern addr_t stack;
 void CPUx86::Run()
 {
 	if(!allDone)return;
+	LOG("Running!!%dd\n",Clock::Instance()->GetCurrentCounter());
 	Thread* newThread;
 	ThreadManager* tman = ThreadManager::Instance();
 	//判断时间片是否用尽
@@ -25,6 +27,7 @@ void CPUx86::Run()
 		//这个进程事没有pid的.
 		newThread = &this->idleThread;
 	}
+	LOG("Switch Thread!!\n",1);
 	//Preparing for switch the thread;
 	//Set the TSS
 	if(currThread != nullptr)

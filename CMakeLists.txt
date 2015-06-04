@@ -20,6 +20,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/kernel/${ARCHITECT})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/kernel)
 
 
+SET(ISO_DIR ${PROJECT_BINARY_DIR}/iso)
 
 add_subdirectory(kernel)
 add_subdirectory(config)
@@ -28,7 +29,6 @@ add_subdirectory(test)
 add_subdirectory(server)
 
 
-SET(ISO_DIR ${PROJECT_BINARY_DIR}/iso)
 ADD_CUSTOM_TARGET(
 	ISO ALL
 	COMMAND mkdir ${ISO_DIR}/boot/grub -p
