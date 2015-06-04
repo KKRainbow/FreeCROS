@@ -52,7 +52,6 @@ class AddressSpaceX86 : AddressSpace
 			uint32_t PageAddress:20;
 			PageTableEntry(){*(uint32_t*)this = 0;}
 		};
-		MemoryAllocator*  alloc;
 		PageDirEntry* cr3;
 		uint16_t* pageDirUsedCount;//Record the size of the pageTableEntries refered by it.
 		
@@ -73,7 +72,7 @@ class AddressSpaceX86 : AddressSpace
 		}
 		
 		static int PageFaultHandler(InterruptParams& params);
-		AddressSpaceX86(MemoryAllocator* _Alloc,PageDirEntry* _PDE);
+		AddressSpaceX86(PageDirEntry* _PDE);
 public:
 	AddressSpaceX86(){};//必须有默认构造函数- -
 	static AddressSpace* GetAddressSpace();

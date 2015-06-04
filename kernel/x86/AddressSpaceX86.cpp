@@ -82,7 +82,7 @@ void AddressSpaceX86::MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser,
 	if(!dir->Present)
 	{
 		dir->PageTableAddress = 
-			((addr_t)alloc->Allocate(PAGE_SIZE,PAGE_SIZE))>>PAGE_SHIFT;
+			(addr_t)MemoryManager::Instance()->KernelPageAllocate(1)>>PAGE_SHIFT;
 		pageDirUsedCount[GetPageDirOffset(_Virt)] = 0;	
 		if(dir->PageTableAddress == 0)
 		{
@@ -149,20 +149,17 @@ addr_t AddressSpaceX86::GetPageDirAddr()
 
 AddressSpace* AddressSpaceX86::GetAddressSpace()
 {
-	auto alloc = MemoryManager::Instance()->GetKernelPageAllocator();
+	auto cr3 = (PageDirEntry*)MemoryManager::Instance()->KernelPageAllocate(1);
 	
-	auto cr3 = (PageDirEntry*)alloc->Allocate((size_t)PAGE_SIZE,PAGE_SIZE);
-	
-	if(!alloc || !cr3)return nullptr;
+	if(!cr3)return nullptr;
 	else
 	{
-		return new AddressSpaceX86(alloc,cr3);
+		return new AddressSpaceX86(cr3);
 	}
 }
-AddressSpaceX86::AddressSpaceX86(MemoryAllocator* _Alloc,PageDirEntry* _PDE)
+AddressSpaceX86::AddressSpaceX86(PageDirEntry* _PDE)
 {
-	Assert(_Alloc&&_PDE);
-	this->alloc = _Alloc;
+	Assert(_PDE);
 	cr3 = _PDE;
 	memset(&cr3[0],0,sizeof(PageDirEntry)*1024);
 }

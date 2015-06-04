@@ -119,8 +119,8 @@ int AddressSpaceManager::PageFaultHandler(InterruptParams& _Params)
 		else
 		{
 			//应该是发送消息给Server,这里先这么实现把.
-			void* page = MemoryManager::Instance()->GetKernelPageAllocator()->
-				Allocate(PAGE_SIZE,PAGE_SIZE);
+			void* page = MemoryManager::Instance()->
+				KernelPageAllocate(1);
 			space->MapVirtAddrToPhysAddr((addr_t)page,address);
 
 		}

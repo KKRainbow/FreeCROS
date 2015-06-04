@@ -189,9 +189,10 @@ void MemoryManager::Dereserve(addr_t _Addr,size_t _Size)
 	if(alloc)
 		alloc->Dereserve((void*)_Addr,_Size);
 }
-MemoryAllocator* MemoryManager::GetKernelPageAllocator()
+void* MemoryManager::KernelPageAllocate(size_t _Count)
 {
-	return this->kernelPageAllocator;
+	auto alloc = this->kernelPageAllocator;
+	return alloc->Allocate(_Count * PAGE_SIZE,PAGE_SIZE);
 }
 MemoryManager::MemoryManager(bool _BootInit):MemoryManager()
 {

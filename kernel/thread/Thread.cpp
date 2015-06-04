@@ -7,10 +7,11 @@ Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threa
 	this->pid = pid;
 	if(_Type == ThreadType::KERNEL)
 	{
+		auto i = 10;
 		addressSpace = AddressSpaceManager::Instance()->GetKernelAddressSpace();
-		this->stackSize = 10*PAGE_SIZE;
+		this->stackSize = i*PAGE_SIZE;
 		this->stackAddr = (addr_t)MemoryManager::Instance()->
-			GetKernelPageAllocator()->Allocate(this->stackSize,PAGE_SIZE);
+			KernelPageAllocate(i);
 			
 	}
 	else

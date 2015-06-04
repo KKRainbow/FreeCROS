@@ -89,8 +89,7 @@ void Thread::PushUserStack(T val,addr_t stackAddr)
 	if(addrlo == 0)
 	{
 		void* page = MemoryManager::Instance()
-			->GetKernelPageAllocator()
-			->Allocate(PAGE_SIZE,PAGE_SIZE);
+			->KernelPageAllocate(1);
 
 		addr = (addr_t)page;
 		s->MapVirtAddrToPhysAddr((addr_t)page,stackAddr);
@@ -98,8 +97,7 @@ void Thread::PushUserStack(T val,addr_t stackAddr)
 	if(addrhi == 0)
 	{
 		void* page = MemoryManager::Instance()
-			->GetKernelPageAllocator()
-			->Allocate(PAGE_SIZE,PAGE_SIZE);
+			->KernelPageAllocate(1);
 
 		addr = (addr_t)page;
 		s->MapVirtAddrToPhysAddr((addr_t)page,stackAddr);

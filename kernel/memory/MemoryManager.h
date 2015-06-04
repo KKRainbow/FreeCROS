@@ -52,7 +52,7 @@ public:
 	MemoryAllocator* OperatorNewCallback(size_t _Size);
 	//delete的
 	MemoryAllocator* OperatorDeleteCallback(void* _Ptr);
-	MemoryAllocator* GetKernelPageAllocator();
+	void* KernelPageAllocate(size_t _Size);
 	uint32_t MemSize(){return this->memSize;}
 };
 
