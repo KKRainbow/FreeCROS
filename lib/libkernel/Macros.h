@@ -54,5 +54,5 @@ _v; \
 
 #define ALIGN_UP(addr,align) (align == 0?addr:(addr+align) - ((addr+align)%align))
 
-#define MAGIC_DEBUG
+#define MAGIC_DEBUG __asm__("xchg %%bx,%%bx\n\t"::)
 //////////////////////

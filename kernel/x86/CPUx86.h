@@ -29,7 +29,7 @@ class CPUx86:public CPU
 			Segment userCode = Segment::BuildCodeSegment(0,3);
 			Segment userData = Segment::BuildDataSegment(0,3);
 		}ldtUser;
-		Thread idleThread;
+		Thread* idleThread = nullptr;
 		char stackAddr;
 		static const int stackSize = 3*PAGE_SIZE;
 		CPUManager* manager;

@@ -24,7 +24,7 @@ class LocalAPIC
 		static volatile char* baseAddr;
 		static bool CPUHasMSR();
 		static void CPUGetMSR(uint32_t _Msr, uint32_t *_Lo, uint32_t *_Hi);
-		static void CPUSetMSR(uint32_t _Msr, uint32_t *_Lo, uint32_t *_Hi);
+		static void CPUSetMSR(uint32_t _Msr, uint32_t _Lo, uint32_t _Hi);
 		static void WriteRegister(int _Offset,uint32_t _Val);
 		static uint32_t ReadRegister(int _Offset);
 		static void SetAPICBaseReg(uint64_t _Addr);

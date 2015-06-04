@@ -1,21 +1,22 @@
 #include"SystemCalls.h"
 #include"memory/AddressSpaceManager.h"
 #include"cpu/CPUManager.h"
+#include"thread/ThreadManager.h"
 #include"Log.h"
 
 static void ReadDataFromCurrThread(void* dest,void* src,size_t size)
 {
 	AddressSpaceManager::CopyDataFromAnotherSpace(
-			*CPUManager::Instance()->GetKernelAddressSpace(),dest,
+			*AddressSpaceManager::Instance()->GetKernelAddressSpace(),dest,
 			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),src
 			,size);
 }
 
 static void WriteDataToCurrThread(void* dest,void* src,size_t size)
 {
-	AddressSpace::CopyDataFromAnotherSpace(
+	AddressSpaceManager::CopyDataFromAnotherSpace(
 			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),dest,
-			*CPUManager::Instance()->GetKernelAddressSpace(),src,
+			*AddressSpaceManager::Instance()->GetKernelAddressSpace(),src,
 			size);
 }
 SYSCALL_METHOD_CPP(CreateThread)

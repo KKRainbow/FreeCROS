@@ -7,6 +7,10 @@
 #include"HAL.h"
 #include "Clock.h"
 
+void idle()
+{
+	for(;;);
+}
 extern addr_t stack;
 void CPUx86::Run()
 {
@@ -25,7 +29,12 @@ void CPUx86::Run()
 	{
 		//没有进程可以运行,我们就运行Idle进程,即idleThread
 		//这个进程事没有pid的.
-		newThread = &this->idleThread;
+		if(this->idleThread == nullptr)
+		{
+			this->idleThread = tman->CreateThread(ThreadType::SERVER);
+			this->idleThread->SetEntry((addr_t)idle);
+		}
+		newThread = this->idleThread;
 	}
 	LOG("Switch Thread!!\n",1);
 	//Preparing for switch the thread;
@@ -38,8 +47,8 @@ void CPUx86::Run()
 	else
 	{
 		Segment::SetBase(gdt.previousTSS,
-				(addr_t)&idleThread.GetCPUState().tss);		
-		Segment::SetLimit(gdt.previousTSS,sizeof(idleThread.GetCPUState().tss));
+				(addr_t)&idleThread->GetCPUState().tss);		
+		//Segment::SetLimit(gdt.previousTSS,sizeof(idleThread->GetCPUState().tss));
 	}
 	Segment::SetBase(gdt.currentTSS,
 			(addr_t)&(newThread->GetCPUState().tss));	

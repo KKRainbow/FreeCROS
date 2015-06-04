@@ -49,6 +49,9 @@ bool MemoryListAllocator::Initialize()
 	head->size = this->size - sizeof(ListHead);
 	head->type = ListHead::FREE;
 	head->next = head->prev = head;
+	
+	auto tmp = &guard;
+	ListInsertAfter(head,tmp);
 	return true;
 }
 
@@ -116,12 +119,10 @@ void* MemoryListAllocator::Allocate(size_t _Size, int _Align)
 {
 	if(_Size == 0)return nullptr;
 	//暂时采用First fit
-	auto guard = (ListHead*)this->start;
 	//防止第一次执行就跳出
-	bool flag = false;
-	for(auto head = guard;head!=guard || flag == false;head = head->next)
+	for(auto head = (ListHead*)this->start;head!=&guard;head = head->next)
 	{
-		flag = true;
+		this->CheckMagic(head);
 		if(head->type != ListHead::FREE)continue;
 		addr_t availStart = (addr_t)head + sizeof(ListHead);
 		addr_t availEnd = availStart + head->size;
@@ -180,13 +181,10 @@ void MemoryListAllocator::MergeFreeHead(ListHead*& _Obj)
 }
 MemoryListAllocator::ListHead* MemoryListAllocator::GetHeadFromAddress(addr_t _Addr,size_t _Size)
 {
-	auto guard = (ListHead*)this->start;
 	auto head = (ListHead*)nullptr;
-	auto flag = false;
 	
-	for(head = guard;head!=guard || flag == false;head = head->next)
+	for(auto head = (ListHead*)this->start;head!=&guard;head = head->next)
 	{
-		flag = true;
 		this->CheckMagic(head);
 		if((addr_t)_Addr >= (addr_t)head && 
 			(addr_t)_Addr + _Size <= (addr_t)head + head->size + sizeof(ListHead))
@@ -201,14 +199,10 @@ MemoryListAllocator::ListHead* MemoryListAllocator::GetHeadFromAddress(addr_t _A
 
 size_t MemoryListAllocator::FreeSize()
 {
-	auto guard = (ListHead*)this->start;
-	auto head = (ListHead*)nullptr;
-	auto flag = false;
 	
 	size_t freeSize = 0;;
-	for(head = guard;head!=guard || flag == false;head = head->next)
+	for(auto head = (ListHead*)this->start;head!=&guard;head = head->next)
 	{
-		flag = true;
 		this->CheckMagic(head);
 		if(head->type == ListHead::FREE)
 		{
@@ -220,25 +214,12 @@ size_t MemoryListAllocator::FreeSize()
 
 void MemoryListAllocator::PrintList()
 {
-	auto func = [&]()
+	for(auto head = (ListHead*)this->start;head!=&guard;head = head->next)
 	{
-	auto guard = (ListHead*)(this->start);
-	//防止第一次执行就跳出
-	auto head = guard;
-	bool flag = false;
-	int i = 0;
-	for(head = guard;head!=guard || flag == false;head = head->next)
-	{
-		flag = true;
 		this->CheckMagic(head);
 		if(head->type == ListHead::FREE)
 		{
-			LOG("Head: 0x%x Size: %x Next: 0x%x Prev 0x%x Type:%d\n",head,head->size,head->next,head->prev,head->type);
+			
 		}
 	}
-		
-	};
-	this->FreeSize();
-	LOG("fdsafd\n",1);
-	for(;;);
 }
