@@ -34,6 +34,7 @@ public:
 	virtual Type GetType() = 0;
 	virtual void StartService() = 0;
 	virtual void ExhaustCurrThread() = 0;
+	virtual void SetIdleThread(Thread* _Thread) = 0;
 	void SetID(int _Id);
 	int GetID()const;
 };

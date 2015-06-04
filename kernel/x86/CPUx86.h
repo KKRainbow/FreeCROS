@@ -50,4 +50,5 @@ class CPUx86:public CPU
 		virtual Type GetType()override;
 		virtual void StartService()override; //表明CPU可以接受线程了
 		virtual void ExhaustCurrThread()override;
+		virtual void SetIdleThread(Thread* _Thread)override;
 };

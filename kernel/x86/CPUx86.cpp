@@ -30,21 +30,18 @@ void CPUx86::Run()
 	newThread = tman->GetNextThreadToExecute(this);
 	if(newThread == nullptr)
 	{
-		return;
 		//没有进程可以运行,我们就运行Idle进程,即idleThread
-		//这个进程事没有pid的.
 		if(this->idleThread == nullptr)
 		{
-			this->idleThread = new Thread(-1,ThreadType::KERNEL);
-			this->idleThread->SetEntry((addr_t)idle);
+			return;
 		}
+		this->idleThread->State()->ToReady(this->idleThread);
 		newThread = this->idleThread;
 	}
 	//必须有这个判断,防止
 	//不断切换到同一个进程会导致栈很快满了
 	if(currThread == newThread)
 	{
-		LOG("Same thread!\n",1);
 		return;
 	}
 	//Preparing for switch the thread;
@@ -161,4 +158,9 @@ void CPUx86::ExhaustCurrThread()
 CPUx86::~CPUx86()
 {
 
+}
+
+void CPUx86::SetIdleThread(Thread* _Thread)
+{
+	this->idleThread = _Thread;
 }

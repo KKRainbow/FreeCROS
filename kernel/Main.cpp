@@ -36,10 +36,7 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	auto t = ThreadManager::Instance()->CreateThread(ThreadType::KERNEL);
 	t->SetEntry((addr_t)test);
 	t->State()->ToReady(t);
+	
+	m->GetCurrentCPU()->SetIdleThread(t);
 	for(;;);
-// 	for(;;)
-// 	{
-// 		CPUManager::Instance()->KernelWait(1000000);
-// 		LOG("hahahaha",1);
-// 	}
 }
