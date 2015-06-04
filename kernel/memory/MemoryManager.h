@@ -49,9 +49,9 @@ protected:
 public:
 	MemoryManager(bool _BootInit);
 	//new运算符每次执行都会调用这个函数来获取合适的Allocator
-	MemoryAllocator* OperatorNewCallback(size_t _Size);
+	void* KernelObjectAllocate(size_t _Size);
 	//delete的
-	MemoryAllocator* OperatorDeleteCallback(void* _Ptr);
+	bool AutoDeallocate(void* _Ptr);
 	void* KernelPageAllocate(size_t _Size);
 	uint32_t MemSize(){return this->memSize;}
 };

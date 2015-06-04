@@ -7,8 +7,6 @@ SINGLETON_CPP(ThreadManager)
 {
 	lock.Lock();
 
-	auto a = (MemoryListAllocator*)(MemoryManager::Instance()->OperatorNewCallback(1));
-	a->PrintList();
 	this->sched = new SchedulerDefault();
 	this->sched->Init();
 

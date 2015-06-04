@@ -150,14 +150,17 @@ bool MemoryManager::MoveModulesToSafe()
 	return true;
 }
 
-MemoryAllocator* MemoryManager::OperatorNewCallback(size_t _Size)
+void* MemoryManager::KernelObjectAllocate(size_t _Size)
 {
-	return this->kernelInitAllocator;
+	return this->kernelInitAllocator->Allocate(_Size,0);
 }
 
-MemoryAllocator* MemoryManager::OperatorDeleteCallback(void* _Ptr)
+bool MemoryManager::AutoDeallocate(void* _Ptr)
 {
-	return this->GetProperAlloc((addr_t)_Ptr);
+	auto alloc = this->GetProperAlloc((addr_t)_Ptr);
+	if(!alloc)return false;
+	alloc->Deallocate(_Ptr);
+	return true;
 }
 
 MemoryAllocator* MemoryManager::GetProperAlloc(addr_t _Addr,size_t _Size)
