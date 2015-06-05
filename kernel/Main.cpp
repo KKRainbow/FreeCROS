@@ -35,11 +35,16 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	//CPUManager正常工作后,Spinlock可以正常使用了`
 	SpinLock::SetBasicMode(false);
 	
-	LOG("Start service!!!\n",1);
-	m->GetCurrentCPU()->StartService();
+	//TODO 开始写ramdisk把~~~~~哈哈哈,应该很简单,嗯= =
+	//Ramdisk之后就可以加载Server,Server利用Ramdisk就可以完成设备初始化了
+	//也就是我们可以开始写TTY的驱动程序了哈哈哈
+	//加载Server!
 	
 	const size_t stackSize = 4*PAGE_SIZE;
 	m->InitAP((addr_t)apmain,stackSize);
+	
+	LOG("Start service!!!\n",1);
+	m->GetCurrentCPU()->StartService();
 	
 	for(;;)
 	{
