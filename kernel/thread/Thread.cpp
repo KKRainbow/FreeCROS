@@ -1,6 +1,7 @@
 #include"Thread.h"
 #include"string.h"
 #include"memory/AddressSpaceManager.h"
+#include"Log.h"
 //Create Thread::a thread with a independent address space=
 Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threadType(_Type)
 {
@@ -13,6 +14,8 @@ Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threa
 		this->stackAddr = (addr_t)MemoryManager::Instance()->
 			KernelPageAllocate(i);
 			
+		LOG("StackAddr: 0x%x",this->stackAddr);
+		Assert(this->stackAddr);
 	}
 	else
 	{

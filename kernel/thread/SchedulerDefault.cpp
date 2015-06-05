@@ -11,14 +11,17 @@ void SchedulerDefault::Deinit()
 
 void SchedulerDefault::ThreadAdded(Thread* thread)
 {
+	lock.Lock();
 	int priority = thread->Priority()/(100/MAX_LIST_SIZE);
 	if(priority>=MAX_LIST_SIZE)priority = MAX_LIST_SIZE-1;
 	if(priority<0)priority = 0;
 	this->lists[priority].PushBack(thread);
+	lock.Unlock();
 }
 
 void SchedulerDefault::ThreadRemoved(Thread* thread)
 {
+	lock.Lock();
 	decltype(lists[0].Begin()) ite;
 	bool flag = false;
 	int i = 0;
@@ -35,10 +38,12 @@ void SchedulerDefault::ThreadRemoved(Thread* thread)
 	{
 		lists[i].Erase(ite);
 	}
+	lock.Unlock();
 }
 
 Thread* SchedulerDefault::NextThread(CPU* _CPU)
 {
+	lock.Lock();
 	decltype(lists[0].Begin()) ite;
 	int i = 0;
 	for(i = MAX_LIST_SIZE-1;i>= 0 ;i--)
@@ -54,24 +59,30 @@ Thread* SchedulerDefault::NextThread(CPU* _CPU)
 			auto stateType = state->Type();
 			Assert(stateType == States::READY);
 			
+			lock.Unlock();
 			return res;
 		}
 	}
+	lock.Unlock();
 	return nullptr;
 }
 
 void SchedulerDefault::RaisePriority(Thread* thread,int _Pri)
 {
+	lock.Lock();
 	ThreadRemoved(thread);
 	thread->Priority() = _Pri;
 	ThreadAdded(thread);
+	lock.Unlock();
 }
 
 void SchedulerDefault::DownPriority(Thread* thread,int _Pri)
 {
+	lock.Lock();
 	ThreadRemoved(thread);
 	thread->Priority() = _Pri;
 	ThreadAdded(thread);
+	lock.Unlock();
 }
 
 

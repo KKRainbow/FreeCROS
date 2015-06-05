@@ -13,16 +13,19 @@ void Clock::InitPIT()
 {
 	CPUManager::Instance()->RegisterIRQ(
 			Clock::ClockHandler,HAL::IRQBase+2);
-	SetPeriod(1800);	
+	SetPeriod(800);	
 	CPUManager::Instance()->GetHAL()->SetMaskOfIRQ(CLOCK_IRQ,false);	
 }
 int Clock::ClockHandler(InterruptParams& params)
 {
+	//先关闭中断,因为如果时钟过快会导致栈溢出
+	Interrupt::Instance()->Cli();
 	Clock* c = Clock::Instance();
 	if(CPUManager::Instance()->GetCurrentCPU()->GetType() == CPU::Type::BSP)
 		c->SetCurrentCounter(c->GetCurrentCounter()+c->GetPeriod());
 	CPUManager::Instance()->GetHAL()->EOI();
 	CPUManager::Instance()->ClockNotify();
+	Interrupt::Instance()->Sti();
 	return true;
 }
 uint32_t Clock::CalcReloadValOfPeriod(uint32_t _Us,uint32_t &res_Us)

@@ -3,6 +3,7 @@
 #include"ThreadManager.h"
 #include"cpu/CPUManager.h"
 #include"stl/slinkedlist.h"
+#include"cpu/SpinLock.h"
 
 
 class SchedulerDefault:public Scheduler
@@ -10,6 +11,7 @@ class SchedulerDefault:public Scheduler
 	private:
 		static const int MAX_LIST_SIZE = 10;
 		lr::sstl::List<Thread*> lists[MAX_LIST_SIZE];
+		SpinLock lock;
 	public:
 		virtual void Init()override;
 		virtual void Deinit()override;

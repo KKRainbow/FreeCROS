@@ -61,9 +61,15 @@ extern "C" void CHandler(InterruptParams params)
 	{
 		LOG("IRQ: %d\n",params.irqnum);
 	}
-	if(params.irqnum == 13)
+	if(params.irqnum <= 20 &&params.irqnum != 14)
 	{
-		//for(;;);
+		Interrupt::Cli();
+		LOG("\nCrush!!!\n eip:0x%x,esp:0x%x\n"
+		"errorcode: 0x%x\n",
+		    params.eip,params.userEsp,
+			params.errorCode
+		);
+		for(;;);
 	}
 }
 void Interrupt::Initialize()

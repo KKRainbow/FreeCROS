@@ -77,6 +77,9 @@ void CPUx86::Run()
 
 	currThread = newThread;
 
+	auto eip = currThread->GetCPUState().tss.eip;
+	LOG("Next task eip: 0x%x\n",eip);
+	if(eip< 0x100000)for(;;);
 	struct{long a,b;}tmp;
 	tmp.a = 0;
 	tmp.b = 32;
