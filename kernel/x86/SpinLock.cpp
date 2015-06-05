@@ -1,6 +1,8 @@
 #include"cpu/SpinLock.h"
 #include"cpu/CPUManager.h"
+#include"Interrupt.h"
 #define UNLOCKED_NUM 0xffffffff 
+#define E
 //改为检查是不是当前cpu
 #define BASIC_LOCK(lock) \
 	__asm__ volatile( \
@@ -27,6 +29,7 @@
 	}while(0)
 void SpinLock::Lock()
 {
+	Interrupt::EnterCritical(this->eflag);
 	if(this->basicMode)
 	{
 		BASIC_LOCK(this->lock);
@@ -51,6 +54,7 @@ void SpinLock::Unlock()
 	if(this->basicMode)
 	{
 		BASIC_UNLOCK(this->lock);
+		Interrupt::LeaveCritical(this->eflag);
 		return;
 	}
 	depth--;
@@ -58,6 +62,7 @@ void SpinLock::Unlock()
 	{
 		currCPU = UNLOCKED_NUM;
 		BASIC_UNLOCK(this->lock);
+		Interrupt::LeaveCritical(this->eflag);
 	}
 }
 
@@ -67,6 +72,8 @@ bool SpinLock::Try()
 	{
 		bool tmp;
 		BASIC_TRY(tmp,this->lock);
+		if(tmp)
+			Interrupt::EnterCritical(this->eflag);
 		return tmp;
 	}
 	int id = CPUManager::Instance()->GetCurrentCPU()->GetID();
@@ -77,6 +84,7 @@ bool SpinLock::Try()
 	{
 		depth++;
 		BASIC_UNLOCK(tmplock);
+		Interrupt::EnterCritical(this->eflag);
 		return true;
 	}
 	BASIC_UNLOCK(tmplock);
@@ -85,6 +93,7 @@ bool SpinLock::Try()
 	{
 		currCPU = id;
 		depth++;
+		Interrupt::EnterCritical(this->eflag);
 		return true;
 	}
 	else

@@ -10,6 +10,7 @@ class SpinLock
 		int depth;
 		int currCPU;
 		static bool basicMode;
+		uint32_t eflag;
 	public:
 		void Lock();
 		void Unlock();

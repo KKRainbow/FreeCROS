@@ -19,13 +19,14 @@ void Clock::InitPIT()
 int Clock::ClockHandler(InterruptParams& params)
 {
 	//先关闭中断,因为如果时钟过快会导致栈溢出
-	Interrupt::Instance()->Cli();
+	uint32_t eflag;
+	Interrupt::EnterCritical(eflag);
 	Clock* c = Clock::Instance();
 	if(CPUManager::Instance()->GetCurrentCPU()->GetType() == CPU::Type::BSP)
 		c->SetCurrentCounter(c->GetCurrentCounter()+c->GetPeriod());
 	CPUManager::Instance()->GetHAL()->EOI();
 	CPUManager::Instance()->ClockNotify();
-	Interrupt::Instance()->Sti();
+	Interrupt::LeaveCritical(eflag);
 	return true;
 }
 uint32_t Clock::CalcReloadValOfPeriod(uint32_t _Us,uint32_t &res_Us)
