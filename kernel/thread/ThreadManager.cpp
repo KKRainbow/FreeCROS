@@ -54,10 +54,9 @@ void ThreadManager::RemoveThread(int _Pid)
 }
 Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 {
-	_CPU = nullptr;
 	lock.Lock();
 
-	Thread* res  =sched->NextThread();
+	Thread* res  =sched->NextThread(_CPU);
 	if(res)
 		res->State()->ToRun(res);
 
@@ -89,3 +88,19 @@ void ThreadManager::SendMessage(IPCMessage& _Msg)
 	lock.Unlock();
 }
 
+void ThreadManager::SetPriority(Thread* _Thread,int _Priority)
+{
+	auto old = _Thread->Priority();
+	if(_Priority == old)return;
+	
+	lock.Lock();
+	if(_Priority > old)
+	{
+		this->sched->RaisePriority(_Thread,_Priority);
+	}
+	else
+	{
+		this->sched->DownPriority(_Thread,_Priority);
+	}
+	lock.Unlock();
+}

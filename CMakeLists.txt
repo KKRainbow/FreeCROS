@@ -3,8 +3,8 @@ project(freecros)
 
 SET(ARCHITECT "x86")
 
-SET(CMAKE_CXX_FLAGS "-fomit-frame-pointer -g -O0 -ffreestanding -fno-builtin -fno-rtti -std=c++11 -m32 -fno-exceptions -nostdlib -nodefaultlibs -nostartfiles -nostdinc -nostdinc++")
-SET(CMAKE_C_FLAGS "-fomit-frame-pointer -g -O0 -m32 -ffreestanding -fno-builtin -nostdlib -nodefaultlibs -nostartfiles -nostdinc")
+SET(CMAKE_CXX_FLAGS "-fomit-frame-pointer -g -O0 -ffreestanding -fno-builtin -fno-rtti -std=c++11 -m32 -fno-exceptions -nostdlib -nodefaultlibs -nostartfiles -nostdinc -nostdinc++ -Wreturn-type")
+SET(CMAKE_C_FLAGS "-fomit-frame-pointer -g -O0 -m32 -ffreestanding -fno-builtin -nostdlib -nodefaultlibs -nostartfiles -nostdinc -Wreturn-type")
 
 SET(Link_Script ${PROJECT_SOURCE_DIR}/config/${ARCHITECT}/kernel.ld)
 SET(CMAKE_EXE_LINKER_FLAGS "-T${Link_Script}")

@@ -37,7 +37,7 @@ void SchedulerDefault::ThreadRemoved(Thread* thread)
 	}
 }
 
-Thread* SchedulerDefault::NextThread()
+Thread* SchedulerDefault::NextThread(CPU* _CPU)
 {
 	decltype(lists[0].Begin()) ite;
 	int i = 0;
@@ -47,6 +47,13 @@ Thread* SchedulerDefault::NextThread()
 		if(ite != lists[i].End()) //List of this priority is not empty.
 		{
 			Thread* res = *ite;
+			
+			Assert(res);
+			auto& state = res->State();
+			Assert(state.Obj());
+			auto stateType = state->Type();
+			Assert(stateType == States::READY);
+			
 			return res;
 		}
 	}

@@ -26,5 +26,6 @@ class ThreadManager
 		Thread* GetNextThreadToExecute(CPU* _CPU);
 		Thread* GetThreadByPID(int _Pid);
 		void SendMessage(IPCMessage& _Msg);
+		void SetPriority(Thread* _Thread,int _Priority);
 };
 

@@ -15,7 +15,7 @@ class SchedulerDefault:public Scheduler
 		virtual void Deinit()override;
 		virtual void ThreadAdded(Thread* thread)override;
 		virtual void ThreadRemoved(Thread* thread)override; 
-		virtual Thread* NextThread()override;
+		virtual Thread* NextThread(CPU* _CPU)override;
 		virtual void RaisePriority(Thread* thread,int _Pri)override;
 		virtual void DownPriority(Thread* thread,int _Pri)override;
 };

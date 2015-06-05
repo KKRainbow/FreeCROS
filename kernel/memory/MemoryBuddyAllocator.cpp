@@ -37,6 +37,7 @@ bool MemoryBuddyAllocator::Deinitialize()
 {
 	this->alloc->Deallocate(&(this->avail[0][0]));
 	this->alloc->Deallocate(this->avail);
+	return true;
 }
 
 bool MemoryBuddyAllocator::Initialize()

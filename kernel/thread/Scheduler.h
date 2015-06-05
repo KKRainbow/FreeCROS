@@ -1,5 +1,6 @@
 #pragma once
 #include"Global.h"
+class CPU;
 class Thread;
 class Scheduler
 {
@@ -10,7 +11,7 @@ class Scheduler
 		virtual void Deinit() = 0;
 		virtual void ThreadAdded(Thread* thread) = 0;
 		virtual void ThreadRemoved(Thread* thread) = 0; 
-		virtual Thread* NextThread() = 0;
+		virtual Thread* NextThread(CPU* _CPU) = 0;
 		virtual void RaisePriority(Thread* thread,int _Pri) = 0;
 		virtual void DownPriority(Thread* thread,int _Pri) = 0;
 };

@@ -22,10 +22,10 @@
 extern "C" int vsnprintf(char *buffer, unsigned int size, const char *fmt, va_list args)
 {
     char buf[size+1];
-    for(int i = 0;i<size;i++)buf[i] = fmt[i];
+    for(unsigned int i = 0;i<size;i++)buf[i] = fmt[i];
     buf[size] = '\0';
     
-    return vsprintf(buffer,fmt,args);
+    return vsprintf(buffer,buf,args);
 }
 
 
