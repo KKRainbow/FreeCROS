@@ -104,3 +104,12 @@ void ThreadManager::SetPriority(Thread* _Thread,int _Priority)
 	}
 	lock.Unlock();
 }
+
+void ThreadManager::ClockNotify(uint64_t _Counter)
+{
+	for(auto& pair : this->threads)
+	{
+		Thread* thread = pair.second;
+		thread->ClockNotify(_Counter);
+	}
+}

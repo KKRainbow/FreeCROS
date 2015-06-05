@@ -12,12 +12,15 @@
 #include"WaitableObj.h"
 
 class CPUState;
+class ThreadManager;
 class Thread
 {
 	public:
+		friend class ThreadManager;
 	private:
 		pid_t pid;
 		int priority;
+		uint32_t alarmCounter = 0;
 		uint32_t kernelCounter = 0;
 		uint32_t userCounter = 0;
 		uint32_t cpuCounter = 10000;
@@ -42,13 +45,13 @@ class Thread
 	private:
 		Thread& operator=(const Thread&){return *this;}
 		Thread(const Thread&){}
-	public:
 		//Create a thread with a independent address space=
 		Thread(pid_t pid,ThreadType _Type,Thread* _Father = nullptr);		
 		//Create a thread with a dependent address space
 		Thread(Thread& _Thread,int _Pid);
-		
 		Thread(){};
+		void ClockNotify(uint64_t _Counter);
+	public:
 		
 		pid_t GetPid();
 		uint32_t& CPUCounter();

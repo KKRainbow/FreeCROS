@@ -2,6 +2,7 @@
 #include"string.h"
 #include"memory/AddressSpaceManager.h"
 #include"Log.h"
+#include"IPCMessage.h"
 //Create Thread::a thread with a independent address space=
 Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threadType(_Type)
 {
@@ -187,4 +188,21 @@ int& Thread::Priority()
 ThreadType Thread::Type()
 {
 	return threadType;
+}
+
+void Thread::ClockNotify(uint64_t _Counter)
+{
+	if(this->alarmCounter != 0)
+	{
+		if(this->alarmCounter < _Counter)
+		{
+			Message msg;
+			msg.timeStamp = _Counter;
+			msg.source = -1;
+			msg.content[0] = 0x101;
+			IPCMessage ipc = msg;
+			this->ReceiveMessage(ipc);
+			this->alarmCounter = 0;
+		}
+	}
 }

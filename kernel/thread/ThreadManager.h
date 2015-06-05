@@ -27,5 +27,6 @@ class ThreadManager
 		Thread* GetThreadByPID(int _Pid);
 		void SendMessage(IPCMessage& _Msg);
 		void SetPriority(Thread* _Thread,int _Priority);
+		void ClockNotify(uint64_t _Counter);
 };
 
