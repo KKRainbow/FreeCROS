@@ -22,10 +22,21 @@ int Clock::ClockHandler(InterruptParams& params)
 	uint32_t eflag;
 	Interrupt::EnterCritical(eflag);
 	Clock* c = Clock::Instance();
-	if(CPUManager::Instance()->GetCurrentCPU()->GetType() == CPU::Type::BSP)
-		c->SetCurrentCounter(c->GetCurrentCounter()+c->GetPeriod());
+	
 	CPUManager::Instance()->GetHAL()->EOI();
-	CPUManager::Instance()->ClockNotify();
+	CPU* cpu = CPUManager::Instance()->GetCurrentCPU();
+	//说明没有初始化完成呢.该cpu还未被加入CPUManager?
+	if(cpu)
+	{
+		if(cpu->GetType() == CPU::Type::BSP)
+		{
+			c->SetCurrentCounter(c->GetCurrentCounter()+c->GetPeriod());
+			CPUManager::Instance()->ClockNotify();
+		}
+		else
+		{
+		}
+	}
 	Interrupt::LeaveCritical(eflag);
 	return true;
 }

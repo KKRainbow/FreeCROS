@@ -8,8 +8,8 @@ add_subdirectory(x86)
 SET(MAIN_SRCS Main.cpp Multiboot.cpp)
 add_executable(kernel ${MAIN_SRCS})
 
-SET(KERNEL_LIB thread memory arch cpu)
+SET(KERNEL_LIB thread memory cpu arch)
 SET(SUPPORT_LIB c lalr exec c++)
-target_link_libraries(kernel ${SUPPORT_LIB} ${KERNEL_LIB})
+target_link_libraries(kernel memory ${SUPPORT_LIB})
 
 message(STATUS ${KERNEL_LIB})

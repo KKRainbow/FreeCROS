@@ -70,7 +70,7 @@ Handler 2,CHandler,1
 Handler 3,CHandler,1
 Handler 4,CHandler,1
 Handler 5,CHandler,1
-Handler 6,CHandler,1
+Handler 6,CHandler,0
 Handler 7,CHandler,1
 Handler 8,CHandler,0
 Handler 9,CHandler,1

@@ -21,12 +21,13 @@
 #include"stl/smap.h"
 #include"Interrupt.h"
 #include"CPU.h"
+#include"SpinLock.h"
 
 class AddressSpace;
 class Clock;
 class HAL;
 
-typedef void (*cpu_entry_t)();
+typedef void (*cpu_entry_t)(addr_t _StackAddr,size_t _StackSize);
 class CPUManager
 {
 	SINGLETON_H(CPUManager)
@@ -36,12 +37,15 @@ class CPUManager
 		Clock* clock;
 		void ClockNotify();
 		HAL* hal;
+		cpu_entry_t apsEntry;
+		SpinLock apsLock;
+		static void APsEntryCaller(addr_t _StackAddr,size_t _StackSize);
 	public:
 		lr::sstl::Map<int,CPU*> CPUList; 
 		HAL* GetHAL();
 		void Initialize();
 		CPU* GetCurrentCPU();
-		void InitAPs(cpu_entry_t _Entry,size_t _StackSize);
+		int InitAP(addr_t _Entry,size_t _StackSize);
 		void AddCPU(CPU* _CPU);
 		void EOI();
 		int RegisterIRQ(IRQHandler _Han,IRQNum _Number);

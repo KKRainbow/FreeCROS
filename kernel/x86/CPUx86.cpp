@@ -129,7 +129,7 @@ CPUx86::CPUx86(CPU::Type _Type)
 	this->type = _Type;
 	this->manager = CPUManager::Instance();
 	
-	type = Type::BSP;
+	type = _Type;
 	this->InitGDT();
 	Interrupt::Instance()->Initialize();
 	
@@ -137,7 +137,14 @@ CPUx86::CPUx86(CPU::Type _Type)
 	this->InitPage();
 	//Init HAL
 	//this->manager->AddCPU(this);//这个是不是不应该有
-	this->manager->GetHAL()->InitBSP();
+	if(_Type == BSP)
+	{
+		this->manager->GetHAL()->InitBSP();
+	}
+	else
+	{
+		this->manager->GetHAL()->InitAsAP();
+	}
 	this->SetID(this->manager->GetHAL()->GetCurrentCPUID());
 	Interrupt::Sti();
 }

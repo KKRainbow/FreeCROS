@@ -49,9 +49,10 @@ void CPUManager::KernelWait(uint32_t _Us)const
 	Clock::Instance()->KernelWait(_Us);
 }
 
-void CPUManager::InitAPs(cpu_entry_t _Entry,size_t _StackSize)
+int CPUManager::InitAP(addr_t _Entry,size_t _StackSize)
 {
-	this->hal->InitAPs(_Entry,_StackSize);
+	this->apsEntry = (cpu_entry_t)_Entry;
+	this->hal->InitAPs((void (*)())CPUManager::APsEntryCaller,_StackSize);
 }
 
 void CPUManager::Initialize()
@@ -94,4 +95,18 @@ void CPUManager::AddCPU(CPU* _CPU)
 {
 	_CPU->id = this->hal->GetCurrentCPUID();
 	CPUList.Insert(lr::sstl::MakePair(_CPU->id,_CPU));
+}
+
+void CPUManager::APsEntryCaller(addr_t _StackAddr,size_t _StackSize)
+{
+	auto& apsEntry = CPUManager::Instance()->apsEntry;
+	auto& apsLock = CPUManager::Instance()->apsLock;
+	apsLock.Lock();
+	CPU* cpu = new CPUx86(CPU::Type::AP);
+	CPUManager::Instance()->AddCPU(cpu);
+	apsLock.Unlock();
+	//为了防止lock把中断关了,我们要再打开它
+	Interrupt::Sti();;
+	apsEntry(_StackAddr,_StackSize);
+	for(;;);
 }

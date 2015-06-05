@@ -1,3 +1,4 @@
+#include"Type.h"
 #include"Multiboot.h"
 #include"memory/MemoryManager.h"
 #include"cpu/CPUManager.h"
@@ -7,15 +8,13 @@
 //全局变量声明
 Multiboot globalMultiboot; //Mutiboot的所有信息都在这里获得
 MemoryManager globalMemoryManager(true);
-
-void test()
+extern "C" void apmain(addr_t _StackAddr,size_t _StackSize)
 {
-	for(;;)
-	{
-		CPUManager::Instance()->KernelWait(1000000);
-		LOG("aaaa\n",1);
-	}
+	LOG("Core Running!\n",1);
+	for(;;)__asm__("hlt");
 }
+
+
 extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 {
 	//设置全局SpinLock
@@ -38,10 +37,14 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	
 	LOG("Start service!!!\n",1);
 	m->GetCurrentCPU()->StartService();
-	auto t = ThreadManager::Instance()->CreateThread(ThreadType::KERNEL);
-	t->SetEntry((addr_t)test);
-	t->State()->ToReady(t);
 	
-	m->GetCurrentCPU()->SetIdleThread(t);
-	for(;;);
+	const size_t stackSize = 4*PAGE_SIZE;
+	m->InitAP((addr_t)apmain,stackSize);
+	
+	for(;;)
+	{
+		m->KernelWait(1e6);
+		LOG("Core 1\n",1);
+	}
+	for(;;)__asm__("hlt");
 }
