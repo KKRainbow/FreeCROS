@@ -16,7 +16,7 @@ int Log::LogStr(const char* str,...)
 	va_end(vlist);
 
 	printer.Print(res);
-//	charList.PushBack(res);
+	//charList.PushBack(res);
 	return count;
 
 }

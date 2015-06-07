@@ -5,8 +5,7 @@ SET(modules)
 SET(Link_Script ${PROJECT_SOURCE_DIR}/config/${ARCHITECT}/user.ld)
 SET(CMAKE_EXE_LINKER_FLAGS "-T${Link_Script}")
 
-# SET(SERVERS device memory)
-SET(SERVERS)
+SET(SERVERS device process)
 SET(SERVERS ${SERVERS} PARENT_SCOPE)
 
 FOREACH(SVR ${SERVERS})

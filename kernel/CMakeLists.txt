@@ -9,7 +9,7 @@ add_subdirectory(ramdisk)
 SET(MAIN_SRCS Main.cpp Multiboot.cpp)
 add_executable(kernel ${MAIN_SRCS})
 
-SET(KERNEL_LIB thread memory cpu arch ramdisk)
+SET(KERNEL_LIB thread memory cpu arch ramdisk misc)
 SET(SUPPORT_LIB c lalr exec c++)
 target_link_libraries(kernel ${KERNEL_LIB} ${SUPPORT_LIB})
 

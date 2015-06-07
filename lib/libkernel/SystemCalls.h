@@ -1,6 +1,8 @@
 #pragma once
 #include"Global.h"
-#include"SystemCallEntry.h"
+#include"Interrupts.h"
+
+#define SYSCALL_IRQ_NUM 0x80
 
 #define SYSCALL_METHOD_H(callname,callnum) \
 class SysCall##callname:public SysCall { \
@@ -24,6 +26,16 @@ class SysCall##callname:public SysCall { \
 	int SysCall##callname::SystemCallNum(){return SysCall##callname::GetCallNum();}\
 	int SysCall##callname::Call(uint32_t _First ,uint32_t _Sec,\
 				uint32_t _Third,uint32_t _Fourth,InterruptParams& params)
+
+class SysCall
+{
+	public:
+		virtual int SystemCallNum() = 0;
+		virtual int Call(uint32_t _First,uint32_t _Sec,
+				uint32_t _Third,uint32_t _Fourth,
+				InterruptParams& params) = 0;
+		//Four parameters
+};
 
 SYSCALL_METHOD_H(Log,0);
 SYSCALL_METHOD_H(CreateThread,1);  //Entry

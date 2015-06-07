@@ -43,7 +43,7 @@ void ServerLoader::LoadModules()
 			addr_t vmupper = PAGE_UPPER_ALIGN
 			(region->virtualAddress+region->size+1);
 			int pages = (vmupper - vmlower)>>PAGE_SHIFT;
-			char* res = MemoryManager::Instance()->KernelPageAllocate(1);
+			char* res = (char*)MemoryManager::Instance()->KernelPageAllocate(1);
 			Assert(res);
 			addr_t tmpvir = vmlower;
 			char* tmpphy = res;
@@ -53,7 +53,7 @@ void ServerLoader::LoadModules()
 				tmpvir += PAGE_SIZE;
 				tmpphy += PAGE_SIZE;
 			}
-			AddressSpaceManager::CopyDataFromAnotherSpace(*space,(void*)region[i].virtualAddress,
+			AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(*space,(void*)region[i].virtualAddress,
 					*kas,region[i].data,vmupper-vmlower);
 		}
 		thread->SetEntry(format->entry());

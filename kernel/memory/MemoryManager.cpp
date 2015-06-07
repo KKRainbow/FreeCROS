@@ -200,6 +200,7 @@ void* MemoryManager::KernelObjectAllocate(size_t _Size)
 {
 	lock.Lock();
 	auto res = this->kernelInitAllocator->Allocate(_Size,0);
+	this->kernelInitAllocator->FreeSize();
 	lock.Unlock();
 	return res;
 }

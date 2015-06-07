@@ -359,7 +359,8 @@ __asm__("cld\n\t"
 else
 __asm__("std\n\t"
 	"rep\n\t"
-	"movsb"
+	"movsb\n\t"
+	"cld\n\t"
 	::"c" (n),"S" ((char*)src+n-1),"D" ((char*)dest+n-1)
 	);
 return dest;

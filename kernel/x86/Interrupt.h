@@ -1,39 +1,13 @@
 #pragma once
 #include"Global.h"
+#include"Interrupts.h"
 #include"stl/sarray.h"
 #include"stl/smap.h"
 #include"stl/stuple.h"
 #include"stl/sidgen.h"
 //Manage Interrupt table
 extern unsigned long ItrnTable;
-struct InterruptParams
-{
-	uint32_t isKernel;
-	
-	uint32_t gs;
-	uint32_t fs;
-	uint32_t es;
-	uint32_t ds;
-	
-	uint32_t edi;
-	uint32_t esi;
-	uint32_t ebp;
-	uint32_t esp;
-	
-	uint32_t ebx;
-	uint32_t edx;
-	uint32_t ecx;
-	uint32_t eax;
-	
-	uint32_t irqnum;
-	uint32_t errorCode;
-	
-	uint32_t eip;
-	uint32_t cs;
-	uint32_t eflags;
-	uint32_t userEsp;
-	uint32_t userSS;
-};
+
 typedef int (*IRQHandler)(InterruptParams& params);
 typedef int IRQNum;
 typedef lr::sstl::Tuple<uint32_t,uint32_t,uint32_t,uint32_t> SyscallParamPacket; 

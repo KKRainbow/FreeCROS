@@ -26,7 +26,6 @@ add_subdirectory(kernel)
 add_subdirectory(config)
 add_subdirectory(lib)
 add_subdirectory(test)
-add_subdirectory(server)
 
 
 ADD_CUSTOM_TARGET(
@@ -59,3 +58,5 @@ ADD_CUSTOM_TARGET(
 	cg	
 	COMMAND cgdb -command=gdbcommand
 	)
+
+add_subdirectory(server)
