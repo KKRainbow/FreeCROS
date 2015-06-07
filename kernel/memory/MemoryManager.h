@@ -28,18 +28,20 @@ class MemoryAllocator;
 class MemoryManager
 {
 	SINGLETON_H(MemoryManager)
-private:
-	//Manager初始化时new还不能使用,我们在这个空间初始化第一个Allocator,以此为其他allocator的基础
-	uint8_t initAllocator[sizeof(MemoryListAllocator)];
+public:
 	struct Module{
 		addr_t addr;
 		size_t size;
-	}*modules;
+	};
+private:
+	//Manager初始化时new还不能使用,我们在这个空间初始化第一个Allocator,以此为其他allocator的基础
+	uint8_t initAllocator[sizeof(MemoryListAllocator)];
 	int16_t moduleCount = 0;
 	MemoryAllocator* GetProperAlloc(addr_t _Addr,size_t _Size = 0);
 	uint32_t memSize = 0;
 	
 	SpinLock lock;
+	Module* modules;
 protected:
 	MemoryAllocator* kernelInitAllocator = nullptr;
 	MemoryAllocator* kernelPageAllocator = nullptr;
@@ -57,6 +59,7 @@ public:
 	bool AutoDeallocate(void* _Ptr);
 	void* KernelPageAllocate(size_t _Size);
 	uint32_t MemSize(){return this->memSize;}
+	Module* GetModules(){return this->modules;}
 };
 
 extern MemoryManager globalMemoryManager;

@@ -19,6 +19,9 @@
 #include"Global.h"
 #include"stl/svector.h"
 #include"RamDiskItemChrDev.h"
+#include"RamDiskItemDir.h"
+#include"RamDiskItemFile.h"
+#include <cpu/CPUManager.h>
 using namespace lr::sstl;
 
 RamDisk::RamDisk():idgen()
@@ -95,11 +98,21 @@ RamDiskItem* RamDisk::GetNewItem(AString _Name,RamDiskItem::Type _Type)
 	if(_Name.Length() == 0)
 	{
 		return nullptr;
-	}RamDiskItem* i = nullptr;
+	}
+	RamDiskItem* i = nullptr;
+	auto currThread = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
 	switch(_Type)
 	{
 		case RamDiskItem::Type::CHAR:
-			i =new RamDiskItemChrDev(this->idgen.GetID(),_Type,_Name);
+			i =new RamDiskItemChrDev
+			(currThread,this->idgen.GetID(),_Type,_Name);
+			break;
+		case RamDiskItem::Type::DIR:
+			i =new RamDiskItemDir(this->idgen.GetID(),_Type,_Name);
+			break;
+		case RamDiskItem::Type::FILE:
+			i =new RamDiskItemFile(this->idgen.GetID(),_Type,_Name);
+			break;
 	}
 	if(i)this->itemsMap.Insert(MakePair(i->id,i));
 	return i;

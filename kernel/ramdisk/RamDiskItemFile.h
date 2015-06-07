@@ -21,7 +21,7 @@
 class RamDiskItemFile :public RamDiskItem
 {
 public:
-	RamDiskItemDir(int32_t _Id,Type _Type,lr::sstl::AString _Name);
+	RamDiskItemFile(int32_t _Id,Type _Type,lr::sstl::AString _Name);
 	virtual pid_t Seek(off_t _Offset, int _Whence);
 	virtual pid_t Write(int8_t* _Buffer, size_t _Size);
 	virtual pid_t Read(int8_t* _Buffer, size_t _Size);

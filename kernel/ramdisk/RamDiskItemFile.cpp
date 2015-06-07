@@ -15,30 +15,30 @@
  * 
  */
 
-#include "RamDiskItemDir.h"
+#include"RamDiskItemFile.h"
 
-RamDiskItemDir::RamDiskItemFile(int32_t _Id,Type _Type,lr::sstl::AString _Name)
+RamDiskItemFile::RamDiskItemFile(int32_t _Id,Type _Type,lr::sstl::AString _Name)
 :RamDiskItem(_Id,_Type,_Name)
 {
 
 }
 
-pid_t RamDiskItemDir::Seek(off_t _Offset, int _Whence)
+pid_t RamDiskItemFile::Seek(off_t _Offset, int _Whence)
 {
 	return 0;
 }
 
-pid_t RamDiskItemDir::Write(int8_t* _Buffer, size_t _Size)
+pid_t RamDiskItemFile::Write(int8_t* _Buffer, size_t _Size)
 {
 	return 0;
 }
 
-pid_t RamDiskItemDir::Read(int8_t* _Buffer, size_t _Size)
+pid_t RamDiskItemFile::Read(int8_t* _Buffer, size_t _Size)
 {
 	return 0;
 }
 
-pid_t RamDiskItemDir::Open()
+pid_t RamDiskItemFile::Open()
 {
 	return 0;
 }

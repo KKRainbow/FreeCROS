@@ -73,8 +73,8 @@ pid_t RamDiskItemChrDev::Read(int8_t* _Buffer,size_t _Size)
 		return -1;
 	}
 	msg.content[0] = MSG_DEVICE_READ_OPERATION;
-	msg.content[1] = _Buffer;
-	msg.content[2] = _Size;
+	msg.content[1] = (uint32_t)_Buffer;
+	msg.content[2] = (uint32_t)_Size;
 	IPCMessage ipc = msg;
 	if(devThread->ReceiveMessage(ipc))
 	{
@@ -94,8 +94,8 @@ pid_t RamDiskItemChrDev::Write(int8_t* _Buffer,size_t _Size)
 		return -1;
 	}
 	msg.content[0] = MSG_DEVICE_OPEN_OPERATION;
-	msg.content[1] = _Buffer;
-	msg.content[2] = _Size;
+	msg.content[1] = (uint32_t)_Buffer;
+	msg.content[2] = (uint32_t)_Size;
 	IPCMessage ipc = msg;
 	if(devThread->ReceiveMessage(ipc))
 	{

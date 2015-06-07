@@ -25,5 +25,6 @@ typedef unsigned long addr_t;
 
 typedef int pid_t;
 typedef int irq_t;
+typedef int off_t;
 
 #endif

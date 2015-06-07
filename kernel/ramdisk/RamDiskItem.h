@@ -39,9 +39,9 @@ private:
 	IDType id; //每个文件唯一一个ID
 	ItemList children;
 	lr::sstl::AString name;
-	RamDiskItem(int32_t _Id,Type _Type,lr::sstl::AString _Name);
 	IDType AddChild(RamDiskItem* _Child);
 public:
+	RamDiskItem(int32_t _Id,Type _Type,lr::sstl::AString _Name);
 	Type GetType();
 	lr::sstl::Pair<ItemList::iterator,ItemList::iterator> GetChildrenIter();
 	RamDiskItem* GetParent();

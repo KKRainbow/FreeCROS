@@ -12,3 +12,5 @@ add_executable(kernel ${MAIN_SRCS})
 SET(KERNEL_LIB thread memory cpu arch ramdisk)
 SET(SUPPORT_LIB c lalr exec c++)
 target_link_libraries(kernel ${KERNEL_LIB} ${SUPPORT_LIB})
+
+add_subdirectory(misc)
