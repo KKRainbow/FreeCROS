@@ -4,6 +4,7 @@
 #include"memory/AddressSpaceManager.h"
 #include"thread/ThreadManager.h"
 #include <cpu/CPUManager.h>
+#include"syscall/SystemCallEntry.h"
 #include"HAL.h"
 #include "Clock.h"
 
@@ -83,6 +84,7 @@ void CPUx86::Run()
 	struct{long a,b;}tmp;
 	tmp.a = 0;
 	tmp.b = 32;
+	MAGIC_DEBUG;
 	__asm__("ljmp *%0\n\t"::"m"(tmp.a));
 }
 
@@ -119,6 +121,10 @@ void CPUx86::InitGDT()
 			"movw %0,%%ss\n\t"
 			::"a"(16));
 }
+void CPUx86::InitSysCall()
+{
+	SystemCallEntry::Instance();
+}
 
 CPUx86::CPUx86(CPU::Type _Type)
 {
@@ -145,6 +151,7 @@ CPUx86::CPUx86(CPU::Type _Type)
 	{
 		this->manager->GetHAL()->InitAsAP();
 	}
+	this->InitSysCall();
 	this->SetID(this->manager->GetHAL()->GetCurrentCPUID());
 	Interrupt::Sti();
 }

@@ -1,3 +1,4 @@
+#include"Log.h"
 /*
  * Copyright 2015 <copyright holder> <email>
  * 
@@ -154,7 +155,12 @@ AddressSpace* AddressSpaceX86::GetAddressSpace()
 	if(!cr3)return nullptr;
 	else
 	{
-		return new AddressSpaceX86(cr3);
+		//把APCI部分映射一下,不然PageFault会用到APCI的内存区域,导致递归
+		auto res = new AddressSpaceX86(cr3);
+		Assert(res);
+		const addr_t apci = 0xfee00000;
+		res->MapVirtAddrToPhysAddr(apci,apci,0,1);
+		return res;
 	}
 }
 AddressSpaceX86::AddressSpaceX86(PageDirEntry* _PDE)
@@ -162,6 +168,9 @@ AddressSpaceX86::AddressSpaceX86(PageDirEntry* _PDE)
 	Assert(_PDE);
 	cr3 = _PDE;
 	memset(&cr3[0],0,sizeof(PageDirEntry)*1024);
+	
+	this->pageDirUsedCount = (uint16_t*)MemoryManager::Instance()->KernelPageAllocate(1);
+	Assert(this->pageDirUsedCount);
 }
 
 void AddressSpaceX86::GetPageEntryProperty(addr_t _VirtAddr)

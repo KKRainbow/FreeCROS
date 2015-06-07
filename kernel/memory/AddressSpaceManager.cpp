@@ -100,12 +100,15 @@ void AddressSpaceManager::CopyDataFromAnotherSpace (
 	}
 }
 
+#include"Log.h"
 int AddressSpaceManager::PageFaultHandler(InterruptParams& _Params)
 {
 	addr_t address;
+	addr_t cr3;
 	__asm__("movl %%cr2,%%eax\n\t":"=a"(address):);
+	__asm__("movl %%cr3,%%eax\n\t":"=a"(cr3):);
 	AddressSpace* kas = AddressSpaceManager::Instance()->GetKernelAddressSpace();
-	AddressSpace* space = AddressSpaceManager::Instance()->GetCurrentAddressSpace();
+	AddressSpace* space = AddressSpaceManager::Instance()->GetAddressSpaceByPageDirAddr(cr3);
 	if(kas == space) //Kernel Space
 	{
 		kas->MapVirtAddrToPhysAddr(address,address,0,1);

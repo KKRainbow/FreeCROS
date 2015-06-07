@@ -39,9 +39,6 @@ class Thread
 		
 		SpinLock msgLock;
 		
-		WaitableObj waitSelf;
-		WaitableObj waitIPCSend;
-		WaitableObj waitIPCReceive;
 	private:
 		Thread& operator=(const Thread&){return *this;}
 		Thread(const Thread&){}
@@ -52,6 +49,9 @@ class Thread
 		Thread(){};
 		void ClockNotify(uint64_t _Counter);
 	public:
+		WaitableObj waitSelf;
+		WaitableObj waitIPCSend;
+		WaitableObj waitIPCReceive;
 		
 		pid_t GetPid();
 		uint32_t& CPUCounter();

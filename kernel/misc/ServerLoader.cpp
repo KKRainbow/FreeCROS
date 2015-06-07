@@ -20,7 +20,7 @@ void ServerLoader::LoadModules()
 	ExecutableFormat* format;
 	MemoryRegion* region = new MemoryRegion[14];
 	AddressSpace* kas = AddressSpaceManager::Instance()->GetKernelAddressSpace();
-
+	count = 1;
 	while(count--)
 	{
 		Thread* thread = ThreadManager::Instance()->CreateThread(SERVER);
@@ -43,7 +43,8 @@ void ServerLoader::LoadModules()
 			addr_t vmupper = PAGE_UPPER_ALIGN
 			(region->virtualAddress+region->size+1);
 			int pages = (vmupper - vmlower)>>PAGE_SHIFT;
-			char* res = (char*)MemoryManager::Instance()->KernelPageAllocate(1);
+			char* res = (char*)MemoryManager::Instance()
+				->KernelPageAllocate(pages);
 			Assert(res);
 			addr_t tmpvir = vmlower;
 			char* tmpphy = res;

@@ -8,4 +8,4 @@ SET(SRCS ${SRCS} ${ASM_SRC})
 SET_SOURCE_FILES_PROPERTIES(${ASM_SRC} PROPERTIES LANGUAGE C)
 
 ADD_LIBRARY(arch ${SRCS} ${APCI_SRC} ${MPS_SRC})
-target_link_libraries(arch cpu memory thread c)
+target_link_libraries(arch cpu memory thread c syscall)

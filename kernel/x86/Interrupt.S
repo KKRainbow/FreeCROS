@@ -3,7 +3,6 @@
 .macro Handler IntrNum,EndFunc,HasErrorCode
 .global AsmHandler\IntrNum
 AsmHandler\IntrNum:
-	//xchg %bx,%bx
 .if \HasErrorCode
 .else
 	pushl $0    /*若没有ErrorCode 那么ErrorCode就应该是0*/ 

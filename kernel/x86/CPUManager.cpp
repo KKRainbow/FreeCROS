@@ -53,6 +53,7 @@ int CPUManager::InitAP(addr_t _Entry,size_t _StackSize)
 {
 	this->apsEntry = (cpu_entry_t)_Entry;
 	this->hal->InitAPs((void (*)())CPUManager::APsEntryCaller,_StackSize);
+	return 1;
 }
 
 void CPUManager::Initialize()

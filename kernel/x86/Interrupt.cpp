@@ -56,11 +56,11 @@ void Interrupt::UniHandler(InterruptParams& params)
 }
 extern "C" void CHandler(InterruptParams params)
 {
-	Interrupt::UniHandler(params);
 	if(params.irqnum != 66)
 	{
-		LOG("IRQ: %d\n",params.irqnum);
+		//LOG("IRQ: %d\n",params.irqnum);
 	}
+	if(params.irqnum == 14)MAGIC_DEBUG;
 	if(params.irqnum <= 20 &&params.irqnum != 14)
 	{
 		Interrupt::Cli();
@@ -71,6 +71,7 @@ extern "C" void CHandler(InterruptParams params)
 		);
 		for(;;);
 	}
+	Interrupt::UniHandler(params);
 }
 void Interrupt::Initialize()
 {

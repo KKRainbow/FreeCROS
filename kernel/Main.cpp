@@ -42,15 +42,9 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	//Ramdisk之后就可以加载Server,Server利用Ramdisk就可以完成设备初始化了
 	//也就是我们可以开始写TTY的驱动程序了哈哈哈
 	//加载Server!
-// 	RamDisk ramdisk;
-// 	lr::sstl::AString str = "123";
-	auto a = new char[4];
-	auto b = "1234";
-// 	lr::sstl::copy(b,b+4,a);
-	memmove(a,b,4);
-	delete a;
+	RamDisk ramdisk;
 	
-	//ServerLoader::Instance()->LoadModules();
+	ServerLoader::Instance()->LoadModules();
 	
 	const size_t stackSize = 4*PAGE_SIZE;
 	//m->InitAP((addr_t)apmain,stackSize);

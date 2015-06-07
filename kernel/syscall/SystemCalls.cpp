@@ -6,7 +6,7 @@
 
 static void ReadDataFromCurrThread(void* dest,void* src,size_t size)
 {
-	AddressSpaceManager::CopyDataFromAnotherSpace(
+	AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
 			*AddressSpaceManager::Instance()->GetKernelAddressSpace(),dest,
 			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),src
 			,size);
@@ -14,7 +14,7 @@ static void ReadDataFromCurrThread(void* dest,void* src,size_t size)
 
 static void WriteDataToCurrThread(void* dest,void* src,size_t size)
 {
-	AddressSpaceManager::CopyDataFromAnotherSpace(
+	AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
 			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),dest,
 			*AddressSpaceManager::Instance()->GetKernelAddressSpace(),src,
 			size);
@@ -63,7 +63,7 @@ SYSCALL_METHOD_CPP(SendMessageTo)
 	ReadDataFromCurrThread(&msg,(void*)_First,sizeof(Message));
 	msg.source = CPUManager::Instance()->GetCurrentCPU()
 		->GetCurrThreadRunning()->GetPid();
-	msg.timeStamp = Clock::Instance()->GetCurrentCounter();
+	msg.timeStamp = CPUManager::Instance()->GetClockCounter();
 
 	Thread* des = ThreadManager::Instance()->GetThreadByPID(msg.destination);
 	if(des == nullptr)return -1;
