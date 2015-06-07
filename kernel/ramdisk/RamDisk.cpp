@@ -18,6 +18,7 @@
 #include"RamDisk.h"
 #include"Global.h"
 #include"stl/svector.h"
+#include"RamDiskItemChrDev.h"
 using namespace lr::sstl;
 
 RamDisk::RamDisk():idgen()
@@ -94,9 +95,13 @@ RamDiskItem* RamDisk::GetNewItem(AString _Name,RamDiskItem::Type _Type)
 	if(_Name.Length() == 0)
 	{
 		return nullptr;
+	}RamDiskItem* i = nullptr;
+	switch(_Type)
+	{
+		case RamDiskItem::Type::CHAR:
+			i =new RamDiskItemChrDev(this->idgen.GetID(),_Type,_Name);
 	}
-	RamDiskItem* i = new RamDiskItem(this->idgen.GetID(),_Type,_Name);
-	this->itemsMap.Insert(MakePair(i->id,i));
+	if(i)this->itemsMap.Insert(MakePair(i->id,i));
 	return i;
 }
 IDType RamDisk::MakeDir(lr::sstl::AString _Path,RamDiskItem* _Parent,bool _Recursive)

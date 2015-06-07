@@ -49,8 +49,8 @@ public:
 	RamDiskItem* FindChildByName(lr::sstl::AString _Name);
 	lr::sstl::AString GetName();
 public:
-// 	virtual int Open();
-// 	virtual size_t Read();
-// 	virtual size_t Write();
-// 	virtual int Seek();
+	virtual pid_t Open() = 0;
+	virtual pid_t Read(int8_t* _Buffer,size_t _Size) = 0;
+	virtual pid_t Write(int8_t* _Buffer,size_t _Size) = 0;
+	virtual pid_t Seek(off_t _Offset,int _Whence) = 0;
 };
