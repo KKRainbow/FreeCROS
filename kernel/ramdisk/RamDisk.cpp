@@ -24,7 +24,7 @@
 #include <cpu/CPUManager.h>
 using namespace lr::sstl;
 
-RamDisk::RamDisk():idgen()
+SINGLETON_CPP(RamDisk)
 {
 	this->root = this->GetNewItem("root",RamDiskItem::Type::DIR);
 	Assert(this->root);
@@ -33,7 +33,9 @@ RamDisk::RamDisk():idgen()
 	this->MakeDir("dev");
 	this->MakeDir("etc");
 	this->MakeDir("home");
+	
 }
+
 Pair<AString,AString> RamDisk::AnalysePath(AString _Path)
 {
 	Vector<AString> tmp;
@@ -91,7 +93,17 @@ RamDiskItem* RamDisk::RegisterBlockDevice(AString _Name)
 }	
 RamDiskItem* RamDisk::RegisterCharaterDevice(AString _Name)
 {
-	return nullptr;
+	auto ri = this->GetNewItem(_Name,RamDiskItem::Type::CHAR);
+	Assert(ri);
+	auto dev  = this->GetItemByPath("/dev");
+	if(dev == nullptr)
+	{
+		dev = this->GetItemByID(this->MakeDir("dev",this->root));
+		Assert(dev);
+	}
+	
+	dev->AddChild(ri);
+	return ri;
 }
 RamDiskItem* RamDisk::GetNewItem(AString _Name,RamDiskItem::Type _Type)
 {

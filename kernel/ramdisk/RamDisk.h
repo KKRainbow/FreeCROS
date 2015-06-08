@@ -23,6 +23,7 @@
 #include"stl/stuple.h"
 class RamDisk
 {
+	SINGLETON_H(RamDisk)
 private:
 	lr::sstl::Map<IDType,RamDiskItem*> itemsMap;
 	RamDiskItem* root = nullptr;
@@ -37,7 +38,6 @@ public:
 	RamDiskItem* GetItemByPath(lr::sstl::AString _Path,RamDiskItem* _Root = nullptr);
 	RamDiskItem* RegisterBlockDevice(lr::sstl::AString _Name);
 	RamDiskItem* RegisterCharaterDevice(lr::sstl::AString _Name);
-	RamDisk();
 	IDType MakeDir(lr::sstl::AString _Path,RamDiskItem* _Parent = nullptr,bool _Recursive = false);
 	IDType CreateFile(lr::sstl::AString _Name,RamDiskItem* _Parent = nullptr);
 };

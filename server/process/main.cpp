@@ -3,6 +3,7 @@
 #include"UserLog.h"
 int main()
 {
+	for(;;);
 	char a[500];
 	int res = 10;
 	int n  =snprintf(a,sizeof(a),"fdsakfldajI/O: %d \n",res);

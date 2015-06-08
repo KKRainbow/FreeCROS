@@ -12,8 +12,8 @@ class SysCall##callname:public SysCall { \
 		virtual int SystemCallNum()override; \
 		virtual int Call(uint32_t _First,uint32_t Sec,\
 				uint32_t _Third,uint32_t _Fourth,InterruptParams& params)override; \
-		static inline int Invoke(uint32_t _First,uint32_t _Sec,\
-				uint32_t _Third,uint32_t _Fourth) \
+		static inline int Invoke(uint32_t _First = 0,uint32_t _Sec = 0,\
+				uint32_t _Third = 0,uint32_t _Fourth = 0) \
 		{\
 			int res = 0; \
 			__asm__ volatile("int %1":"=a"(res):"i"(SYSCALL_IRQ_NUM),"a"(GetCallNum()),"b"(_First)\
@@ -46,4 +46,8 @@ SYSCALL_METHOD_H(ReceiveFrom,5); //Source,Message*
 SYSCALL_METHOD_H(ReceiveAll,6); //Message*
 SYSCALL_METHOD_H(ReadDataFromThread,7); //PID,Addr,Size
 SYSCALL_METHOD_H(RegisterIRQ,8); //irqnum
+SYSCALL_METHOD_H(RegisterChrDev,9); //devname
+SYSCALL_METHOD_H(Open,10); //devname
+SYSCALL_METHOD_H(Read,11); //devname
+SYSCALL_METHOD_H(Write,12); //devname
 

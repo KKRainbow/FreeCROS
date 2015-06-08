@@ -3,6 +3,7 @@
 #include"cpu/CPUManager.h"
 #include"thread/ThreadManager.h"
 #include"Log.h"
+#include"ramdisk/RamDisk.h"
 
 static void ReadDataFromCurrThread(void* dest,void* src,size_t size)
 {
@@ -17,6 +18,14 @@ static void WriteDataToCurrThread(void* dest,void* src,size_t size)
 	AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
 			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),dest,
 			*AddressSpaceManager::Instance()->GetKernelAddressSpace(),src,
+			size);
+}
+static void TransferDateFromOtherThread(void* _DBuffer,Thread* _SThread,
+						void* _SBuffer,size_t size)
+{
+	AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
+			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),_DBuffer,
+			*_SThread->GetAddressSpace(),_SBuffer,
 			size);
 }
 SYSCALL_METHOD_CPP(CreateThread)
@@ -88,7 +97,8 @@ SYSCALL_METHOD_CPP(ReceiveFrom)
 		curr->waitIPCReceive.Wait();	
 	}
 	curr->waitIPCSend.Wake();
-	WriteDataToCurrThread((void*)_First,&ipc.msg,sizeof(ipc.msg));	
+	WriteDataToCurrThread((void*)_Sec,&ipc.msg,sizeof(ipc.msg));	
+	return 1;
 }
 
 SYSCALL_METHOD_CPP(ReceiveAll)
@@ -101,6 +111,7 @@ SYSCALL_METHOD_CPP(ReceiveAll)
 	}
 	curr->waitIPCSend.Wake();
 	WriteDataToCurrThread((void*)_First,&ipc.msg,sizeof(ipc.msg));	
+	return 1;
 }
 
 SYSCALL_METHOD_CPP(ReadDataFromThread)
@@ -111,4 +122,75 @@ SYSCALL_METHOD_CPP(ReadDataFromThread)
 SYSCALL_METHOD_CPP(RegisterIRQ)
 {
 	return 1;
+}
+
+SYSCALL_METHOD_CPP(RegisterChrDev) //devname
+{
+	auto rd = RamDisk::Instance();
+	Assert(rd);
+	
+	char devname[500];
+	ReadDataFromCurrThread(devname,(void*)_First,sizeof(devname) - 1);
+	devname[500] = 0;
+	auto ri = rd->RegisterCharaterDevice(devname);
+	return ri->GetID();
+}
+
+SYSCALL_METHOD_CPP(Open)//path
+{
+	auto rd = RamDisk::Instance();
+	Message msg;
+	char devname[500];
+	
+	ReadDataFromCurrThread(devname,(void*)_First,sizeof(devname) - 1);
+	devname[500] = 0;
+	auto ri = rd->GetItemByPath(devname);
+	if(ri == nullptr)return -1;
+	
+	auto res = ri->Open();
+	//如果错误了就不用进行下面的步骤
+	if(res < 0)return res;
+	//判断打开的设备类型
+	switch(ri->GetType())
+	{
+		case RamDiskItem::Type::CHAR:
+			//获取的是设备进程的pid,要想获取最终结果还需ReceiMsg一下
+			SysCallReceiveFrom::Invoke((uint32_t)res,(uint32_t)&msg,0,0);
+			if(msg.content[0])return ri->GetID();	
+			else return -1;
+		default:
+			break;
+	}
+	return -1;
+}
+
+SYSCALL_METHOD_CPP(Read)//path
+{
+	auto rd = RamDisk::Instance();
+	Message msg;
+	
+	auto ri = rd->GetItemByID(_First);
+	if(ri == nullptr)return -1;
+	
+	auto res = ri->Read((int8_t*)_Sec,_Third);
+	//如果错误了就不用进行下面的步骤
+	if(res < 0)return res;
+	//判断打开的设备类型
+	auto devThread = ThreadManager::Instance()->GetThreadByPID(res);
+	if(!devThread)return -1;
+	switch(ri->GetType())
+	{
+		case RamDiskItem::Type::CHAR:
+			//获取的是设备进程的pid,要想获取最终结果还需ReceiMsg一下
+			SysCallReceiveFrom::Invoke((uint32_t)res,(uint32_t)&msg,0,0);
+			//参数: data,size;
+			if(msg.content[0] == 0)return -1;
+			TransferDateFromOtherThread((void*)_Sec,devThread,
+				(void*)msg.content[0],msg.content[1]
+			);
+			return msg.content[1];
+		default:
+			break;
+	}
+	return -1;
 }

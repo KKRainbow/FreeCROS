@@ -57,6 +57,7 @@ pid_t RamDiskItemChrDev::Open()
 	
 	if(devThread->ReceiveMessage(ipc))
 	{
+		devThread->waitIPCReceive.Wake();
 		return devThread->GetPid();
 	}
 	else
@@ -78,6 +79,7 @@ pid_t RamDiskItemChrDev::Read(int8_t* _Buffer,size_t _Size)
 	IPCMessage ipc = msg;
 	if(devThread->ReceiveMessage(ipc))
 	{
+		devThread->waitIPCReceive.Wake();
 		return devThread->GetPid();
 	}
 	else
@@ -99,6 +101,7 @@ pid_t RamDiskItemChrDev::Write(int8_t* _Buffer,size_t _Size)
 	IPCMessage ipc = msg;
 	if(devThread->ReceiveMessage(ipc))
 	{
+		devThread->waitIPCReceive.Wake();
 		return devThread->GetPid();
 	}
 	else
@@ -120,6 +123,7 @@ pid_t RamDiskItemChrDev::Seek(off_t _Offset,int _Whence)
 	IPCMessage ipc = msg;
 	if(devThread->ReceiveMessage(ipc))
 	{
+		devThread->waitIPCReceive.Wake();
 		return devThread->GetPid();
 	}
 	else
