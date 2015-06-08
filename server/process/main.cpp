@@ -1,9 +1,15 @@
 #include"stdio.h"
 #include"SystemCalls.h"
-
+#include"UserLog.h"
 int main()
 {
 	char a[500];
+	int res = 10;
+	int n  =snprintf(a,sizeof(a),"fdsakfldajI/O: %d \n",res);
+	SysCallLog::Invoke((uint32_t)a,n,0,0);	
+	
+	log("fijdsoaifjsdoaijfosdaj\n");
+	for(;;);
 	for(;;)
 	{
 		//char a[] = "Fdsafdsafsda\n";

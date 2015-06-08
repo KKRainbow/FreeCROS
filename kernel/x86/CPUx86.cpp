@@ -79,13 +79,15 @@ void CPUx86::Run()
 	currThread = newThread;
 
 	auto eip = currThread->GetCPUState().tss.eip;
-	LOG("Next task eip: 0x%x\n",eip);
+// 	LOG("Next task eip: 0x%x\n",eip);
 	if(eip< 0x100000)for(;;);
 	struct{long a,b;}tmp;
 	tmp.a = 0;
 	tmp.b = 32;
-	MAGIC_DEBUG;
-	__asm__("ljmp *%0\n\t"::"m"(tmp.a));
+	__asm__(
+		"ljmp *%0\n\t"
+		"clts\n\t"
+	::"m"(tmp.a));
 }
 
 void CPUx86::InitPage()

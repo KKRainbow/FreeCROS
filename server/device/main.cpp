@@ -1,6 +1,7 @@
 #include"SystemCalls.h"
 #include"Threads.h"
 #include"stdio.h"
+#include"UserLog.h"
 void thread();
 int main()
 {
@@ -8,10 +9,12 @@ int main()
 	int i = 0;
 	char a[500];
 	int pid = SysCallCreateThread::Invoke((uint32_t)thread,0,0,0);
+	log("pid: %d\n",pid);
 	for(;;)
 	{
 		msg.content[0] = i;
 		msg.destination = pid;
+		for(;;);
 		SysCallSendMessageTo::Invoke((uint32_t)&msg,0,0,0);
 		i++;
 	}

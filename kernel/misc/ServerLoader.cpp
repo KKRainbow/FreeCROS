@@ -20,7 +20,7 @@ void ServerLoader::LoadModules()
 	ExecutableFormat* format;
 	MemoryRegion* region = new MemoryRegion[14];
 	AddressSpace* kas = AddressSpaceManager::Instance()->GetKernelAddressSpace();
-	count = 1;
+	
 	while(count--)
 	{
 		Thread* thread = ThreadManager::Instance()->CreateThread(SERVER);
