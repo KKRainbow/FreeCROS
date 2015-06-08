@@ -61,7 +61,9 @@ extern "C" void CHandler(InterruptParams params)
 		//LOG("IRQ: %d\n",params.irqnum);
 	}
 // 	if(params.irqnum == 14)MAGIC_DEBUG;
-	if(params.irqnum <= 20 &&params.irqnum != 14)
+	if(params.irqnum <= 20 &&params.irqnum != 14
+		&& params.irqnum != 7
+	)
 	{
 		Interrupt::Cli();
 		LOG("\nCrush!!! irqnum:%d\n eip:0x%x,esp:0x%x\n"

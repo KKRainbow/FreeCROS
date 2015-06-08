@@ -14,7 +14,6 @@ int main()
 	{
 		msg.content[0] = i;
 		msg.destination = pid;
-		for(;;);
 		SysCallSendMessageTo::Invoke((uint32_t)&msg,0,0,0);
 		i++;
 	}
@@ -23,6 +22,7 @@ int main()
 
 void thread()
 {
+	__asm__("xchg %%bx,%%bx\n\t"::);
 	char a[500];
 	for(;;)
 	{

@@ -76,6 +76,7 @@ void CPUx86::Run()
 	newThread->State()->ToRun(newThread); //Change the state of the thread
 	endCounter = startCounter + newThread->CPUCounter();
 
+	this->SaveFPU(currThread);
 	currThread = newThread;
 
 	auto eip = currThread->GetCPUState().tss.eip;
@@ -86,8 +87,31 @@ void CPUx86::Run()
 	tmp.b = 32;
 	__asm__(
 		"ljmp *%0\n\t"
-		"clts\n\t"
 	::"m"(tmp.a));
+}
+void CPUx86::SaveFPU(Thread* _Thread)
+{
+	__asm__(
+		"clts\n\t"
+		"fnsave %0\n\t"
+		::"m"(_Thread->GetCPUState().tss.i387)
+	);
+}
+void CPUx86::LoadFPU()
+{
+	Thread* currThread = CPUManager::
+		Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	Assert(currThread);
+	__asm__(
+		"clts\n\t"
+		"frstor %0\n\t"
+		::"m"(currThread->GetCPUState().tss.i387)
+	);
+}
+void CPUx86::InitFPU()
+{
+	__asm__("fninit\n\t clts\n\t"::);
+	CPUManager::Instance()->RegisterIRQ((IRQHandler)CPUx86::LoadFPU,7);
 }
 
 void CPUx86::InitPage()
@@ -143,6 +167,7 @@ CPUx86::CPUx86(CPU::Type _Type)
 	
 	//现在中断可以用了,InitPage里会调用Interrupt
 	this->InitPage();
+	this->InitFPU();
 	//Init HAL
 	//this->manager->AddCPU(this);//这个是不是不应该有
 	if(_Type == BSP)

@@ -36,6 +36,7 @@ Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threa
 		father = _Father;
 		_Father->children.PushBack(this);
 	}
+	cpuState.tss.esp0 = (uint32_t)MemoryManager::Instance()->KernelPageAllocate(4);
 	state = ThreadState::GetState(States::UNINTERRUPTABLE);
 }
 
@@ -73,6 +74,8 @@ Thread::Thread(Thread& _Thread,int _Pid):cpuState(_Thread.cpuState),
 	}
 	else
 	{
+		//设置内核栈
+		cpuState.tss.esp0 = (uint32_t)MemoryManager::Instance()->KernelPageAllocate(4);
 		state = ThreadState::GetState(States::UNINTERRUPTABLE);
 		return;
 	}

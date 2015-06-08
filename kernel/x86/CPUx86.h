@@ -41,6 +41,10 @@ class CPUx86:public CPU
 		void InitPage();
 		void InitGDT();
 		void InitSysCall();
+		void SaveFPU(Thread* _Thread);
+		static void LoadFPU();
+		static void InitFPU();
+		
 	public:
 		static uint16_t GetGDTSelector(int i){return i<<3;}
 		static uint16_t GetLDTSelector(int i){return (i<<3)|0b100;}

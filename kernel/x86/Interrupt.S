@@ -63,16 +63,16 @@ for i in range(0,256):
 
 */
 .section ".text"
-Handler 0,CHandler,1
+Handler 0,CHandler,0
 Handler 1,CHandler,0			 /*Debug intr has no errorcode*/ 
-Handler 2,CHandler,1
-Handler 3,CHandler,1
-Handler 4,CHandler,1
-Handler 5,CHandler,1
+Handler 2,CHandler,0
+Handler 3,CHandler,0
+Handler 4,CHandler,0
+Handler 5,CHandler,0
 Handler 6,CHandler,0
-Handler 7,CHandler,1
+Handler 7,CHandler,0
 Handler 8,CHandler,0
-Handler 9,CHandler,1
+Handler 9,CHandler,0
 Handler 10,CHandler,1
 Handler 11,CHandler,1
 Handler 12,CHandler,1
