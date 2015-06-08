@@ -47,6 +47,7 @@ States ThreadStateUninterruptable::Type()
 }
 bool ThreadStateInterruptable::ToRun(Thread* _Thread)
 {
+	_Thread->PrepareToRun();			//Make the thread prepare something
 	return false;
 }
 bool ThreadStateInterruptable::ToIOBlocked(Thread* _Thread)
@@ -60,7 +61,7 @@ bool ThreadStateInterruptable::ToPause(Thread* _Thread)
 bool ThreadStateInterruptable::ToReady(Thread* _Thread)
 {
 	_Thread->State() = new ThreadStateReady();
-	ThreadManager::Instance()->sched->ThreadAdded(_Thread);
+// 	ThreadManager::Instance()->sched->ThreadAdded(_Thread);
 	return true;
 }
 bool ThreadStateInterruptable::ToZombie(Thread* _Thread)
@@ -85,7 +86,7 @@ bool ThreadStateReady::ToIOBlocked(Thread* _Thread)
 bool ThreadStateReady::ToPause(Thread* _Thread)
 {
 	_Thread->State() = new ThreadStateInterruptable();
-	ThreadManager::Instance()->sched->ThreadRemoved(_Thread);
+// 	ThreadManager::Instance()->sched->ThreadRemoved(_Thread);
 	return true;
 }
 bool ThreadStateReady::ToReady(Thread* _Thread)

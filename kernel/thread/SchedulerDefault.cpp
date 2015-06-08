@@ -57,7 +57,7 @@ Thread* SchedulerDefault::NextThread(CPU* _CPU)
 			auto& state = res->State();
 			Assert(state.Obj());
 			auto stateType = state->Type();
-			Assert(stateType == States::READY);
+			Assert(stateType == States::READY || stateType == States::INTERRUPTABLE);
 			
 			lock.Unlock();
 			return res;

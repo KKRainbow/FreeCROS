@@ -11,6 +11,7 @@
 #include"ThreadState.h"
 #include"WaitableObj.h"
 
+
 class CPUState;
 class ThreadManager;
 class Thread
@@ -37,8 +38,16 @@ class Thread
 		lr::sstl::Map<int,lr::sstl::Queue<IPCMessage>> msgMap;
 		ThreadType threadType;
 		
+		addr_t kernelStackAddr = 0;
+		size_t kernelStackSize = 4 << PAGE_SHIFT;
+		
 		SpinLock msgLock;
 		
+		//信号有关
+		//信号值,信号结构体
+		lr::sstl::MultiMap<int,sigaction> sigactions;
+		uint32_t mask;
+		///////////////
 	private:
 		Thread& operator=(const Thread&){return *this;}
 		Thread(const Thread&){}
@@ -77,14 +86,16 @@ class Thread
 		bool PrepareToRun();	//Do some check before running. Handle signal~~
 		
 		template<class T>
-		void PushUserStack(T val,addr_t stack_Addr);
+		void PushUserStack(T val,addr_t& stack_Addr);
 		template<class T>
 		T PopUserStack();
 };
 
 template<class T>
-void Thread::PushUserStack(T val,addr_t stackAddr)
+void Thread::PushUserStack(T val,addr_t& stackAddr)
 {
+	//不应该跨两页
+	Assert(sizeof(T)<= PAGE_SIZE);
 	AddressSpace* s = this->addressSpace.Obj();
 	addr_t addrhi = s->GetPhisicalAddress(stackAddr);
 	addr_t addrlo = s->GetPhisicalAddress(stackAddr - sizeof(T));
@@ -105,6 +116,9 @@ void Thread::PushUserStack(T val,addr_t stackAddr)
 		addr = (addr_t)page;
 		s->MapVirtAddrToPhysAddr((addr_t)page,stackAddr);
 	}
+	
+	stackAddr -= sizeof(T);
+	*(T*)stackAddr = val;
 }
 template<class T>
 T Thread::PopUserStack()

@@ -7,6 +7,10 @@
 class DeviceOperationKeyboard : public DeviceOperation
 {
 public:
+	DeviceOperationKeyboard()
+	{
+		
+	}
 	virtual	bool Open(pid_t _Pid)
 	{
 		return true;

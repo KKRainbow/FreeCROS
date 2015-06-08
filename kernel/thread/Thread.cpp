@@ -36,7 +36,9 @@ Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threa
 		father = _Father;
 		_Father->children.PushBack(this);
 	}
-	cpuState.tss.esp0 = (uint32_t)MemoryManager::Instance()->KernelPageAllocate(4);
+	this->kernelStackAddr = 
+		(addr_t)MemoryManager::Instance()->KernelPageAllocate(kernelStackSize>>PAGE_SHIFT);
+	cpuState.tss.esp0 = this->kernelStackAddr + this->kernelStackSize - 4;
 	state = ThreadState::GetState(States::UNINTERRUPTABLE);
 }
 
@@ -75,7 +77,9 @@ Thread::Thread(Thread& _Thread,int _Pid):cpuState(_Thread.cpuState),
 	else
 	{
 		//设置内核栈
-		cpuState.tss.esp0 = (uint32_t)MemoryManager::Instance()->KernelPageAllocate(4);
+		this->kernelStackAddr = 
+		(addr_t)MemoryManager::Instance()->KernelPageAllocate(kernelStackSize>>PAGE_SHIFT);
+		cpuState.tss.esp0 = this->kernelStackAddr + this->kernelStackSize - 4;
 		state = ThreadState::GetState(States::UNINTERRUPTABLE);
 		return;
 	}
@@ -121,6 +125,38 @@ lr::Ptr<ThreadState>& Thread::State()
 //Do some check before running. Handle signal~~
 bool Thread::PrepareToRun()
 {
+	//处理信号
+	if(this->sigactions.Size() != 0)
+	{
+		bool flag = false;
+		sigaction sigac;
+		int num;
+		for(auto ite = sigactions.Begin();ite!=sigactions.End();ite++)
+		{
+			num = ite->first;
+			if(((~mask) & (1<<num)) != 0)
+			{
+				flag = true;
+				sigac = ite->second;
+				break;
+			}
+		}
+		//有信号..开始处理过程
+		if(flag)
+		{
+			auto userStackBottom = this->kernelStackAddr;
+			InterruptParams* params = (InterruptParams*)
+				(this->kernelStackAddr - sizeof(InterruptParams));
+			Assert(params->cs != 0x8);//我们必须确定从这里返回之后不应该是内核
+			
+			addr_t& userEsp = *(addr_t*)params->userEsp;
+			this->PushUserStack(*params,userEsp);
+			this->PushUserStack(sigac.sa_handler,userEsp);
+			this->PushUserStack(num,userEsp);
+			this->PushUserStack(params->eip,userEsp);//方便调试
+			params->eip = (addr_t)sigac.lib_sa_handler;
+		}
+	}
 	return true;
 }
 
