@@ -13,11 +13,20 @@ extern unsigned long kernelEnd;
 extern unsigned long kernelObjInitZoneStart;
 extern unsigned long kernelObjInitZoneEnd;
 
+#include"Log.h"
 //Die
-static void Assert(bool cond)
+static void AssertFunc(bool cond)
 {
 	if(!cond)
 	{
 		for(;;);
 	}
 }
+#define Assert(cond) do {			\
+	if(!(cond)){	\
+	LOG(__FILE__);		\
+	LOG(":");		\
+	LOG("%d",__LINE__);		\
+	LOG("\n");}		\
+	AssertFunc(cond);\
+}while(0)

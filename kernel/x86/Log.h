@@ -1,3 +1,4 @@
+#pragma once
 #include"Global.h"
 #include"stl/sstring.h"
 #include"stl/slinkedlist.h"

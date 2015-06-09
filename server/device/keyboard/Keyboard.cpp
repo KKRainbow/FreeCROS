@@ -43,8 +43,9 @@ void KeyboardIntHandler(int num,void*,void*)
 void keyboard()
 {
 	Signal(SIGINT ,(sighandler_t)KeyboardIntHandler,0);
-	SysCallAlarm::Invoke(1e3);
+// 	SysCallAlarm::Invoke(1e3);
 	SysCallRegisterIRQ::Invoke(65);
+	log("trying open\n");
 	auto id = SysCallRegisterChrDev::Invoke((uint32_t)"keyboard",0,0,0);
 	log("open id: %d\n",id);
 	DeviceOperationKeyboard kop;

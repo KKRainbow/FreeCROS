@@ -24,7 +24,7 @@ private:
 	uint32_t alarmCounter = 0;
 	uint32_t kernelCounter = 0;
 	uint32_t userCounter = 0;
-	uint32_t cpuCounter = 10000;
+	uint32_t cpuCounter = 8000;
 	lr::Ptr<AddressSpace> addressSpace; 
 	CPUState cpuState;
 	lr::sstl::List<Thread*> children;

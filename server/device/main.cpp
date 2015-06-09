@@ -13,10 +13,14 @@ int main()
 	int pid = SysCallCreateThread::Invoke((uint32_t)keyboard,0,0,0);
 	log("pid: %d\n",pid);
 	
-	for(int i = 0;i<0x123456;i++);//等待
 // 	SysCallSendMessageTo::Invoke((uint32_t)&msg,0,0,0);
 	log("start open\n");
-	auto fid = SysCallOpen::Invoke((uint32_t)"/dev/keyboard",0,0,0);
+	auto fid = -1;
+	while(1)
+	{
+		fid = SysCallOpen::Invoke((uint32_t)"/dev/keyboard",0,0,0);
+		if(fid >= 0)break;
+	}
 	log("Get dev_t : %d\n",fid);
 	
 // 	SysCallKill::Invoke(pid,1);
