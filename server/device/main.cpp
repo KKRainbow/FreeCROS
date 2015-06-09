@@ -13,7 +13,6 @@ int main()
 	int pid = SysCallCreateThread::Invoke((uint32_t)keyboard,0,0,0);
 	log("pid: %d\n",pid);
 	
-// 	SysCallSendMessageTo::Invoke((uint32_t)&msg,0,0,0);
 	log("start open\n");
 	auto fid = -1;
 	while(1)
@@ -23,12 +22,10 @@ int main()
 	}
 	log("Get dev_t : %d\n",fid);
 	
-// 	SysCallKill::Invoke(pid,1);
 	for(;;)
 	{
 		auto size = SysCallRead::Invoke(fid,(uint32_t)a,500,0);
 		log(a);
 	}
-	for(;;);
 	return 1;
 }
