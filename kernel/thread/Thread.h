@@ -50,6 +50,8 @@ class Thread
 		lr::sstl::Map<int,sigaction> sigactions;
 		CPUState beforeSignal;
 		uint32_t mask;
+		addr_t signalKernelStackAddr = 0;
+		addr_t signalKernelStackSize = 1 << PAGE_SHIFT;
 		bool isSignalProcessFinish = false;
 		bool isSignalProcessing = false;
 		///////////////

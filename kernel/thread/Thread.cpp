@@ -132,10 +132,15 @@ bool Thread::PrepareToRun()
 		this->cpuState = this->beforeSignal;
 		this->isSignalProcessing = false;
 		this->isSignalProcessFinish = false;
+		//删除信号内核栈
+		Assert(this->signalKernelStackAddr);
+		delete (char*)this->signalKernelStackAddr;
+		this->signalKernelStackAddr = 0;
+		
+		LOG("After esp0: %x\n",this->cpuState.tss.esp0);
 	}
 	if(this->sigmap.Size() != 0)
 	{
-		LOG("KILL!!!");
 		bool flag = false;
 		sigaction sigac;
 		int num;
@@ -162,8 +167,9 @@ bool Thread::PrepareToRun()
 		//有信号..开始处理过程
 		if(flag)
 		{
+			LOG("Before esp0: %x\n",this->cpuState.tss.esp0);
 			this->sigmap.Erase(ite);
-			beforeSignal = this->cpuState;
+			this->beforeSignal = this->cpuState;
 			auto userStackBottom = this->kernelStackAddr;
 			InterruptParams* params = (InterruptParams*)
 				(this->kernelStackAddr +this->kernelStackSize - sizeof(InterruptParams));
@@ -181,11 +187,19 @@ bool Thread::PrepareToRun()
 			this->cpuState.tss.es = params->es;
 			this->cpuState.tss.fs = params->fs;
 			this->cpuState.tss.gs = params->gs;
-			this->cpuState.tss.esp0 = this->beforeSignal.tss.esp0;
 			this->cpuState.tss.esp1 = 
 				this->cpuState.tss.esp2 = 
 				this->cpuState.tss.regs.esp  = userEsp;
 			this->cpuState.tss.eip = (addr_t)sigac.lib_sa_handler;
+			
+			//设置signal的内核栈
+			this->signalKernelStackAddr = (addr_t)
+				MemoryManager::Instance()->KernelPageAllocate(
+					this->signalKernelStackSize >> PAGE_SHIFT
+				);
+			Assert(this->signalKernelStackSize);
+			this->cpuState.tss.esp0 = this->signalKernelStackAddr;
+				
 			
 			this->isSignalProcessing = true;
 		}
