@@ -117,7 +117,7 @@ int AddressSpaceManager::PageFaultHandler(InterruptParams& _Params)
 	{
 		if(address< 0x10000000||address>0xf0000000) //这个空间以下的应用程序都不能使用
 		{
-			space->MapVirtAddrToPhysAddr(address,address,0,1);
+			space->MapVirtAddrToPhysAddr(address,address,1,1);
 		}
 		else
 		{

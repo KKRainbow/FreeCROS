@@ -62,7 +62,7 @@ void AddressSpaceX86::DisableSpaceMode()
 addr_t AddressSpaceX86::GetPhisicalAddress(addr_t _VirtAddr)
 {
 	PageTableEntry* entry = GetPageTableEntry(_VirtAddr);
-	if(entry==nullptr)return 0;
+	if(entry==nullptr || entry->Present == 0)return 0;
 
 	addr_t content = (entry->PageAddress)<<PAGE_SHIFT;
 	return content + GetPageInnerOffset(_VirtAddr);

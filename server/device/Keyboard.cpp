@@ -34,7 +34,7 @@ void tmp(int num,void*,void*)
 
 void keyboard()
 {
-	//Signal(1,(sighandler_t)tmp,0);
+	Signal(1,(sighandler_t)tmp,0);
 	auto id = SysCallRegisterChrDev::Invoke((uint32_t)"keyboard",0,0,0);
 	log("open id: %d\n",id);
 	DeviceOperationKeyboard kop;

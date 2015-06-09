@@ -218,3 +218,16 @@ SYSCALL_METHOD_CPP(Kill) //pid,signum
 	return false;
 	
 }
+
+SYSCALL_METHOD_CPP(SignalRestore)//no params
+{
+	auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	if(curr->RestoreFromSignal())
+	{
+		CPUManager::Instance()->GetCurrentCPU()->ExhaustCurrThread();
+		CPUManager::Instance()->GetCurrentCPU()->Run();
+		//这个返回值其实没有意义
+		return 1;
+	}
+	return -1;
+}

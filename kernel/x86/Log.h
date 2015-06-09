@@ -35,4 +35,4 @@ class Log
 		int LogStr(const char* str,...); 
 };
 
-#define LOG(str,...) Log::Instance()->LogStr(str,__VA_ARGS__)
+#define LOG(...) Log::Instance()->LogStr(__VA_ARGS__)

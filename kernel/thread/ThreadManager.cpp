@@ -55,7 +55,19 @@ void ThreadManager::RemoveThread(int _Pid)
 Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 {
 	lock.Lock();
-
+	//扫描线程列表,检查信号
+	for(auto& pair : this->threads)
+	{
+		Thread* t = pair.second;
+		if(t->sigmap.Size() != 0)
+		{
+			if(t->State()->Type() == States::INTERRUPTABLE)
+			{
+				t->State()->ToReady(t);
+			}
+		}
+		//mask交给Thread类自己去判断
+	}
 	Thread* res  =sched->NextThread(_CPU);
 	if(res)
 		res->State()->ToRun(res);

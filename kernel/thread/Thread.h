@@ -48,7 +48,10 @@ class Thread
 		//信号值,信号结构体
 		lr::sstl::MultiMap<int,pid_t> sigmap;
 		lr::sstl::Map<int,sigaction> sigactions;
+		CPUState beforeSignal;
 		uint32_t mask;
+		bool isSignalProcessFinish = false;
+		bool isSignalProcessing = false;
 		///////////////
 	private:
 		Thread& operator=(const Thread&){return *this;}
@@ -94,6 +97,7 @@ class Thread
 		
 		addr_t AddSignalHandler(int _Signum,addr_t _Handler,int _Flag);
 		bool Kill(pid_t _Source,int _Signum);
+		bool RestoreFromSignal();
 };
 
 template<class T>
@@ -102,6 +106,7 @@ void Thread::PushUserStack(T val,addr_t& stackAddr)
 	//不应该跨两页
 	Assert(sizeof(T)<= PAGE_SIZE);
 	AddressSpace* s = this->addressSpace.Obj();
+	MAGIC_DEBUG;
 	addr_t addrhi = s->GetPhisicalAddress(stackAddr);
 	addr_t addrlo = s->GetPhisicalAddress(stackAddr - sizeof(T));
 	addr_t addr;
@@ -111,7 +116,8 @@ void Thread::PushUserStack(T val,addr_t& stackAddr)
 			->KernelPageAllocate(1);
 
 		addr = (addr_t)page;
-		s->MapVirtAddrToPhysAddr((addr_t)page,stackAddr);
+		s->MapVirtAddrToPhysAddr((addr_t)page,stackAddr - sizeof(T));
+		addrlo = s->GetPhisicalAddress(stackAddr - sizeof(T));
 	}
 	if(addrhi == 0)
 	{
@@ -120,8 +126,26 @@ void Thread::PushUserStack(T val,addr_t& stackAddr)
 
 		addr = (addr_t)page;
 		s->MapVirtAddrToPhysAddr((addr_t)page,stackAddr);
+		addrhi = s->GetPhisicalAddress(stackAddr);
 	}
-	
+	//运行这里的时候地址空间可能并非该进程的地址空间,所以我们需要直接写入物理地址.
+	//首先判断是否跨页.
+	if((addrlo>>PAGE_SHIFT) != (addrhi>>PAGE_SHIFT))
+	{
+		addr_t objaddr = (addr_t)&val;
+		//跨页了.
+		//计算低地址的页面需要拷贝的大小.
+		size_t lowSize = PAGE_UPPER_ALIGN(addrlo) - addrlo;
+		size_t highSize = sizeof(T) - lowSize;
+		//拷贝到低地址页
+		memmove((void*)addrlo,(void*)objaddr,lowSize);
+		//高地址
+		memmove((void*)(PAGE_LOWER_ALIGN(addrhi)),(void*)(objaddr+lowSize),highSize);
+	}
+	else
+	{
+		memmove((void*)addrlo,&val,sizeof(T));
+	}
 	stackAddr -= sizeof(T);
 	*(T*)stackAddr = val;
 }

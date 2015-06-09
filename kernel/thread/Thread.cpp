@@ -38,7 +38,7 @@ Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threa
 	}
 	this->kernelStackAddr = 
 		(addr_t)MemoryManager::Instance()->KernelPageAllocate(kernelStackSize>>PAGE_SHIFT);
-	cpuState.tss.esp0 = this->kernelStackAddr + this->kernelStackSize - 4;
+	cpuState.tss.esp0 = this->kernelStackAddr + this->kernelStackSize;
 	state = ThreadState::GetState(States::UNINTERRUPTABLE);
 }
 
@@ -79,7 +79,7 @@ Thread::Thread(Thread& _Thread,int _Pid):cpuState(_Thread.cpuState),
 		//设置内核栈
 		this->kernelStackAddr = 
 		(addr_t)MemoryManager::Instance()->KernelPageAllocate(kernelStackSize>>PAGE_SHIFT);
-		cpuState.tss.esp0 = this->kernelStackAddr + this->kernelStackSize - 4;
+		cpuState.tss.esp0 = this->kernelStackAddr + this->kernelStackSize;
 		state = ThreadState::GetState(States::UNINTERRUPTABLE);
 		return;
 	}
@@ -125,16 +125,23 @@ lr::Ptr<ThreadState>& Thread::State()
 //Do some check before running. Handle signal~~
 bool Thread::PrepareToRun()
 {
-	return true;
 	//处理信号
 	sigLock.Lock();
+	if(this->isSignalProcessFinish == true)
+	{
+		this->cpuState = this->beforeSignal;
+		this->isSignalProcessing = false;
+		this->isSignalProcessFinish = false;
+	}
 	if(this->sigmap.Size() != 0)
 	{
+		LOG("KILL!!!");
 		bool flag = false;
 		sigaction sigac;
 		int num;
 		pid_t source;
-		for(auto ite = sigmap.Begin();ite!=sigmap.End();ite++)
+		auto ite = sigmap.Begin();
+		for(;ite!=sigmap.End();ite++)
 		{
 			num = ite->first;
 			if(num >= 32 || (((~mask) & (1<<num)) != 0))
@@ -155,17 +162,32 @@ bool Thread::PrepareToRun()
 		//有信号..开始处理过程
 		if(flag)
 		{
+			this->sigmap.Erase(ite);
+			beforeSignal = this->cpuState;
 			auto userStackBottom = this->kernelStackAddr;
 			InterruptParams* params = (InterruptParams*)
-				(this->kernelStackAddr - sizeof(InterruptParams));
+				(this->kernelStackAddr +this->kernelStackSize - sizeof(InterruptParams));
 			Assert(params->cs != 0x8);//我们必须确定从这里返回之后不应该是内核
 			
-			addr_t& userEsp = *(addr_t*)params->userEsp;
+			addr_t userEsp = params->userEsp;
 			this->PushUserStack(*params,userEsp);
 			this->PushUserStack(sigac.sa_handler,userEsp);
 			this->PushUserStack(num,userEsp);
 			this->PushUserStack(params->eip,userEsp);//方便调试
-			params->eip = (addr_t)sigac.lib_sa_handler;
+			
+			this->cpuState.tss.cs = params->cs;
+			this->cpuState.tss.ss = params->userSS;
+			this->cpuState.tss.ds = params->ds;
+			this->cpuState.tss.es = params->es;
+			this->cpuState.tss.fs = params->fs;
+			this->cpuState.tss.gs = params->gs;
+			this->cpuState.tss.esp0 = this->beforeSignal.tss.esp0;
+			this->cpuState.tss.esp1 = 
+				this->cpuState.tss.esp2 = 
+				this->cpuState.tss.regs.esp  = userEsp;
+			this->cpuState.tss.eip = (addr_t)sigac.lib_sa_handler;
+			
+			this->isSignalProcessing = true;
 		}
 	}
 	sigLock.Unlock();
@@ -245,6 +267,7 @@ void Thread::ClockNotify(uint64_t _Counter)
 {
 	if(this->alarmCounter != 0)
 	{
+		//TODO: 这里应该改为信号
 		if(this->alarmCounter < _Counter)
 		{
 			Message msg;
@@ -275,5 +298,18 @@ bool Thread::Kill(pid_t _Source,int _Signum)
 	sigLock.Lock();
 	this->sigmap.Insert(lr::sstl::MakePair(_Signum,_Source));
 	sigLock.Unlock();
+	return true;
+}
+
+bool Thread::RestoreFromSignal()
+{
+	if(this->isSignalProcessing == false)
+	{
+		//根本就没有信号被处理!!
+		return false;
+	}
+	this->sigLock.Lock();
+	this->isSignalProcessFinish = true;
+	this->sigLock.Unlock();
 	return true;
 }
