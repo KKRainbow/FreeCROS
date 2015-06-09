@@ -25,3 +25,7 @@ struct sigaction
 	unsigned long sa_flags;
 };
 sighandler_t Signal(int _Signum,sighandler_t _Sig,int _Flag);
+
+
+#define SIGALARM 0
+#define SIGINT 1

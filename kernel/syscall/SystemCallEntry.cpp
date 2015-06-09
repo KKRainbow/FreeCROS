@@ -20,6 +20,7 @@ SINGLETON_CPP(SystemCallEntry)
 	ADD_SYSTEM_CALL(Signal);
 	ADD_SYSTEM_CALL(Kill);
 	ADD_SYSTEM_CALL(SignalRestore);
+	ADD_SYSTEM_CALL(Alarm);
 	Interrupt::Instance()->RegisterIRQ(Call,SYSCALL_IRQ_NUM);	
 	Interrupt::Instance()->SetDPLOfIRQ(SYSCALL_IRQ_NUM,1);
 }

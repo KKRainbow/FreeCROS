@@ -231,3 +231,10 @@ SYSCALL_METHOD_CPP(SignalRestore)//no params
 	}
 	return -1;
 }
+
+SYSCALL_METHOD_CPP(Alarm) //time
+{
+	auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	curr->Alarm(_First * 1e3);
+	return 0;
+}

@@ -54,4 +54,5 @@ SYSCALL_METHOD_H(Write,12); //devname
 SYSCALL_METHOD_H(Signal,13); //signum,handler,flag
 SYSCALL_METHOD_H(Kill,14); //pid,signum
 SYSCALL_METHOD_H(SignalRestore,15);//no params
+SYSCALL_METHOD_H(Alarm,16); //_Us
 

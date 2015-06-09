@@ -19,13 +19,12 @@ int main()
 	auto fid = SysCallOpen::Invoke((uint32_t)"/dev/keyboard",0,0,0);
 	log("Get dev_t : %d\n",fid);
 	
-	SysCallKill::Invoke(pid,1);
-		log("\nReceived from deviceabdd\n");
+// 	SysCallKill::Invoke(pid,1);
 	for(;;)
 	{
-		auto size = SysCallRead::Invoke(fid,(uint32_t)a,500,0);
-		//log(a);
-		SysCallKill::Invoke(pid,1);
+// 		auto size = SysCallRead::Invoke(fid,(uint32_t)a,500,0);
+// 		log(a);
+// 		SysCallKill::Invoke(pid,1);
 	}
 	for(;;);
 	return 1;

@@ -3,6 +3,8 @@
 #include"memory/AddressSpaceManager.h"
 #include"Log.h"
 #include"IPCMessage.h"
+#include <cpu/CPUManager.h>
+#include"Threads.h"
 //Create Thread::a thread with a independent address space=
 Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threadType(_Type)
 {
@@ -281,12 +283,14 @@ void Thread::ClockNotify(uint64_t _Counter)
 		//TODO: 这里应该改为信号
 		if(this->alarmCounter < _Counter)
 		{
-			Message msg;
-			msg.timeStamp = _Counter;
-			msg.source = -1;
-			msg.content[0] = 0x101;
-			IPCMessage ipc = msg;
-			this->ReceiveMessage(ipc);
+			//信号版本的实现
+			this->Kill(0,SIGALARM);
+// 			Message msg;
+// 			msg.timeStamp = _Counter;
+// 			msg.source = -1;
+// 			msg.content[0] = 0x101;
+// 			IPCMessage ipc = msg;
+// 			this->ReceiveMessage(ipc);
 			this->alarmCounter = 0;
 		}
 	}
@@ -323,4 +327,9 @@ bool Thread::RestoreFromSignal()
 	this->isSignalProcessFinish = true;
 	this->sigLock.Unlock();
 	return true;
+}
+
+void Thread::Alarm(uint32_t _Us)
+{
+	this->alarmCounter = CPUManager::Instance()->GetClockCounter() + _Us;
 }
