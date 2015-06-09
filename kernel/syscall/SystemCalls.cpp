@@ -119,9 +119,44 @@ SYSCALL_METHOD_CPP(ReadDataFromThread)
 	return 1;
 }
 
-SYSCALL_METHOD_CPP(RegisterIRQ)
+static lr::sstl::MultiMap<irq_t,pid_t> irqMap;
+static bool isInitialized = false;
+static int RegisteredIRQHandler(InterruptParams& params)
 {
+	auto range = irqMap.EqualRange(params.irqnum);
+	auto& b = range.first;
+	auto& e = range.second;
+	for(;b!=e;)
+	{
+		pid_t pid = b->second;
+		auto t = ThreadManager::Instance()->GetThreadByPID(pid);
+		if(t == nullptr)
+		{
+			auto tmp = b;
+			b++;
+			irqMap.Erase(tmp);
+		}
+		else
+		{
+			t->Kill(0,SIGINT);
+			b++;
+		}
+	}
 	return 1;
+}
+SYSCALL_METHOD_CPP(RegisterIRQ)//irqnum
+{
+	if(_First > 254)return -1;
+	if(isInitialized == false)
+	{
+		new (&irqMap) decltype(irqMap)();
+		isInitialized = true;
+	}
+	auto id = CPUManager::Instance()->RegisterIRQ((IRQHandler)RegisteredIRQHandler,_First);
+	auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	Assert(curr);
+	irqMap.Insert(lr::sstl::MakePair((irq_t)_First,curr->GetPid()));
+	return id;
 }
 
 SYSCALL_METHOD_CPP(RegisterChrDev) //devname

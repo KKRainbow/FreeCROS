@@ -27,5 +27,5 @@ struct sigaction
 sighandler_t Signal(int _Signum,sighandler_t _Sig,int _Flag);
 
 
-#define SIGALARM 0
-#define SIGINT 1
+static const int SIGALARM = 0;
+static const int SIGINT = 1;

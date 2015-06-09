@@ -14,6 +14,7 @@ SINGLETON_CPP(SystemCallEntry)
 	ADD_SYSTEM_CALL(ReceiveFrom);
 	ADD_SYSTEM_CALL(ReadDataFromThread);
 	ADD_SYSTEM_CALL(WriteToPhisicalAddr);
+	ADD_SYSTEM_CALL(RegisterIRQ);
 	ADD_SYSTEM_CALL(RegisterChrDev);
 	ADD_SYSTEM_CALL(Open);
 	ADD_SYSTEM_CALL(Read);
