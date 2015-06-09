@@ -111,7 +111,6 @@ void Thread::PushUserStack(T val,addr_t& stackAddr)
 	//不应该跨两页
 	Assert(sizeof(T)<= PAGE_SIZE);
 	AddressSpace* s = this->addressSpace.Obj();
-	MAGIC_DEBUG;
 	addr_t addrhi = s->GetPhisicalAddress(stackAddr);
 	addr_t addrlo = s->GetPhisicalAddress(stackAddr - sizeof(T));
 	addr_t addr;
