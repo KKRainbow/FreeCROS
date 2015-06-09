@@ -17,6 +17,8 @@ SINGLETON_CPP(SystemCallEntry)
 	ADD_SYSTEM_CALL(RegisterChrDev);
 	ADD_SYSTEM_CALL(Open);
 	ADD_SYSTEM_CALL(Read);
+	ADD_SYSTEM_CALL(Signal);
+	ADD_SYSTEM_CALL(Kill);
 	Interrupt::Instance()->RegisterIRQ(Call,SYSCALL_IRQ_NUM);	
 	Interrupt::Instance()->SetDPLOfIRQ(SYSCALL_IRQ_NUM,1);
 }

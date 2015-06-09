@@ -22,6 +22,7 @@ int main()
 	auto size = SysCallRead::Invoke(fid,(uint32_t)a,500,0);
 	log("\nReceived from deviceabdd\n");
 	log(a);
+	//SysCallKill::Invoke(pid,1);
 	for(;;);
 	return 1;
 }

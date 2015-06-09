@@ -194,3 +194,27 @@ SYSCALL_METHOD_CPP(Read)//path
 	}
 	return -1;
 }
+
+
+
+
+SYSCALL_METHOD_CPP(Signal) //signum,handler,flag
+{
+	auto t = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	Assert(t);
+	return t->AddSignalHandler(_First,_Sec,_Third);
+}
+
+SYSCALL_METHOD_CPP(Kill) //pid,signum
+{
+	auto t = ThreadManager::Instance()->GetThreadByPID(_First);
+	if(t == nullptr)return -1;
+	
+	auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	Assert(curr);
+	
+	if(t->Kill(curr->GetPid(),_Sec))
+		return true;
+	return false;
+	
+}

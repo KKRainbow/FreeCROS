@@ -42,10 +42,12 @@ class Thread
 		size_t kernelStackSize = 4 << PAGE_SHIFT;
 		
 		SpinLock msgLock;
+		SpinLock sigLock;
 		
 		//信号有关
 		//信号值,信号结构体
-		lr::sstl::MultiMap<int,sigaction> sigactions;
+		lr::sstl::MultiMap<int,pid_t> sigmap;
+		lr::sstl::Map<int,sigaction> sigactions;
 		uint32_t mask;
 		///////////////
 	private:
@@ -89,6 +91,9 @@ class Thread
 		void PushUserStack(T val,addr_t& stack_Addr);
 		template<class T>
 		T PopUserStack();
+		
+		addr_t AddSignalHandler(int _Signum,addr_t _Handler,int _Flag);
+		bool Kill(pid_t _Source,int _Signum);
 };
 
 template<class T>

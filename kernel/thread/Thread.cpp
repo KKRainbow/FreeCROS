@@ -125,19 +125,30 @@ lr::Ptr<ThreadState>& Thread::State()
 //Do some check before running. Handle signal~~
 bool Thread::PrepareToRun()
 {
+	return true;
 	//处理信号
-	if(this->sigactions.Size() != 0)
+	sigLock.Lock();
+	if(this->sigmap.Size() != 0)
 	{
 		bool flag = false;
 		sigaction sigac;
 		int num;
-		for(auto ite = sigactions.Begin();ite!=sigactions.End();ite++)
+		pid_t source;
+		for(auto ite = sigmap.Begin();ite!=sigmap.End();ite++)
 		{
 			num = ite->first;
-			if(((~mask) & (1<<num)) != 0)
+			if(num >= 32 || (((~mask) & (1<<num)) != 0))
 			{
+				if(this->sigactions.Find(num) != this->sigactions.End())
+				{
+					sigac = this->sigactions[num];
+				}
+				else
+				{
+					continue;
+				}
 				flag = true;
-				sigac = ite->second;
+				source = ite->second;
 				break;
 			}
 		}
@@ -157,6 +168,7 @@ bool Thread::PrepareToRun()
 			params->eip = (addr_t)sigac.lib_sa_handler;
 		}
 	}
+	sigLock.Unlock();
 	return true;
 }
 
@@ -244,4 +256,24 @@ void Thread::ClockNotify(uint64_t _Counter)
 			this->alarmCounter = 0;
 		}
 	}
+}
+
+addr_t Thread::AddSignalHandler(int _Signum,addr_t _Handler,int _Flag)
+{
+	sigLock.Lock();
+	typedef decltype(this->sigactions[_Signum].lib_sa_handler) h_t;
+	auto& sigac = this->sigactions[_Signum];
+	auto origin = (addr_t)sigac.lib_sa_handler;
+	sigac.lib_sa_handler = (h_t)_Handler;
+	sigac.sa_flags = _Flag;
+	sigLock.Unlock();
+	return origin;
+}
+
+bool Thread::Kill(pid_t _Source,int _Signum)
+{
+	sigLock.Lock();
+	this->sigmap.Insert(lr::sstl::MakePair(_Signum,_Source));
+	sigLock.Unlock();
+	return true;
 }
