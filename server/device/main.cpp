@@ -20,11 +20,12 @@ int main()
 	log("Get dev_t : %d\n",fid);
 	
 	SysCallKill::Invoke(pid,1);
+		log("\nReceived from deviceabdd\n");
 	for(;;)
 	{
 		auto size = SysCallRead::Invoke(fid,(uint32_t)a,500,0);
-		log("\nReceived from deviceabdd\n");
-		log(a);
+		//log(a);
+		SysCallKill::Invoke(pid,1);
 	}
 	for(;;);
 	return 1;

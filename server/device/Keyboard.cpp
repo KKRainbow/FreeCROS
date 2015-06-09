@@ -17,7 +17,7 @@ public:
 	}
 	virtual	size_t Read(char* _Buffer,size_t _Size)
 	{
-		char a[] = "Keyboard test";
+		char a[] = "Keyboard test\n";
 		memcpy(_Buffer,a,sizeof(a));
 		return sizeof(a);
 	}

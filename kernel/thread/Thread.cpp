@@ -136,8 +136,6 @@ bool Thread::PrepareToRun()
 		Assert(this->signalKernelStackAddr);
 		delete (char*)this->signalKernelStackAddr;
 		this->signalKernelStackAddr = 0;
-		
-		LOG("After esp0: %x\n",this->cpuState.tss.esp0);
 	}
 	if(this->sigmap.Size() != 0)
 	{
@@ -167,7 +165,6 @@ bool Thread::PrepareToRun()
 		//有信号..开始处理过程
 		if(flag)
 		{
-			LOG("Before esp0: %x\n",this->cpuState.tss.esp0);
 			this->sigmap.Erase(ite);
 			this->beforeSignal = this->cpuState;
 			auto userStackBottom = this->kernelStackAddr;
