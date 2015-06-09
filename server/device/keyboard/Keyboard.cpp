@@ -3,6 +3,8 @@
 #include"stdio.h"
 #include"UserLog.h"
 #include"Device.h"
+#include"KeyHandler.h"
+
 
 class DeviceOperationKeyboard : public DeviceOperation
 {
@@ -17,7 +19,8 @@ public:
 	}
 	virtual	size_t Read(char* _Buffer,size_t _Size)
 	{
-		char a[] = "Keyboard test\n";
+		char a[2] = " ";
+		a[0] = read_key().ascii;
 		memcpy(_Buffer,a,sizeof(a));
 		return sizeof(a);
 	}
@@ -27,15 +30,19 @@ public:
 	}
 };
 
-void tmp(int num,void*,void*)
+void KeyboardIntHandler(int num,void*,void*)
 {
-	log("signal\n");
+	auto scanCode = Inb(0x60);
+	do_intr(scanCode);
+	//清空buffer
+	auto tmp = Inb(0x61);
+	Outb(tmp | 0x80, 0x61);
+	Outb(tmp & 0x7f, 0x61);
+	Outb(0x20,0x61);
 }
-
 void keyboard()
 {
-	Signal(SIGALARM,(sighandler_t)tmp,0);
-	Signal(SIGINT ,(sighandler_t)tmp,0);
+	Signal(SIGINT ,(sighandler_t)KeyboardIntHandler,0);
 	SysCallAlarm::Invoke(1e3);
 	SysCallRegisterIRQ::Invoke(65);
 	auto id = SysCallRegisterChrDev::Invoke((uint32_t)"keyboard",0,0,0);
