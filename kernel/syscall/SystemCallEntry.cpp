@@ -28,11 +28,15 @@ SINGLETON_CPP(SystemCallEntry)
 int SystemCallEntry::Call(InterruptParams& params)
 {
 	Interrupt::Instance()->Cli();
+	auto& lock = SystemCallEntry::Instance()->lock;
+// 	lock.Lock();
 	auto ins = SystemCallEntry::Instance();
 	auto ite = ins->callMap.Find(params.eax);
 	if(ite==ins->callMap.End())
 	{
 		params.eax = -1;
+// 		lock.Unlock();
+		Interrupt::Instance()->Sti();
 		return -1;
 	}
 	else
@@ -42,8 +46,9 @@ int SystemCallEntry::Call(InterruptParams& params)
 				,params.edx
 				,params.esi,params);
 		params.eax = res;
+		Interrupt::Instance()->Sti();
+// 		lock.Unlock();
 		return 1;
 	}
-	Interrupt::Instance()->Sti();
 }
 	

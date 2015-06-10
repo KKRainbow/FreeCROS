@@ -35,7 +35,7 @@ void SpinLock::Lock()
 		BASIC_LOCK(this->lock);
 		return;
 	}
-	int id = CPUManager::Instance()->GetCurrentCPU()->GetID();
+	int id = CPUManager::Instance()->GetCurrentCPUID();
 	BASIC_LOCK(tmplock);
 	if(currCPU == id)
 	{
@@ -76,7 +76,7 @@ bool SpinLock::Try()
 			Interrupt::EnterCritical(this->eflag);
 		return tmp;
 	}
-	int id = CPUManager::Instance()->GetCurrentCPU()->GetID();
+	int id = CPUManager::Instance()->GetCurrentCPUID();
 	bool res;
 
 	BASIC_LOCK(tmplock);

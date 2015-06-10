@@ -48,11 +48,11 @@ ADD_CUSTOM_TARGET(
 	)
 ADD_CUSTOM_TARGET(
 	run
-	COMMAND qemu-system-i386 -cdrom myos.iso -smp 4 
+	COMMAND qemu-system-i386 -cdrom myos.iso -smp 2 
 	)
 ADD_CUSTOM_TARGET(
 	qd	
-	COMMAND qemu-system-i386 -cdrom myos.iso -smp 4 -s -S
+	COMMAND qemu-system-i386 -cdrom myos.iso -smp 2 -s -S
 	)
 ADD_CUSTOM_TARGET(
 	cg	

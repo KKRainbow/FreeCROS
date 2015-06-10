@@ -45,7 +45,7 @@ Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threa
 }
 
 //Create Thread::a thread with a dependent address space
-Thread::Thread(Thread& _Thread,int _Pid):cpuState(_Thread.cpuState),
+Thread::Thread(Thread& _Thread,int _Pid):cpuState(_Thread.threadType),
 	threadType(_Thread.threadType)
 {
 	pid = _Pid;

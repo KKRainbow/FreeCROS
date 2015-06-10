@@ -61,16 +61,20 @@ Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 		Thread* t = pair.second;
 		if(t->sigmap.Size() != 0)
 		{
-			if(t->State()->Type() == States::INTERRUPTABLE)
+			if(t->State()->Type() == States::INTERRUPTABLE
+				||t->State()->Type() == States::RUNNING
+			)
 			{
 				t->State()->ToReady(t);
 			}
 		}
 		//mask交给Thread类自己去判断
 	}
-	Thread* res  =sched->NextThread(_CPU);
+	Thread* res  = sched->NextThread(_CPU);
 	if(res)
+	{
 		res->State()->ToRun(res);
+	}
 
 	lock.Unlock();
 	return res;

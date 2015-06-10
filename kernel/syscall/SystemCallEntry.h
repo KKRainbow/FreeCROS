@@ -8,6 +8,7 @@
 class SystemCallEntry
 {
 	SINGLETON_H(SystemCallEntry)
+	SpinLock lock;
 	private:
 		lr::sstl::Map<int,SysCall*> callMap;
 	public:

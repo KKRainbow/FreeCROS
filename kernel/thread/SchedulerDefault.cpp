@@ -59,6 +59,8 @@ Thread* SchedulerDefault::NextThread(CPU* _CPU)
 			auto stateType = state->Type();
 			Assert(stateType == States::READY || stateType == States::INTERRUPTABLE);
 			
+			//在这里就得把这个线程从准备列表中山除了,不然另一个CPU过来还有可能选择它;
+			lists[i].Erase(ite);
 			lock.Unlock();
 			return res;
 		}

@@ -46,11 +46,11 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	ServerLoader::Instance()->LoadModules();
 	
 	const size_t stackSize = 4*PAGE_SIZE;
-	//m->InitAP((addr_t)apmain,stackSize);
+	m->InitAP((addr_t)apmain,stackSize);
 	
 	LOG("Start service!!!\n",1);
-	m->GetCurrentCPU()->StartService();
-	
+// 	m->GetCurrentCPU()->StartService();
+	for(;;);
 	for(;;)
 	{
 		m->KernelWait(1e6);

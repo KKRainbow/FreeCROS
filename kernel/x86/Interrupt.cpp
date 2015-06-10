@@ -56,9 +56,9 @@ void Interrupt::UniHandler(InterruptParams& params)
 }
 extern "C" void CHandler(InterruptParams params)
 {
-	if(params.irqnum != 66)
+	if(params.irqnum != 66 && params.irqnum != 128)
 	{
-		//LOG("IRQ: %d\n",params.irqnum);
+		LOG("IRQ: %d\n",params.irqnum);
 	}
 // 	if(params.irqnum == 14)MAGIC_DEBUG;
 	if(params.irqnum <= 20 &&params.irqnum != 14

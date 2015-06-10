@@ -35,6 +35,7 @@ int Clock::ClockHandler(InterruptParams& params)
 		}
 		else
 		{
+			CPUManager::Instance()->ClockNotify();
 		}
 	}
 	Interrupt::LeaveCritical(eflag);
@@ -132,5 +133,7 @@ void Clock::KernelWait(uint32_t _Us)const
 	uint32_t tmp = GetCurrentCounter();
 
 	while(tmp+_Us > GetCurrentCounter())
-	{}
+	{
+		Interrupt::Sti();
+	}
 }

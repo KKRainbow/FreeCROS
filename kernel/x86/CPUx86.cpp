@@ -84,6 +84,7 @@ void CPUx86::Run()
 	
 	if(currThread->GetPid() == 2)
 	{
+// 		MAGIC_DEBUG;
 		currThread = newThread;
 	}
 	struct{long a,b;}tmp;
@@ -177,12 +178,12 @@ CPUx86::CPUx86(CPU::Type _Type)
 	if(_Type == BSP)
 	{
 		this->manager->GetHAL()->InitBSP();
+		this->InitSysCall();
 	}
 	else
 	{
 		this->manager->GetHAL()->InitAsAP();
 	}
-	this->InitSysCall();
 	this->SetID(this->manager->GetHAL()->GetCurrentCPUID());
 	Interrupt::Sti();
 }

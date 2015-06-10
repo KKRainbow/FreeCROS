@@ -53,5 +53,6 @@ class CPUManager
 		uint64_t GetClockCounter()const;
 		uint32_t GetClockPeriod()const;
 		void KernelWait(uint32_t _Us)const;
+		int GetCurrentCPUID();
 };
 

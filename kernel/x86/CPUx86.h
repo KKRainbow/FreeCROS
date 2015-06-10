@@ -38,6 +38,8 @@ class CPUx86:public CPU
 		uint64_t endCounter = 0;  //两个判断当前进程时间片的Counter
 		bool allDone = false;
 		
+		uint32_t eflag;
+		
 		void InitPage();
 		void InitGDT();
 		void InitSysCall();

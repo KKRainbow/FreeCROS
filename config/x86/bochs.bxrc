@@ -183,6 +183,7 @@
 #=======================================================================
 #cpu: model=corei5_lynnfield_750, count=1, ips=50000000, reset_on_triple_fault=1, ignore_bad_msrs=1, msrs="msrs.def"
 #cpu: cpuid_limit_winnt=0
+cpu: count=2, ips=10000000
 
 #=======================================================================
 # CPUID:

@@ -50,6 +50,19 @@ void CPUManager::KernelWait(uint32_t _Us)const
 	Clock::Instance()->KernelWait(_Us);
 }
 
+void CPUManager::APsEntryCaller(addr_t _StackAddr,size_t _StackSize)
+{
+	auto& apsEntry = CPUManager::Instance()->apsEntry;
+	auto& apsLock = CPUManager::Instance()->apsLock;
+	apsLock.Lock();
+	CPU* cpu = new CPUx86(CPU::Type::AP);
+	CPUManager::Instance()->AddCPU(cpu);
+	apsLock.Unlock();
+	//为了防止lock把中断关了,我们要再打开它
+	Interrupt::Sti();;
+	apsEntry(_StackAddr,_StackSize);
+	for(;;);
+}
 int CPUManager::InitAP(addr_t _Entry,size_t _StackSize)
 {
 	this->apsEntry = (cpu_entry_t)_Entry;
@@ -81,7 +94,7 @@ void CPUManager::ClockNotify()
 	CPU* cpu = this->GetCurrentCPU();	
 	if(cpu->GetType() == CPU::Type::BSP) //需要通知其他CPU
 	{
-		ThreadManager::Instance()->ClockNotify(Clock::Instance()->GetCurrentCounter());
+// 		ThreadManager::Instance()->ClockNotify(Clock::Instance()->GetCurrentCounter());
 		GetHAL()->InterruptAllOtherCPU(Clock::CLOCK_IRQ);		
 	}
 	cpu->Run();//下一轮,CPU由时钟驱动
@@ -93,23 +106,13 @@ CPU* CPUManager::GetCurrentCPU()
 	if(ite == CPUList.End())return nullptr;
 	else return ite->second;	
 }
+int CPUManager::GetCurrentCPUID()
+{
+	return this->hal->GetCurrentCPUID();
+}
 
 void CPUManager::AddCPU(CPU* _CPU)
 {
 	_CPU->id = this->hal->GetCurrentCPUID();
 	CPUList.Insert(lr::sstl::MakePair(_CPU->id,_CPU));
-}
-
-void CPUManager::APsEntryCaller(addr_t _StackAddr,size_t _StackSize)
-{
-	auto& apsEntry = CPUManager::Instance()->apsEntry;
-	auto& apsLock = CPUManager::Instance()->apsLock;
-	apsLock.Lock();
-	CPU* cpu = new CPUx86(CPU::Type::AP);
-	CPUManager::Instance()->AddCPU(cpu);
-	apsLock.Unlock();
-	//为了防止lock把中断关了,我们要再打开它
-	Interrupt::Sti();;
-	apsEntry(_StackAddr,_StackSize);
-	for(;;);
 }
