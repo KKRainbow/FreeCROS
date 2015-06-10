@@ -49,7 +49,7 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	m->InitAP((addr_t)apmain,stackSize);
 	
 	LOG("Start service!!!\n",1);
-// 	m->GetCurrentCPU()->StartService();
+	m->GetCurrentCPU()->StartService();
 	for(;;);
 	for(;;)
 	{

@@ -80,7 +80,8 @@ public:
 	virtual void ChangeToCurrentSpaceMode();
 	virtual addr_t GetPhisicalAddress(addr_t _VirtAddr);
 	virtual bool VerifyVirtAddress(addr_t _VirtAddr);
-	virtual void MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser = 1,int isWritable = 1);
+	virtual void MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser = 1,int isWritable = 1,
+			int isCachaDisabled = 0);
 	virtual void UnmapVirtAddr(addr_t _Virt);
 	virtual void SetPageWritable(addr_t _Virt,bool _Present);
 	virtual bool IfPageWritable(addr_t _Virt);

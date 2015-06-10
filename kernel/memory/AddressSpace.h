@@ -27,7 +27,8 @@ class AddressSpace
 		virtual void ChangeToCurrentSpaceMode() = 0;
 		virtual addr_t GetPhisicalAddress(addr_t _VirtAddr) = 0;
 		virtual bool VerifyVirtAddress(addr_t _VirtAddr) = 0;
-		virtual void MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser = 1,int isWritable = 1) = 0;
+		virtual void MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser = 1,int isWritable = 1,
+			int isCachaDisabled = 0) = 0;
 		virtual void UnmapVirtAddr(addr_t _Virt) = 0;
 		virtual void SetPageWritable(addr_t _Virt,bool _Present) = 0;
 		virtual bool IfPageWritable(addr_t _Virt) = 0;

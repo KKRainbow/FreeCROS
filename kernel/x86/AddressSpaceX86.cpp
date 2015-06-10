@@ -76,7 +76,9 @@ bool AddressSpaceX86::VerifyVirtAddress(addr_t _VirtAddr)
 	return true;
 }
 
-void AddressSpaceX86::MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser,int isWritable)
+void AddressSpaceX86::MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser,int isWritable
+	,int isCacheDisabled
+)
 {
 	PageDirEntry* dir = GetPageDirEntry(_Virt);
 	PageTableEntry* table;
@@ -104,6 +106,7 @@ void AddressSpaceX86::MapVirtAddrToPhysAddr(addr_t _Phy,addr_t _Virt,int isUser,
 	table->Present = 1;
 	table->US = isUser;
 	table->RW = isWritable;
+	table->PCD = isCacheDisabled;
 }
 
 void AddressSpaceX86::UnmapVirtAddr(addr_t _Virt)
@@ -159,7 +162,7 @@ AddressSpace* AddressSpaceX86::GetAddressSpace()
 		auto res = new AddressSpaceX86(cr3);
 		Assert(res);
 		const addr_t apci = 0xfee00000;
-		res->MapVirtAddrToPhysAddr(apci,apci,0,1);
+		res->MapVirtAddrToPhysAddr(apci,apci,0,1,1);
 		return res;
 	}
 }
