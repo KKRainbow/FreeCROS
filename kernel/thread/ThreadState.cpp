@@ -127,7 +127,9 @@ States ThreadStateZombie::Type()
 }
 bool ThreadStateRunning::ToRun(Thread* _Thread)
 {
-	return false;
+	_Thread->State() = new ThreadStateRunning();
+	ThreadManager::Instance()->sched->ThreadRemoved(_Thread);
+	return true;
 }
 bool ThreadStateRunning::ToIOBlocked(Thread* _Thread)
 {
@@ -137,6 +139,7 @@ bool ThreadStateRunning::ToIOBlocked(Thread* _Thread)
 bool ThreadStateRunning::ToPause(Thread* _Thread)
 {
 	_Thread->State() = new ThreadStateInterruptable();
+	ThreadManager::Instance()->sched->ThreadRemoved(_Thread);
 	return true;
 }
 bool ThreadStateRunning::ToReady(Thread* _Thread)

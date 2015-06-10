@@ -17,7 +17,6 @@ Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threa
 		this->stackAddr = (addr_t)MemoryManager::Instance()->
 			KernelPageAllocate(i);
 			
-		LOG("StackAddr: 0x%x",this->stackAddr);
 		Assert(this->stackAddr);
 	}
 	else

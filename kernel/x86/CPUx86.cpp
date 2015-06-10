@@ -47,7 +47,7 @@ void CPUx86::Run()
 	}
 	//Preparing for switch the thread;
 	//Set the TSS
-	if(currThread != nullptr)
+	if(currThread != nullptr )
 	{
 		Segment::SetBase(gdt.previousTSS,
 				Segment::GetBase(gdt.currentTSS));	

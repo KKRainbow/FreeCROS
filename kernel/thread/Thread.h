@@ -103,6 +103,7 @@ public:
 	addr_t AddSignalHandler(int _Signum,addr_t _Handler,int _Flag);
 	bool Kill(pid_t _Source,int _Signum);
 	bool RestoreFromSignal();
+	bool IsProcessingSignal(){return this->isSignalProcessing;};
 };
 
 template<class T>
