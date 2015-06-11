@@ -158,6 +158,7 @@ void LocalAPIC::InitAPs(int APICID,void (*entry)(),addr_t _StackAddr,size_t _Sta
 		uint32_t flag;//上一个AP初始化好后会将这一位置为0
 		uint32_t flag_absolute_addr;
 	}*boot_data = (BootData*)&aps_boot_data;
+	Assert(boot_data);
 	Clock* c = Clock::Instance();
 	IPIMessage msg;
 
@@ -181,10 +182,8 @@ void LocalAPIC::InitAPs(int APICID,void (*entry)(),addr_t _StackAddr,size_t _Sta
 	msg.detail.deliMode = 0b110; //Starup INIT
 	SendIPI(&msg);
 
-	c->KernelWait(200);
-	SendIPI(&msg);
-	c->KernelWait(200);
-
+// 	c->KernelWait(200);
+// 	SendIPI(&msg);
 }
 bool LocalAPIC::InitAPCI()
 {

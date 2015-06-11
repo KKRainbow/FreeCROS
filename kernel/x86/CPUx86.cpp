@@ -22,6 +22,13 @@ void CPUx86::Run()
 {
 	if(!allDone)return;
 	CPUState::TSSStruct tmptss;
+	Thread* newThread;
+	
+	if(this->threadToUnlock != nullptr)
+	{
+		this->threadToUnlock->threadLock.Unlock();
+		this->threadToUnlock = nullptr;
+	}
 	ThreadManager* tman = ThreadManager::Instance();
 	//判断时间片是否用尽
 	this->startCounter = CPUManager::Instance()->GetClockCounter();
@@ -87,20 +94,15 @@ void CPUx86::Run()
 	tmp.a = 0;
 	tmp.b = 32;
 	
-	char* lockAddr = nullptr;
 	if(currThread && currThread != this->idleThread)
 	{
-		lockAddr = &(currThread->threadLock.lock);
+		this->threadToUnlock = currThread;
 	}
 	//之所以以这种方式解锁,是为了尽量增大线程解锁与线程被选中指奸的间距
 	__asm__(
 		"xchg %1,%2\n\t"
-		"cmpb $0,%3\n\t"
-		"je 1f\n\t"
-		"movb $0,%3\n\t"
-		"1:\n\t"
 		"ljmp *%0\n\t"
-	::"m"(tmp.a),"m"(currThread),"r"(newThread),"m"(*lockAddr));
+	::"m"(tmp.a),"m"(currThread),"r"(newThread));
 }
 void CPUx86::SaveFPU(Thread* _Thread)
 {

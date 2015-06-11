@@ -1,9 +1,8 @@
 #include"Log.h"
 SINGLETON_CPP(Log)
 {
-	instance->printer.Clear();
+	this->instance->printer.Clear();
 }
-
 
 int Log::LogStr(const char* str,...)
 {

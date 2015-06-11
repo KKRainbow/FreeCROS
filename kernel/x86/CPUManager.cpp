@@ -64,7 +64,6 @@ void CPUManager::APsEntryCaller(addr_t _StackAddr,size_t _StackSize)
 	
 	apsLock.Unlock();
 	//为了防止lock把中断关了,我们要再打开它
-	Interrupt::Sti();;
 	apsEntry(_StackAddr,_StackSize);
 	for(;;);
 }
@@ -101,9 +100,6 @@ void CPUManager::ClockNotify()
 	{
 // 		ThreadManager::Instance()->ClockNotify(Clock::Instance()->GetCurrentCounter());
 // 		GetHAL()->InterruptAllOtherCPU(Clock::CLOCK_IRQ);		
-	}
-	else
-	{
 	}
 	cpu->Run();//下一轮,CPU由时钟驱动
 }

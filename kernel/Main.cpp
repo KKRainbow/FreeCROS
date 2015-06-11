@@ -7,12 +7,14 @@
 #include"ramdisk/RamDisk.h"
 #include"misc/ServerLoader.h"
 
+static const int timeToWatiOtherCPU = 1e6;
 //全局变量声明
 Multiboot globalMultiboot; //Mutiboot的所有信息都在这里获得
 MemoryManager globalMemoryManager(true);
 extern "C" void apmain(addr_t _StackAddr,size_t _StackSize)
 {
 	LOG("Core Running!\n",1);
+	CPUManager::Instance()->KernelWait(timeToWatiOtherCPU);
 	CPUManager::Instance()->GetCurrentCPU()->StartService();
 	for(;;)__asm__("hlt");
 }
@@ -48,6 +50,7 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	const size_t stackSize = 4*PAGE_SIZE;
 	m->InitAP((addr_t)apmain,stackSize);
 	
+	CPUManager::Instance()->KernelWait(timeToWatiOtherCPU);
 	LOG("Start service!!!\n",1);
 	m->GetCurrentCPU()->StartService();
 	for(;;);

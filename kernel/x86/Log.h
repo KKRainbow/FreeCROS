@@ -4,6 +4,7 @@
 #include"stl/slinkedlist.h"
 #include"stdio.h"
 #include"stdarg.h"
+#include"cpu/SpinLock.h"
 
 class Log;
 class Printer

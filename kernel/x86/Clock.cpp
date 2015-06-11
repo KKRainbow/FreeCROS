@@ -13,7 +13,7 @@ void Clock::InitPIT()
 {
 	CPUManager::Instance()->RegisterIRQ(
 			Clock::ClockHandler,HAL::IRQBase+2);
-	SetPeriod(1800);	
+	SetPeriod(100);	
 	CPUManager::Instance()->GetHAL()->SetMaskOfIRQ(CLOCK_IRQ,false);	
 }
 int Clock::ClockHandler(InterruptParams& params)
@@ -31,12 +31,8 @@ int Clock::ClockHandler(InterruptParams& params)
 		if(cpu->GetType() == CPU::Type::BSP)
 		{
 			c->SetCurrentCounter(c->GetCurrentCounter()+c->GetPeriod());
-			CPUManager::Instance()->ClockNotify();
 		}
-		else
-		{
-			CPUManager::Instance()->ClockNotify();
-		}
+		CPUManager::Instance()->ClockNotify();
 	}
 // 	Interrupt::LeaveCritical(eflag);
 	return true;
