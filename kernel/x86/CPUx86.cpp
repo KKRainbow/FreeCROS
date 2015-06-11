@@ -22,7 +22,6 @@ void CPUx86::Run()
 {
 	if(!allDone)return;
 	CPUState::TSSStruct tmptss;
-	Thread* newThread;
 	ThreadManager* tman = ThreadManager::Instance();
 	//判断时间片是否用尽
 	this->startCounter = CPUManager::Instance()->GetClockCounter();
@@ -75,10 +74,6 @@ void CPUx86::Run()
 	{
 		currThread->State()->ToReady(currThread);
 	}
-	if(currThread && currThread != this->idleThread)
-	{
-		currThread->threadLock.Unlock();
-	}
 	if(newThread != this->idleThread)
 	{
 		newThread->State()->ToRun(newThread); //Change the state of the thread
@@ -86,19 +81,16 @@ void CPUx86::Run()
 	}
 
 	this->SaveFPU(currThread);
-	currThread = newThread;
 
-	auto eip = currThread->GetCPUState().tss.eip;
-	if(eip< 0x100000)for(;;);
 	
-	if(currThread->GetPid() == 2)
-	{
-// 		MAGIC_DEBUG;
-		currThread = newThread;
-	}
 	struct{long a,b;}tmp;
 	tmp.a = 0;
 	tmp.b = 32;
+	if(currThread && currThread != this->idleThread)
+	{
+		currThread->threadLock.Unlock();
+	}
+	currThread = newThread;
 	__asm__(
 		"ljmp *%0\n\t"
 	::"m"(tmp.a));

@@ -34,6 +34,7 @@ class CPUx86:public CPU
 		static const int stackSize = 3*PAGE_SIZE;
 		CPUManager* manager;
 		Thread* currThread;
+		Thread* newThread;
 		uint64_t startCounter = 0;
 		uint64_t endCounter = 0;  //两个判断当前进程时间片的Counter
 		bool allDone = false;
