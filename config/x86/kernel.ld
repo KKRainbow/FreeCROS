@@ -88,7 +88,7 @@ SECTIONS
 
 		. += 4096;
 		kernelObjInitZoneStart = .;
-		. = 0x01400000;
+		. = 0x01800000;
 		kernelObjInitZoneEnd = .;
 		kernelEnd = .;
     }

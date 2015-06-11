@@ -14,7 +14,10 @@ void WaitableObj::Wait()
 	
 	curr->State()->ToPause(curr);
 	cpu->ExhaustCurrThread(); //当前进程的时间片归零	
+	
+	lock.Unlock();
 	cpu->Run();
+	lock.Lock();
 
 	wait = prev;
 	if(prev != nullptr)

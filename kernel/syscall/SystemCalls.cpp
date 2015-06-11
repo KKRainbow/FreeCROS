@@ -223,6 +223,7 @@ SYSCALL_METHOD_CPP(Read)//path
 			TransferDateFromOtherThread((void*)_Sec,devThread,
 				(void*)msg.content[0],msg.content[1]
 			);
+			LOG("CORE: %d\n",CPUManager::Instance()->GetCurrentCPUID());
 			return msg.content[1];
 		default:
 			break;

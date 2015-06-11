@@ -54,7 +54,9 @@ void ThreadManager::RemoveThread(int _Pid)
 }
 Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 {
+	Interrupt::Cli();
 	lock.Lock();
+	auto id = CPUManager::Instance()->GetCurrentCPUID();
 	//扫描线程列表,检查信号
 	for(auto& pair : this->threads)
 	{
@@ -71,11 +73,11 @@ Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 		//mask交给Thread类自己去判断
 	}
 	Thread* res  = sched->NextThread(_CPU);
-	if(res)
-	{
-		res->State()->ToRun(res);
-	}
-
+// 	if(res)
+// 	{
+// 		res->State()->ToRun(res);
+// 	}
+// 
 	lock.Unlock();
 	return res;
 }

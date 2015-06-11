@@ -40,7 +40,6 @@ private:
 	MemoryAllocator* GetProperAlloc(addr_t _Addr,size_t _Size = 0);
 	uint32_t memSize = 0;
 	
-	SpinLock lock;
 	Module* modules;
 protected:
 	MemoryAllocator* kernelInitAllocator = nullptr;

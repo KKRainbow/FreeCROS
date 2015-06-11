@@ -193,6 +193,7 @@ MemoryListAllocator::ListHead* MemoryListAllocator::GetHeadFromAddress(addr_t _A
 		}
 	}
 	//正常情况下绝对不会运行到这
+	LOG("Unknow addr deleted! : 0x%x",_Addr);
 	Assert(false);
 	return nullptr;
 }

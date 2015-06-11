@@ -39,4 +39,8 @@ class LocalAPIC
 		static void InitAPs(int _APICID,void (*_Entry)(),addr_t _StackAddr,size_t _StackSize);
 		static void InterruptCPU(int _APICID,int _Irq);
 		static void InterruptAllOtherCPU(int _Irq);
+		
+		static void SetClockNextCounter(int _Counter);
+		static uint32_t GetClockCurrCounter();
+		static void SetClockIRQ(irq_t _IrqNum);
 };

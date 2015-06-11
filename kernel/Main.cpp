@@ -36,7 +36,7 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	m->Initialize();
 	
 	//CPUManager正常工作后,Spinlock可以正常使用了`
-	SpinLock::SetBasicMode(false);
+// 	SpinLock::SetBasicMode(false);
 	
 	//TODO 开始写ramdisk把~~~~~哈哈哈,应该很简单,嗯= =
 	//Ramdisk之后就可以加载Server,Server利用Ramdisk就可以完成设备初始化了

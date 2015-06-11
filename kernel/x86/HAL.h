@@ -35,5 +35,9 @@ class HAL
 		virtual void InterruptCPU(int Id,int Irq) = 0;
 		virtual void InterruptAllOtherCPU(int Irq) = 0;
 		
+		virtual void SetClockNextCounter(int _Counter) = 0;
+		virtual uint32_t GetClockCurrCounter() = 0;
+		virtual void SetClockIRQ(irq_t _IrqNum) = 0;
+		
 		static HAL* GetProperHAL();
 };

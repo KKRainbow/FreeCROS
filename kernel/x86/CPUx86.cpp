@@ -11,8 +11,10 @@
 void idle()
 {
 	int a = 0;
+	WaitableObj wait;
 	for(;;)
 	{
+		wait.Wait();
 	}
 }
 extern addr_t stack;
@@ -34,9 +36,9 @@ void CPUx86::Run()
 		//没有进程可以运行,我们就运行Idle进程,即idleThread
 		if(this->idleThread == nullptr)
 		{
-			return;
+			this->idleThread = new Thread(-1,ThreadType::KERNEL);
+			this->idleThread->SetEntry((addr_t)idle);
 		}
-		this->idleThread->State()->ToReady(this->idleThread);
 		newThread = this->idleThread;
 	}
 	//必须有这个判断,防止
@@ -69,12 +71,19 @@ void CPUx86::Run()
 
 	__asm__("ltr %%ax"::"a"(24));
 
-	if(currThread&&currThread->State()->Type() == RUNNING)
+	if(currThread&&currThread->State()->Type() == RUNNING&&currThread != this->idleThread)
 	{
 		currThread->State()->ToReady(currThread);
 	}
-	newThread->State()->ToRun(newThread); //Change the state of the thread
-	endCounter = startCounter + newThread->CPUCounter();
+	if(currThread && currThread != this->idleThread)
+	{
+		currThread->threadLock.Unlock();
+	}
+	if(newThread != this->idleThread)
+	{
+		newThread->State()->ToRun(newThread); //Change the state of the thread
+		endCounter = startCounter + newThread->CPUCounter();
+	}
 
 	this->SaveFPU(currThread);
 	currThread = newThread;

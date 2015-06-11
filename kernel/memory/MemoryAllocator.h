@@ -17,6 +17,7 @@
 #pragma once
 #include"Global.h"
 #include"stdlib.h"
+#include"cpu/SpinLock.h"
 enum MemoryZoneType
 {
 	KERNEL_PAGE_ALLOC,	//分配页大小
@@ -28,6 +29,7 @@ class MemoryAllocator
 protected:
 	MemoryZoneType allocType;
 public:
+	SpinLock lock;
 	virtual ~MemoryAllocator(){};
 	
 	virtual void* Allocate(size_t _Size,int _Align=0) = 0;

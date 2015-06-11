@@ -58,7 +58,8 @@ public:
 	void Alarm(uint32_t _Us);
 private:
 	///////////////
-private:
+// private:
+public:
 	Thread& operator=(const Thread&){return *this;}
 	Thread(const Thread&){}
 	//Create a thread with a independent address space=
@@ -104,6 +105,9 @@ public:
 	bool Kill(pid_t _Source,int _Signum);
 	bool RestoreFromSignal();
 	bool IsProcessingSignal(){return this->isSignalProcessing;};
+	
+public:
+	SpinLock threadLock;
 };
 
 template<class T>

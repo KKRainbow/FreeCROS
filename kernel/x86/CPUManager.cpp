@@ -57,6 +57,11 @@ void CPUManager::APsEntryCaller(addr_t _StackAddr,size_t _StackSize)
 	apsLock.Lock();
 	CPU* cpu = new CPUx86(CPU::Type::AP);
 	CPUManager::Instance()->AddCPU(cpu);
+	
+	auto hal = CPUManager::Instance()->GetHAL();
+	hal->SetClockIRQ(Clock::CLOCK_IRQ);
+	hal->SetClockNextCounter(8000);
+	
 	apsLock.Unlock();
 	//为了防止lock把中断关了,我们要再打开它
 	Interrupt::Sti();;
@@ -95,7 +100,10 @@ void CPUManager::ClockNotify()
 	if(cpu->GetType() == CPU::Type::BSP) //需要通知其他CPU
 	{
 // 		ThreadManager::Instance()->ClockNotify(Clock::Instance()->GetCurrentCounter());
-		GetHAL()->InterruptAllOtherCPU(Clock::CLOCK_IRQ);		
+// 		GetHAL()->InterruptAllOtherCPU(Clock::CLOCK_IRQ);		
+	}
+	else
+	{
 	}
 	cpu->Run();//下一轮,CPU由时钟驱动
 }

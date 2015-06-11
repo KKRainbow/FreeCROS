@@ -53,6 +53,8 @@ Thread* SchedulerDefault::NextThread(CPU* _CPU)
 		{
 			Thread* res = *ite;
 			
+			if(res->threadLock.Try() == false)break;
+			
 			Assert(res);
 			auto& state = res->State();
 			Assert(state.Obj());
@@ -60,8 +62,8 @@ Thread* SchedulerDefault::NextThread(CPU* _CPU)
 			Assert(stateType == States::READY || stateType == States::INTERRUPTABLE);
 			
 			//在这里就得把这个线程从准备列表中山除了,不然另一个CPU过来还有可能选择它;
-			lists[i].Erase(ite);
 			lock.Unlock();
+			this->ThreadRemoved(res);
 			return res;
 		}
 	}

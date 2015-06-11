@@ -206,8 +206,6 @@ bool LocalAPIC::InitAPCI()
 	WriteRegister(APIC_LVT_TMR,32);
 	//Divided by 3
 	WriteRegister(APIC_TMRDIV,0x3);
-	//Counter
-	WriteRegister(APIC_TMRINITCNT,100);
 	
 	uint32_t tmp = ReadRegister(APIC_TMRCURRCNT);
 
@@ -253,4 +251,18 @@ void LocalAPIC::InterruptAllOtherCPU(int Irq)
 	msg.detail.shortHand = 0b11; //Excluding itself;	
 	msg.detail.vecotr = Irq;
 	SendIPI(&msg);
+}
+
+void LocalAPIC::SetClockNextCounter(int _Counter)
+{
+	WriteRegister(APIC_TMRINITCNT,_Counter);
+}
+uint32_t LocalAPIC::GetClockCurrCounter()
+{
+	//Counter
+	return ReadRegister(APIC_TMRINITCNT);
+}
+void LocalAPIC::SetClockIRQ(irq_t _IrqNum)
+{
+	WriteRegister(APIC_LVT_TMR,_IrqNum | (0b01 << 17));
 }

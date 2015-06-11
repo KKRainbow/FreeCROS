@@ -174,47 +174,53 @@ MemoryManager::MemoryManager(bool _BootInit):MemoryManager()
 //下面是需要加锁的
 void MemoryManager::Reserve(addr_t _Addr,size_t _Size)
 {
-	lock.Lock();
 	auto alloc = this->GetProperAlloc(_Addr,_Size);
 	if(alloc)
+	{
+		alloc->lock.Lock();
 		alloc->Reserve((void*)_Addr,_Size);
-	lock.Unlock();
+		alloc->lock.Unlock();
+	}
 }
 void MemoryManager::Dereserve(addr_t _Addr,size_t _Size)
 {
-	lock.Lock();
 	auto alloc = this->GetProperAlloc(_Addr,_Size);
 	if(alloc)
+	{
+		alloc->lock.Lock();
 		alloc->Dereserve((void*)_Addr,_Size);
-	lock.Unlock();
+		alloc->lock.Unlock();
+	}
 }
 void* MemoryManager::KernelPageAllocate(size_t _Count)
 {
-	lock.Lock();
 	auto alloc = this->kernelPageAllocator;
+	alloc->lock.Lock();
 	auto res =  alloc->Allocate(_Count * PAGE_SIZE,PAGE_SIZE);
-	lock.Unlock();
+	alloc->lock.Unlock();
+	Assert(res);
 	return res;
 }
 void* MemoryManager::KernelObjectAllocate(size_t _Size)
 {
-	lock.Lock();
-	auto res = this->kernelInitAllocator->Allocate(_Size,0);
-	this->kernelInitAllocator->FreeSize();
-	lock.Unlock();
+	auto alloc = this->kernelInitAllocator;
+	alloc->lock.Lock();
+	auto res =  alloc->Allocate(_Size,0);
+	alloc->lock.Unlock();
+	Assert(res);
 	return res;
 }
 
 bool MemoryManager::AutoDeallocate(void* _Ptr)
 {
-	lock.Lock();
 	bool res = false;
 	auto alloc = this->GetProperAlloc((addr_t)_Ptr);
 	if(alloc)
 	{
+		alloc->lock.Lock();
 		alloc->Deallocate(_Ptr);
+		alloc->lock.Unlock();
 		res = true;
 	}
-	lock.Unlock();
 	return true;
 }

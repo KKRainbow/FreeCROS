@@ -314,3 +314,18 @@ void APCI::InterruptAllOtherCPU(int Irq)
 	LocalAPIC lapic;
 	lapic.InterruptAllOtherCPU(Irq);
 }
+
+void APCI::SetClockNextCounter(int _Counter)
+{
+	LocalAPIC::SetClockNextCounter(_Counter);
+}
+
+uint32_t APCI::GetClockCurrCounter()
+{
+	return LocalAPIC::GetClockCurrCounter();
+}
+
+void APCI::SetClockIRQ(irq_t _IrqNum)
+{
+	LocalAPIC::SetClockIRQ(_IrqNum);
+}

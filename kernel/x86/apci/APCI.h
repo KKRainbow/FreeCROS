@@ -47,4 +47,7 @@ class APCI:public HAL
 		virtual void InitBSP()override;
 		virtual void InterruptCPU(int _Id,int _Irq)override;
 		virtual void InterruptAllOtherCPU(int _Irq)override;
+		virtual void SetClockNextCounter(int _Counter)override;
+		virtual uint32_t GetClockCurrCounter()override;
+		virtual void SetClockIRQ(irq_t _IrqNum)override;
 };

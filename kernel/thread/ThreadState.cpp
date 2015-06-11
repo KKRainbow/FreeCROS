@@ -47,6 +47,7 @@ States ThreadStateUninterruptable::Type()
 }
 bool ThreadStateInterruptable::ToRun(Thread* _Thread)
 {
+	_Thread->State() = new ThreadStateRunning();
 	_Thread->PrepareToRun();			//Make the thread prepare something
 	return false;
 }
