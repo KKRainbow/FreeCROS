@@ -86,14 +86,21 @@ void CPUx86::Run()
 	struct{long a,b;}tmp;
 	tmp.a = 0;
 	tmp.b = 32;
+	
+	char* lockAddr = nullptr;
 	if(currThread && currThread != this->idleThread)
 	{
-		currThread->threadLock.Unlock();
+		lockAddr = &(currThread->threadLock.lock);
 	}
-	currThread = newThread;
+	//之所以以这种方式解锁,是为了尽量增大线程解锁与线程被选中指奸的间距
 	__asm__(
+		"xchg %1,%2\n\t"
+		"cmpb $0,%3\n\t"
+		"je 1f\n\t"
+		"movb $0,%3\n\t"
+		"1:\n\t"
 		"ljmp *%0\n\t"
-	::"m"(tmp.a));
+	::"m"(tmp.a),"m"(currThread),"r"(newThread),"m"(*lockAddr));
 }
 void CPUx86::SaveFPU(Thread* _Thread)
 {

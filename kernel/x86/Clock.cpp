@@ -13,7 +13,7 @@ void Clock::InitPIT()
 {
 	CPUManager::Instance()->RegisterIRQ(
 			Clock::ClockHandler,HAL::IRQBase+2);
-	SetPeriod(4800);	
+	SetPeriod(1800);	
 	CPUManager::Instance()->GetHAL()->SetMaskOfIRQ(CLOCK_IRQ,false);	
 }
 int Clock::ClockHandler(InterruptParams& params)

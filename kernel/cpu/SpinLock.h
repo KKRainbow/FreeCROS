@@ -6,12 +6,12 @@ class SpinLock
 {
 	private:
 		char tmplock;
-		char lock;
 		int depth;
 		int currCPU;
 		static bool basicMode;
 		uint32_t eflag;
 	public:
+		char lock;
 		void Lock();
 		void Unlock();
 		bool Try();
