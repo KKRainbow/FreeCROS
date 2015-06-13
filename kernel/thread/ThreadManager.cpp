@@ -54,30 +54,25 @@ void ThreadManager::RemoveThread(int _Pid)
 }
 Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 {
-	Interrupt::Cli();
 	lock.Lock();
-	auto id = CPUManager::Instance()->GetCurrentCPUID();
 	//扫描线程列表,检查信号
 	for(auto& pair : this->threads)
 	{
 		Thread* t = pair.second;
 		if(t->sigmap.Size() != 0)
 		{
-			if(t->State()->Type() == States::INTERRUPTABLE
-				||t->State()->Type() == States::RUNNING
-			)
+			if(t->State()->Type() == States::INTERRUPTABLE)
 			{
-				t->State()->ToReady(t);
+				if(t->threadLock.Try())
+				{
+					t->State()->ToReady(t);
+					t->threadLock.Unlock();
+				}
 			}
 		}
 		//mask交给Thread类自己去判断
 	}
 	Thread* res  = sched->NextThread(_CPU);
-// 	if(res)
-// 	{
-// 		res->State()->ToRun(res);
-// 	}
-// 
 	lock.Unlock();
 	return res;
 }
@@ -128,6 +123,10 @@ void ThreadManager::ClockNotify(uint64_t _Counter)
 	for(auto& pair : this->threads)
 	{
 		Thread* thread = pair.second;
-		thread->ClockNotify(_Counter);
+		if(thread->threadLock.Try())
+		{
+			thread->ClockNotify(_Counter);
+			thread->threadLock.Unlock();
+		}
 	}
 }

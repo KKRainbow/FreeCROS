@@ -98,7 +98,7 @@ void CPUManager::ClockNotify()
 	CPU* cpu = this->GetCurrentCPU();	
 	if(cpu->GetType() == CPU::Type::BSP) //需要通知其他CPU
 	{
-// 		ThreadManager::Instance()->ClockNotify(Clock::Instance()->GetCurrentCounter());
+		ThreadManager::Instance()->ClockNotify(Clock::Instance()->GetCurrentCounter());
 // 		GetHAL()->InterruptAllOtherCPU(Clock::CLOCK_IRQ);		
 	}
 	cpu->Run();//下一轮,CPU由时钟驱动

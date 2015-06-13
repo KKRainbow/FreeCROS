@@ -7,7 +7,7 @@
 #include"ramdisk/RamDisk.h"
 #include"misc/ServerLoader.h"
 
-static const int timeToWatiOtherCPU = 1e6;
+static const int timeToWatiOtherCPU = 8e5;
 //全局变量声明
 Multiboot globalMultiboot; //Mutiboot的所有信息都在这里获得
 MemoryManager globalMemoryManager(true);
@@ -34,6 +34,8 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	
 	new(&globalMemoryManager)MemoryManager(true);
 	
+	ServerLoader::Instance()->LoadModules();
+	
 	auto m = CPUManager::Instance();
 	m->Initialize();
 	
@@ -45,7 +47,6 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	//也就是我们可以开始写TTY的驱动程序了哈哈哈
 	//加载Server!
 	
-	ServerLoader::Instance()->LoadModules();
 	
 	const size_t stackSize = 4*PAGE_SIZE;
 	m->InitAP((addr_t)apmain,stackSize);

@@ -13,14 +13,13 @@ void Clock::InitPIT()
 {
 	CPUManager::Instance()->RegisterIRQ(
 			Clock::ClockHandler,HAL::IRQBase+2);
-	SetPeriod(100);	
+	SetPeriod(1800);	
 	CPUManager::Instance()->GetHAL()->SetMaskOfIRQ(CLOCK_IRQ,false);	
 }
 int Clock::ClockHandler(InterruptParams& params)
 {
 	//先关闭中断,因为如果时钟过快会导致栈溢出
 	uint32_t eflag;
-// 	Interrupt::EnterCritical(eflag);
 	Clock* c = Clock::Instance();
 	
 	CPUManager::Instance()->GetHAL()->EOI();
@@ -34,7 +33,6 @@ int Clock::ClockHandler(InterruptParams& params)
 		}
 		CPUManager::Instance()->ClockNotify();
 	}
-// 	Interrupt::LeaveCritical(eflag);
 	return true;
 }
 uint32_t Clock::CalcReloadValOfPeriod(uint32_t _Us,uint32_t &res_Us)

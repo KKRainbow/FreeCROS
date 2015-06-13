@@ -19,8 +19,8 @@ public:
 	}
 	virtual	size_t Read(char* _Buffer,size_t _Size)
 	{
-		char a[3] = "ab";
-		a[0] = read_key().ascii == 0? 'c':'d';
+		char a[] = "a";
+		a[0] = read_key().ascii;
 		memcpy(_Buffer,a,sizeof(a));
 		return sizeof(a);
 	}
@@ -44,7 +44,7 @@ void keyboard()
 {
 	Signal(SIGINT ,(sighandler_t)KeyboardIntHandler,0);
 // 	SysCallAlarm::Invoke(1e3);
-// 	SysCallRegisterIRQ::Invoke(65);
+	SysCallRegisterIRQ::Invoke(65);
 	log("trying open\n");
 	auto id = SysCallRegisterChrDev::Invoke((uint32_t)"keyboard",0,0,0);
 	log("open id: %d\n",id);

@@ -317,12 +317,13 @@ bool Thread::Kill(pid_t _Source,int _Signum)
 
 bool Thread::RestoreFromSignal()
 {
+	this->sigLock.Lock();
 	if(this->isSignalProcessing == false)
 	{
 		//根本就没有信号被处理!!
+		this->sigLock.Unlock();
 		return false;
 	}
-	this->sigLock.Lock();
 	this->isSignalProcessFinish = true;
 	this->sigLock.Unlock();
 	return true;

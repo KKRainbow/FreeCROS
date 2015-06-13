@@ -20,6 +20,7 @@ void idle()
 extern addr_t stack;
 void CPUx86::Run()
 {
+	Interrupt::Cli();
 	if(!allDone)return;
 	CPUState::TSSStruct tmptss;
 	Thread* newThread;
