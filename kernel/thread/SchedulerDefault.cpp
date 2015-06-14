@@ -66,12 +66,6 @@ Thread* SchedulerDefault::NextThread(CPU* _CPU)
 					this->ThreadRemoved(res);
 					return res;
 				}
-// 				else if(stateType == States::INTERRUPTABLE)
-// 				{
-// 					res->threadLock.Unlock();
-// 					ite++;
-// 					continue;
-// 				}
 				else
 				{
 					Assert(false);
