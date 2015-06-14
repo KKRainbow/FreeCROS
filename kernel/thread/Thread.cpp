@@ -11,7 +11,7 @@ Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threa
 	this->pid = pid;
 	if(_Type == ThreadType::KERNEL)
 	{
-		auto i = 10;
+		auto i = 1;
 		addressSpace = AddressSpaceManager::Instance()->GetKernelAddressSpace();
 		this->stackSize = i*PAGE_SIZE;
 		this->stackAddr = (addr_t)MemoryManager::Instance()->
@@ -138,7 +138,8 @@ bool Thread::PrepareToRun()
 		delete (char*)this->signalKernelStackAddr;
 		this->signalKernelStackAddr = 0;
 	}
-	if(this->sigmap.Size() != 0)
+	auto ssize = sigmap.Size();
+	if(ssize != 0)
 	{
 		bool flag = false;
 		sigaction sigac;

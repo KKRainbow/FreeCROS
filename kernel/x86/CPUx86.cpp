@@ -27,6 +27,7 @@ void CPUx86::Run()
 	
 	if(this->threadToUnlock != nullptr)
 	{
+		this->threadToUnlock->cpuRunningOn = -1;
 		this->threadToUnlock->threadLock.Unlock();
 		this->threadToUnlock = nullptr;
 	}
@@ -56,7 +57,7 @@ void CPUx86::Run()
 	}
 	//Preparing for switch the thread;
 	//Set the TSS
-	if(currThread != nullptr )
+	if(currThread != nullptr)
 	{
 		Segment::SetBase(gdt.previousTSS,
 				Segment::GetBase(gdt.currentTSS));	
@@ -89,17 +90,15 @@ void CPUx86::Run()
 	}
 
 	this->SaveFPU(currThread);
-
-	
-	struct{long a,b;}tmp;
-	tmp.a = 0;
-	tmp.b = 32;
 	
 	if(currThread && currThread != this->idleThread)
 	{
 		this->threadToUnlock = currThread;
 	}
-	//之所以以这种方式解锁,是为了尽量增大线程解锁与线程被选中指奸的间距
+	currThread->cpuRunningOn = this->id;
+	struct{long a,b;}tmp;
+	tmp.a = 0;
+	tmp.b = 32;
 	__asm__(
 		"xchg %1,%2\n\t"
 		"ljmp *%0\n\t"

@@ -2,6 +2,7 @@
 #include"Log.h"
 #include"stl/sidgen.h"
 #include"cpu/CPUManager.h"
+#include <thread/Thread.h>
 using namespace lr::sstl;
 
 struct IDTItem
@@ -67,10 +68,13 @@ extern "C" void CHandler(InterruptParams params)
 	{
 		Interrupt::Cli();
 		LOG("\nCrush!!! irqnum:%d\n eip:0x%x,esp:0x%x\n"
-		"errorcode: 0x%x\n",
+		"errorcode: 0x%x\n"
+		"PID: %d,CPU: %d",
 			params.irqnum,
 		    params.eip,params.userEsp,
-			params.errorCode
+			params.errorCode,
+			CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning()->GetPid(),
+			CPUManager::Instance()->GetCurrentCPUID()
 		);
 		for(;;);
 	}

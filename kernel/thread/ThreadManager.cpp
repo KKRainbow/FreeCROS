@@ -59,16 +59,17 @@ Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 	for(auto& pair : this->threads)
 	{
 		Thread* t = pair.second;
-		if(t->sigmap.Size() != 0)
+		if(t->threadLock.Try())
 		{
-			if(t->State()->Type() == States::INTERRUPTABLE)
+			if(t->sigmap.Size() != 0)
 			{
-				if(t->threadLock.Try())
+				if(t->State()->Type() == States::INTERRUPTABLE)
 				{
 					t->State()->ToReady(t);
-					t->threadLock.Unlock();
 				}
 			}
+			
+			t->threadLock.Unlock();
 		}
 		//mask交给Thread类自己去判断
 	}

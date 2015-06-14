@@ -72,6 +72,7 @@ public:
 	WaitableObj waitSelf;
 	WaitableObj waitIPCSend;
 	WaitableObj waitIPCReceive;
+	int cpuRunningOn = 0;
 	
 	pid_t GetPid();
 	uint32_t& CPUCounter();

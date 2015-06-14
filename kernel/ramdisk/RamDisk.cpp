@@ -101,7 +101,7 @@ RamDiskItem* RamDisk::RegisterCharaterDevice(AString _Name)
 		dev = this->GetItemByID(this->MakeDir("dev",this->root));
 		Assert(dev);
 	}
-	
+	LOG("DEV ADDR: 0x%x\n",dev);
 	dev->AddChild(ri);
 	return ri;
 }
