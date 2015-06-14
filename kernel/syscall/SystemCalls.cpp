@@ -258,7 +258,7 @@ SYSCALL_METHOD_CPP(Kill) //pid,signum
 SYSCALL_METHOD_CPP(SignalRestore)//no params
 {
 	auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
-	if(curr->RestoreFromSignal())
+	if(curr&&curr->RestoreFromSignal())
 	{
 		CPUManager::Instance()->GetCurrentCPU()->ExhaustCurrThread();
 		CPUManager::Instance()->GetCurrentCPU()->Run();

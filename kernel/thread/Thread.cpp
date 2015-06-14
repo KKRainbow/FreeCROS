@@ -135,7 +135,7 @@ bool Thread::PrepareToRun()
 		this->isSignalProcessFinish = false;
 		//删除信号内核栈
 		Assert(this->signalKernelStackAddr);
-		delete (char*)this->signalKernelStackAddr;
+// 		delete (char*)this->signalKernelStackAddr;
 		this->signalKernelStackAddr = 0;
 	}
 	auto ssize = sigmap.Size();
@@ -192,11 +192,14 @@ bool Thread::PrepareToRun()
 			this->cpuState.tss.eip = (addr_t)sigac.lib_sa_handler;
 			
 			//设置signal的内核栈
-			this->signalKernelStackAddr = (addr_t)
+			if(this->signalKernelStackAddr == 0)
+			{
+				this->signalKernelStackAddr = (addr_t)
 				MemoryManager::Instance()->KernelPageAllocate(
 					this->signalKernelStackSize >> PAGE_SHIFT
 				);
-			Assert(this->signalKernelStackSize);
+				Assert(this->signalKernelStackSize);
+			}
 			this->cpuState.tss.esp0 = this->signalKernelStackAddr;
 				
 			

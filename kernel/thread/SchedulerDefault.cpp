@@ -49,22 +49,35 @@ Thread* SchedulerDefault::NextThread(CPU* _CPU)
 	for(i = MAX_LIST_SIZE-1;i>= 0 ;i--)
 	{
 		ite = lists[i].Begin();
-		if(ite != lists[i].End()) //List of this priority is not empty.
+		while(ite != lists[i].End()) //List of this priority is not empty.
 		{
 			Thread* res = *ite;
 			
-			if(res->threadLock.Try() == false)break;
-			
-			Assert(res);
-			auto& state = res->State();
-			Assert(state.Obj());
-			auto stateType = state->Type();
-			Assert(stateType == States::READY || stateType == States::INTERRUPTABLE);
-			
-			//在这里就得把这个线程从准备列表中山除了,不然另一个CPU过来还有可能选择它;
-			lock.Unlock();
-			this->ThreadRemoved(res);
-			return res;
+			if(res->threadLock.Try())
+			{
+				Assert(res);
+				auto& state = res->State();
+				Assert(state.Obj());
+				auto stateType = state->Type();
+				
+				if(stateType == States::READY)
+				{
+					lock.Unlock();
+					this->ThreadRemoved(res);
+					return res;
+				}
+// 				else if(stateType == States::INTERRUPTABLE)
+// 				{
+// 					res->threadLock.Unlock();
+// 					ite++;
+// 					continue;
+// 				}
+				else
+				{
+					Assert(false);
+				}
+			}
+			ite++;
 		}
 	}
 	lock.Unlock();
