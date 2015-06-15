@@ -1,4 +1,5 @@
-add_subdirectory(keyboard)
+# add_subdirectory(keyboard)
+add_subdirectory(tty)
 
 FILE(GLOB_RECURSE SRCS ./*.cpp)
 ADD_EXECUTABLE(device ${SRCS})

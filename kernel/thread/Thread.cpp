@@ -264,7 +264,7 @@ bool Thread::ReceiveMessage(IPCMessage& _Msg)
 {
 	msgLock.Lock();
 	auto& list = msgMap[_Msg.GetSource()];
-	if(list.Size() > 1)
+	if(list.Size() > 10)
 		return false; //Max 10 messages
 	list.Push(_Msg);
 	msgLock.Unlock();

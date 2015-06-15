@@ -28,7 +28,7 @@ int main()
 	for(;;)
 	{
 		auto size = SysCallRead::Invoke(fid,(uint32_t)a,500,0);
-		log(a);
+// 		log(a);
 	}
 	return 1;
 }

@@ -19,8 +19,8 @@ public:
 	}
 	virtual	size_t Read(char* _Buffer,size_t _Size)
 	{
-		char a[] = "a";
-		a[0] = read_key().ascii;
+		char a[] = "ca";
+// 		a[0] = read_key().ascii;
 		memcpy(_Buffer,a,sizeof(a));
 		return sizeof(a);
 	}

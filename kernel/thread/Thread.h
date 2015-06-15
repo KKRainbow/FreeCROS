@@ -40,7 +40,7 @@ public:
 	lr::Ptr<AddressSpace>& GetAddressSpace();
 	lr::Ptr<ThreadState>& State();
 	void ClockNotify(uint64_t _Counter);
-	//进程的主要组成部件//////////////////////////////////////
+	CPUState& GetCPUState();
 	/*********************************************************************/
 	
 
@@ -72,13 +72,11 @@ public:
 	uint32_t& CPUCounter();
 	uint32_t& KernelCounter();
 	uint32_t& UserCounter();
-	CPUState& GetCPUState();
 	int& Priority();
 	ThreadType Type();
 	
 	void IncKernelCounter(uint32_t _Inc);
 	void IncUserCounter(uint32_t _Inc);
-	//进程体重要信息相关///////////////////////
 	/*********************************************************************/
 	
 
@@ -109,7 +107,6 @@ public:
 	void PushUserStack(T val,addr_t& stack_Addr);
 	template<class T>
 	T PopUserStack();
-	//信号有关///////////////////////////////////
 	/*********************************************************************/
 	
 
@@ -132,6 +129,23 @@ public:
 	(int _Pid,IPCMessage& _Msg);//Get the ipc msg of one spcific thread
 	bool ExtractMessage(IPCMessage& _Msg);
 	/*********************************************************************/
+	
+	
+	
+	
+	
+	
+	
+	/*********************************************************************/
+	//线程堆管理部分。
+	
+	/*********************************************************************/
+	
+	
+	
+	
+	
+	
 	
 	
 	

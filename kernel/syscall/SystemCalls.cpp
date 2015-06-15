@@ -92,6 +92,7 @@ SYSCALL_METHOD_CPP(ReceiveFrom)
 {
 	IPCMessage ipc;
 	Thread* curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	Assert(curr);
 	while(!curr->ExtractMessage(_First,ipc))
 	{
 		curr->waitIPCReceive.Wait();	
@@ -105,6 +106,7 @@ SYSCALL_METHOD_CPP(ReceiveAll)
 {
 	IPCMessage ipc;
 	Thread* curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	Assert(curr);
 	while(!curr->ExtractMessage(ipc))
 	{
 		curr->waitIPCReceive.Wait();	
