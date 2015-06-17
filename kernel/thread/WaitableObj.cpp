@@ -13,10 +13,14 @@ void WaitableObj::Wait()
 	wait = curr;
 	
 	curr->State()->ToPause(curr);
-	cpu->ExhaustCurrThread(); //当前进程的时间片归零	
-	
 	lock.Unlock();
+repeat:
+	cpu->ExhaustCurrThread(); //当前进程的时间片归零	
 	cpu->Run();
+	if(curr->State()->Type() == States::UNINTERRUPTABLE)
+	{
+		goto repeat;
+	}
 	lock.Lock();
 
 	wait = prev;
@@ -38,12 +42,17 @@ void WaitableObj::Sleep()
 	CPU* cpu = CPUManager::Instance()->GetCurrentCPU();
 	Thread* prev = wait;
 	Thread* curr = cpu->GetCurrThreadRunning();
-
 	wait = curr;
-	
 	curr->State()->ToIOBlocked(curr);
+	lock.Unlock();
+repeat:
 	cpu->ExhaustCurrThread(); //当前进程的时间片归零	
 	cpu->Run();
+	if(curr->State()->Type() == States::UNINTERRUPTABLE)
+	{
+		goto repeat;
+	}
+	lock.Lock();
 
 	wait = prev;
 	if(prev != nullptr)

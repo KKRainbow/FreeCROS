@@ -276,3 +276,15 @@ SYSCALL_METHOD_CPP(Alarm) //time
 	curr->Alarm(_First * 1e3);
 	return 0;
 }
+
+
+SYSCALL_METHOD_CPP(Pause) 
+{
+	WaitableObj wait;
+	wait.Wait();
+}
+SYSCALL_METHOD_CPP(Sleep) 
+{
+	WaitableObj wait;
+	wait.Sleep();
+}

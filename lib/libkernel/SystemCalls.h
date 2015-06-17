@@ -20,6 +20,11 @@ class SysCall##callname:public SysCall { \
 					,"c"(_Sec),"d"(_Third),"S"(_Fourth));\
 			return res;\
 		}\
+};\
+static inline int callname(uint32_t _First = 0,uint32_t _Sec = 0,\
+				uint32_t _Third = 0,uint32_t _Fourth = 0) \
+{\
+	return SysCall##callname::Invoke(_First,_Sec,_Third,_Fourth);\
 }
 
 #define SYSCALL_METHOD_CPP(callname) \
@@ -56,3 +61,6 @@ SYSCALL_METHOD_H(Kill,14); //pid,signum
 SYSCALL_METHOD_H(SignalRestore,15);//no params
 SYSCALL_METHOD_H(Alarm,16); //_Us
 
+
+SYSCALL_METHOD_H(Pause,17);
+SYSCALL_METHOD_H(Sleep,18);
