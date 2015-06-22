@@ -16,7 +16,6 @@
  */
 
 #include "MemoryListAllocator.h"
-#include"Log.h"
 
 MemoryListAllocator::MemoryListAllocator(addr_t _Start,size_t _Size,MemoryZoneType _Type)
 :start(_Start),size(_Size)
@@ -193,7 +192,6 @@ MemoryListAllocator::ListHead* MemoryListAllocator::GetHeadFromAddress(addr_t _A
 		}
 	}
 	//正常情况下绝对不会运行到这
-	LOG("Unknow addr deleted! : 0x%x",_Addr);
 	Assert(false);
 	return nullptr;
 }

@@ -18,9 +18,10 @@
 #pragma once
 
 #include"Global.h"
-#include"MemoryListAllocator.h"
 #include"stl/slinkedlist.h"
 #include"cpu/SpinLock.h"
+#include"memory/MemoryListAllocator.h"
+#include"memory/MemoryBuddyAllocator.h"
 
 class AddressSpace;
 class MemoryAllocator;

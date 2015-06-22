@@ -27,7 +27,6 @@ public:
 	//进程的主要组成部件//////////////////////////////////////
 private:
 	lr::sstl::List<Thread*> children;
-	Thread* father = nullptr;
 	
 	lr::Ptr<AddressSpace> addressSpace; 
 	CPUState cpuState;
@@ -54,6 +53,9 @@ public:
 	//进程体重要信息相关///////////////////////
 private:
 	pid_t pid;
+	pid_t pgrp,session,leader;
+	unsigned short uid,euid,suid;
+	unsigned short gid,egid,sgid;
 	int priority;
 	ThreadType threadType;
 	uint32_t alarmCounter = 0;
@@ -66,6 +68,8 @@ private:
 	
 	addr_t kernelStackAddr = 0;
 	size_t kernelStackSize = 4 << PAGE_SHIFT;
+	
+	Thread* father = nullptr;
 public:
 	int cpuRunningOn = 0;
 	pid_t GetPid();

@@ -17,8 +17,6 @@
 
 #include"MemoryManager.h"
 #include"Multiboot.h"
-#include"MemoryBuddyAllocator.h"
-#include"MemoryListAllocator.h"
 
 SINGLETON_CPP(MemoryManager)
 {
