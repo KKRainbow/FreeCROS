@@ -93,13 +93,15 @@ bool MemoryManager::ArrangeMemoryLayout()
 			,this->kernelInitAllocator
 			,MemoryZoneType::KERNEL_ARBITRARY_ALLOC
 		);
-	this->userObjectAllocator = new
-		(this->kernelInitAllocator->Allocate(sizeof(MemoryListAllocator)))
-		MemoryListAllocator(objStart,objEnd - objStart
-			,MemoryZoneType::KERNEL_ARBITRARY_ALLOC
+		
+	this->userPageAllocator = new
+	(this->kernelInitAllocator->Allocate(sizeof(MemoryBuddyAllocator)))
+		MemoryBuddyAllocator(objStart,objEnd-objStart,PAGE_SIZE
+			,this->kernelInitAllocator
+			,MemoryZoneType::KERNEL_PAGE_ALLOC
 		);
 	
-	if(!this->kernelPageAllocator || !this->userObjectAllocator)
+	if(!this->kernelPageAllocator || !this->userPageAllocator)
 	{
 		return false;
 	}
@@ -109,7 +111,7 @@ bool MemoryManager::ArrangeMemoryLayout()
 		return false;
 	}
 	
-	if(!this->userObjectAllocator->Initialize())
+	if(!this->userPageAllocator->Initialize())
 	{
 		return false;
 	}
@@ -154,7 +156,7 @@ MemoryAllocator* MemoryManager::GetProperAlloc(addr_t _Addr,size_t _Size)
 	{
 		this->kernelInitAllocator,
 		this->kernelPageAllocator,
-		this->userObjectAllocator
+		this->userPageAllocator
 	};
 	for(auto alloc : allocs)
 	{
@@ -208,6 +210,15 @@ void* MemoryManager::KernelObjectAllocate(size_t _Size)
 	Assert(res);
 	return res;
 }
+void* MemoryManager::UserObjectAllocate(size_t _Count)
+{
+	auto alloc = this->userPageAllocator;
+	alloc->lock.Lock();
+	auto res =  alloc->Allocate(_Count * PAGE_SIZE,PAGE_SIZE);
+	alloc->lock.Unlock();
+	return res;
+}
+
 
 bool MemoryManager::AutoDeallocate(void* _Ptr)
 {

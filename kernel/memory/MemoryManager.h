@@ -45,7 +45,7 @@ private:
 protected:
 	MemoryAllocator* kernelInitAllocator = nullptr;
 	MemoryAllocator* kernelPageAllocator = nullptr;
-	MemoryAllocator* userObjectAllocator = nullptr;
+	MemoryAllocator* userPageAllocator = nullptr;
 	bool InitInitAllocator();
 	bool ArrangeMemoryLayout();
 	bool MoveModulesToSafe();
@@ -55,9 +55,10 @@ public:
 	MemoryManager(bool _BootInit);
 	//new运算符每次执行都会调用这个函数来获取合适的Allocator
 	void* KernelObjectAllocate(size_t _Size);
+	void* KernelPageAllocate(size_t _Count);
+	void* UserObjectAllocate(size_t _Count);
 	//delete的
 	bool AutoDeallocate(void* _Ptr);
-	void* KernelPageAllocate(size_t _Size);
 	uint32_t MemSize(){return this->memSize;}
 	Module* GetModules(){return this->modules;}
 };
