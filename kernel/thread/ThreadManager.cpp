@@ -28,6 +28,10 @@ Thread* ThreadManager::CreateChildThread(Thread* _Parent)
 
 	Thread* thread = new Thread(*_Parent,pidGen.GetID());
 	this->threads.Insert(MakePair(thread->GetPid(),thread));
+	
+	//确保线程产生的线程也属于父线程所属的进程
+	auto belongTo = _Parent->belongTo;
+	thread->belongTo = belongTo ? belongTo : _Parent;
 
 	lock.Unlock();
 	return thread;

@@ -61,6 +61,10 @@ public:
 	bool AutoDeallocate(void* _Ptr);
 	uint32_t MemSize(){return this->memSize;}
 	Module* GetModules(){return this->modules;}
+	
+	MemoryAllocator* GetKernelInitAllocator(){return this->kernelInitAllocator;}
+	MemoryAllocator* GetKernelPageAllocator(){return this->kernelPageAllocator;}
+	MemoryAllocator* GetUserPageAllocator(){return this->userPageAllocator;}
 };
 
 extern MemoryManager globalMemoryManager;

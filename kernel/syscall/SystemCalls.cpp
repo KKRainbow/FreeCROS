@@ -31,6 +31,8 @@ static void TransferDateFromOtherThread(void* _DBuffer,Thread* _SThread,
 SYSCALL_METHOD_CPP(CreateThread)
 {
 	Thread* curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	//判断当前Thread是线程还是进程,如果是线程，那么新的线程的父线程理所当然是进程。
+	if(curr->belongTo)curr = curr->belongTo;
 	Thread* newThread = ThreadManager::Instance()->CreateChildThread(curr);
 	if(newThread->State()->Type() == ZOMBIE)
 	{
@@ -282,9 +284,11 @@ SYSCALL_METHOD_CPP(Pause)
 {
 	WaitableObj wait;
 	wait.Wait();
+	return 0;
 }
 SYSCALL_METHOD_CPP(Sleep) 
 {
 	WaitableObj wait;
 	wait.Sleep();
+	return 0;
 }

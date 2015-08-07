@@ -71,6 +71,7 @@ private:
 	
 	Thread* father = nullptr;
 public:
+	Thread* belongTo = nullptr; //该线程所属的进程，如果是进程，那么这个就是空的。
 	int cpuRunningOn = 0;
 	pid_t GetPid();
 	uint32_t& CPUCounter();
@@ -142,7 +143,14 @@ public:
 	
 	/*********************************************************************/
 	//线程堆管理部分。
-	
+public:
+	//页框管理所用的结构体
+	struct PageFrame
+	{
+		
+	};
+private:
+// 	lr::sstl::Map<uint32_t,
 	/*********************************************************************/
 	
 	
