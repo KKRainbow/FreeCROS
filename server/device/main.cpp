@@ -9,13 +9,15 @@ int main()
 	Message msg;
 	int i = 0;
 	char a[500];
-	
+	void* test = new char[500];
+	log("new: %x \n,",test);
+
 	int pid = SysCallCreateThread::Invoke((uint32_t)keyboard,0,0,0);
 	log("pid: %d\n",pid);
 	
 	int *tmp =(int*) 0x20000000;
 	*tmp = 5;
-	
+
 	log("start open\n");
 	auto fid = -1;
 	while(1)

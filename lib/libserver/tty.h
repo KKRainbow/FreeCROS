@@ -6,8 +6,7 @@
  * offsets into 'tty_queue'
  */
 
-#ifndef _TTY_H
-#define _TTY_H
+#pragma once
 
 #define MAX_CONSOLES	8
 #define NR_SERIALS	2
@@ -95,5 +94,3 @@ void spty_write(struct tty_struct * tty);
 void copy_to_cooked(struct tty_struct * tty);
 
 void update_screen(void);
-
-#endif

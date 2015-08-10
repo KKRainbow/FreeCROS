@@ -14,6 +14,7 @@ extern unsigned long kernelObjInitZoneStart;
 extern unsigned long kernelObjInitZoneEnd;
 
 #include"Log.h"
+#ifdef __DEBUG
 //Die
 static void AssertFunc(bool cond)
 {
@@ -30,3 +31,9 @@ static void AssertFunc(bool cond)
 	LOG("\n");}		\
 	AssertFunc(cond);\
 }while(0)
+
+#else
+
+#define Assert(cond) do{if(cond)do{}while(0);}while(0)
+
+#endif
