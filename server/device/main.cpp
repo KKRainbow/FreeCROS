@@ -23,6 +23,7 @@ int main()
 	while(1)
 	{
 		fid = SysCallOpen::Invoke((uint32_t)"/dev/keyboard",0,0,0);
+		log("Get fid : %d\n", fid);
 		if(fid >= 0)break;
 	}
 	log("Get dev_t : %d\n",fid);

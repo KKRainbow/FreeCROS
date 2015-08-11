@@ -32,7 +32,6 @@ SYSCALL_METHOD_CPP(CreateThread)
 {
 	Thread* curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
 	//判断当前Thread是线程还是进程,如果是线程，那么新的线程的父线程理所当然是进程。
-	if(curr->belongTo)curr = curr->belongTo;
 	Thread* newThread = ThreadManager::Instance()->CreateChildThread(curr);
 	if(newThread->State()->Type() == ZOMBIE)
 	{
@@ -72,10 +71,22 @@ SYSCALL_METHOD_CPP(SendMessageTo)
 {
 	Message msg;
 	ReadDataFromCurrThread(&msg,(void*)_First,sizeof(Message));
-	msg.source = CPUManager::Instance()->GetCurrentCPU()
-		->GetCurrThreadRunning()->GetPid();
-	msg.timeStamp = CPUManager::Instance()->GetClockCounter();
 
+	auto curr = CPUManager::Instance()->GetCurrentCPU()
+		->GetCurrThreadRunning();
+	if(_Sec & SEND_MESSAGE_FLAG_PROXY_PROCESS) {
+		auto t = curr->belongTo ? curr->belongTo : curr;
+		msg.source = t->GetPid();
+	}
+	else if (_Sec & SEND_MESSAGE_FLAG_PROXY_FATHER){
+		auto t = curr->father ? curr->father : curr;
+		msg.source = t->GetPid();
+	}
+	else
+	{
+		msg.source = curr->GetPid();
+	}
+	msg.timeStamp = CPUManager::Instance()->GetClockCounter();
 	Thread* des = ThreadManager::Instance()->GetThreadByPID(msg.destination);
 	if(des == nullptr)return -1;
 
@@ -97,7 +108,7 @@ SYSCALL_METHOD_CPP(ReceiveFrom)
 	Assert(curr);
 	while(!curr->ExtractMessage(_First,ipc))
 	{
-		curr->waitIPCReceive.Wait();	
+		curr->waitIPCReceive.Wait();
 	}
 	curr->waitIPCSend.Wake();
 	WriteDataToCurrThread((void*)_Sec,&ipc.msg,sizeof(ipc.msg));	
@@ -185,7 +196,7 @@ SYSCALL_METHOD_CPP(Open)//path
 	devname[500] = 0;
 	auto ri = rd->GetItemByPath(devname);
 	if(ri == nullptr)return -1;
-	
+
 	auto res = ri->Open();
 	//如果错误了就不用进行下面的步骤
 	if(res < 0)return res;
@@ -291,4 +302,26 @@ SYSCALL_METHOD_CPP(Sleep)
 	WaitableObj wait;
 	wait.Sleep();
 	return 0;
+}
+
+SYSCALL_METHOD_CPP(WakeUp)
+{
+	auto t = ThreadManager::Instance()->GetThreadByPID(_First);
+	if(!t)return -1;
+	if(t->State()->Type() == INTERRUPTABLE)
+	{
+		t->State()->ToReady(t);
+	}
+	return 0;
+}
+
+SYSCALL_METHOD_CPP(Exit)
+{
+ 	//这里应该回收所有线程占用的资源
+	auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	//先这么简单的实现，先实验tty的功能,便于写调试命令,
+	//TODO 如果结束的是进程，那么还需要删掉所有的线程。
+	ThreadManager::Instance()->RemoveThread(curr->GetPid());
+	CPUManager::Instance()->GetCurrentCPU()->ExhaustCurrThread();
+	CPUManager::Instance()->GetCurrentCPU()->Run();
 }

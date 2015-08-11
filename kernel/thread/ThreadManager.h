@@ -17,6 +17,7 @@ class ThreadManager
 	private:
 		lr::sstl::IDGenerator<int> pidGen;
 		lr::sstl::Map<int,Thread*> threads;
+		lr::sstl::List<Thread*> zombieThreads;
 		Scheduler* sched;
 		SpinLock lock;
 	public:

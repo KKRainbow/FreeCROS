@@ -34,6 +34,7 @@ private:
 	lr::Ptr<ThreadState> state;
 	static const int MAX_THREAD = 1024;
 	lr::Ptr<uint8_t> childBitMap; //It serves to allocate stack space
+	int mapSlot = -1;
 public:
 	SpinLock threadLock;
 	lr::Ptr<AddressSpace>& GetAddressSpace();
@@ -69,8 +70,8 @@ private:
 	addr_t kernelStackAddr = 0;
 	size_t kernelStackSize = 4 << PAGE_SHIFT;
 	
-	Thread* father = nullptr;
 public:
+	Thread* father = nullptr;
 	Thread* belongTo = nullptr; //该线程所属的进程，如果是进程，那么这个就是空的。
 	int cpuRunningOn = 0;
 	pid_t GetPid();

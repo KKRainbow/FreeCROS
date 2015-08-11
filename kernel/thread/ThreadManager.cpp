@@ -49,10 +49,10 @@ void ThreadManager::RemoveThread(int _Pid)
 	}
 
 	Thread* thread = ite->second;
-	threads.Erase(ite);
 	sched->ThreadRemoved(thread);
 
-	delete thread;
+    thread->State()->ToZombie(thread);
+    this->zombieThreads.PushBack(thread);
 
 	lock.Unlock();
 }
@@ -60,7 +60,6 @@ Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 {
 	lock.Lock();
 	//扫描线程列表,检查信号
-	/*
 	for(auto& pair : this->threads)
 	{
 		Thread* t = pair.second;
@@ -78,7 +77,23 @@ Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
 		}
 		//mask交给Thread类自己去判断
 	}
-	*/
+    //删除所有僵尸进程
+    for(auto ite = this->zombieThreads.Begin();ite!=this->zombieThreads.End();ite++)
+    {
+        Thread* zombie = *ite;
+        if(zombie->threadLock.Try())
+        {
+            //开始删除
+            auto parent = zombie->father;
+            if(zombie->mapSlot != -1)
+            {
+                zombie->childBitMap.Obj()[zombie->mapSlot] = 0;
+            }
+            this->threads.Erase(this->threads.Find(zombie->GetPid()));
+            this->zombieThreads.Erase(ite);
+            ite = this->zombieThreads.Begin();
+        }
+    }
 	Thread* res  = sched->NextThread(_CPU);
 	lock.Unlock();
 	return res;

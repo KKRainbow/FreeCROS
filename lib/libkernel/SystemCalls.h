@@ -46,6 +46,9 @@ SYSCALL_METHOD_H(Log,0);
 SYSCALL_METHOD_H(CreateThread,1);  //Entry
 SYSCALL_METHOD_H(WriteToPhisicalAddr,2);//Dest Src Size
 SYSCALL_METHOD_H(ReadFromPhisicalAddr,3);//Dest Src Size
+
+#define SEND_MESSAGE_FLAG_PROXY_PROCESS 1
+#define SEND_MESSAGE_FLAG_PROXY_FATHER 2
 SYSCALL_METHOD_H(SendMessageTo,4); //Message*
 SYSCALL_METHOD_H(ReceiveFrom,5); //Source,Message*
 SYSCALL_METHOD_H(ReceiveAll,6); //Message*
@@ -64,3 +67,5 @@ SYSCALL_METHOD_H(Alarm,16); //_Us
 
 SYSCALL_METHOD_H(Pause,17);
 SYSCALL_METHOD_H(Sleep,18);
+SYSCALL_METHOD_H(WakeUp,19);
+SYSCALL_METHOD_H(Exit,20);

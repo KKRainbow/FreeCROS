@@ -22,8 +22,11 @@ SINGLETON_CPP(SystemCallEntry)
 	ADD_SYSTEM_CALL(Kill);
 	ADD_SYSTEM_CALL(SignalRestore);
 	ADD_SYSTEM_CALL(Alarm);
+	ADD_SYSTEM_CALL(Pause);
+	ADD_SYSTEM_CALL(Sleep);
+	ADD_SYSTEM_CALL(Exit);
 	Interrupt::Instance()->RegisterIRQ(Call,SYSCALL_IRQ_NUM);	
-	Interrupt::Instance()->SetDPLOfIRQ(SYSCALL_IRQ_NUM,1);
+	Interrupt::Instance()->SetDPLOfIRQ(SYSCALL_IRQ_NUM,3);
 }
 int SystemCallEntry::Call(InterruptParams& params)
 {

@@ -63,6 +63,7 @@ Thread::Thread(Thread& _Thread,int _Pid):cpuState(_Thread.threadType),
 		{
 			stackAddr = stackAddr - (stackSize*PAGE_SIZE*(i+1));
 			tmp[i] = 1;
+			this->mapSlot = i;
 			cpuState.tss.regs.ebp = 
 				cpuState.tss.regs.esp =
 				cpuState.tss.esp1 =
