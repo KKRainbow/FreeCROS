@@ -211,6 +211,7 @@ void copy_to_cooked(struct tty_struct * tty)
 		if (c==10 || (EOF_CHAR(tty) != _POSIX_VDISABLE &&
 			      c==EOF_CHAR(tty)))
 			tty->secondary->data++;
+        PUTCH(c,tty->secondary);
 		if (L_ECHO(tty)) {
 			if (c==10) {
 				PUTCH(10,tty->write_q);
@@ -224,7 +225,6 @@ void copy_to_cooked(struct tty_struct * tty)
 				PUTCH(c,tty->write_q);
 			tty->write(tty);
 		}
-		PUTCH(c,tty->secondary);
 	}
 	tty->secondary->wait.Wake();
 }
@@ -320,12 +320,13 @@ int tty_read(unsigned channel, char * buf, int nr)
 			     c==EOF_CHAR(tty)) && L_CANON(tty))
 				break;
 			else {
-                AddressSpaceManager::
-                Instance()->
-                        CopyDataFromAnotherSpace(*current->GetAddressSpace() ,
-                                                 b++,
-                                                 *AddressSpaceManager::Instance()->GetKernelAddressSpace(),
-                                                 &c,1);
+                *b++ = c;
+//                AddressSpaceManager::
+//                Instance()->
+//                        CopyDataFromAnotherSpace(*current->GetAddressSpace() ,
+//                                                 b++,
+//                                                 *AddressSpaceManager::Instance()->GetKernelAddressSpace(),
+//                                                 &c,1);
 				if (!--nr)
 					break;
 			}
