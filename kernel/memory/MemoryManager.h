@@ -19,7 +19,7 @@
 
 #include"Global.h"
 #include"stl/slinkedlist.h"
-#include"cpu/SpinLock.h"
+#include"SpinLock.h"
 #include"memory/MemoryListAllocator.h"
 #include"memory/MemoryBuddyAllocator.h"
 

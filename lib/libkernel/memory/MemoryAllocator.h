@@ -18,7 +18,7 @@
 #include"Global.h"
 #include"stdlib.h"
 #ifndef __SERVER
-#include"cpu/SpinLock.h"
+#include"SpinLock.h"
 #endif
 enum MemoryZoneType
 {

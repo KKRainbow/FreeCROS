@@ -3,7 +3,7 @@
 #include"ThreadManager.h"
 #include"cpu/CPUManager.h"
 #include"stl/slinkedlist.h"
-#include"cpu/SpinLock.h"
+#include"SpinLock.h"
 
 
 class SchedulerDefault:public Scheduler

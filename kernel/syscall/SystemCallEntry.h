@@ -2,7 +2,7 @@
 #include"Global.h"
 #include"Interrupt.h"
 #include"stl/smap.h"
-#include"cpu/SpinLock.h"
+#include"SpinLock.h"
 #include"SystemCalls.h"
 
 class SystemCallEntry

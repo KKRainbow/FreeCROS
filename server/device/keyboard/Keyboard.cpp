@@ -21,7 +21,10 @@ public:
 	{
 		char a[] = "c";
 
-		while ( (a[0] = read_key().ascii) == 0);
+		while ( (a[0] = read_key().ascii) == 0)
+		{
+			SysCallGiveUp::Invoke();
+		}
 		memcpy(_Buffer,a,sizeof(a));
 		return sizeof(a);
 	}

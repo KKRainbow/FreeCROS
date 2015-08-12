@@ -24,7 +24,7 @@ static void DevOpen()
 	ret.destination = msg.source;
 	ret.content[0] = (uint32_t)globalDevOp->Open(msg.source);
 	SysCallSendMessageTo::Invoke((uint32_t)&ret, SEND_MESSAGE_FLAG_PROXY_FATHER);
-//	log("exit!!!!~~~\n");
+	log("open~~~~!!!!~~~\n");
 	SysCallExit::Invoke();
 }
 

@@ -81,7 +81,11 @@ Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
     for(auto ite = this->zombieThreads.Begin();ite!=this->zombieThreads.End();ite++)
     {
         Thread* zombie = *ite;
-        if(zombie->threadLock.Try())
+		if(!zombie)
+		{
+			this->zombieThreads.Erase(ite);
+		}
+        else if(zombie->threadLock.Try())
         {
             //开始删除
             auto parent = zombie->father;
@@ -93,6 +97,10 @@ Thread* ThreadManager::GetNextThreadToExecute(CPU* _CPU)
             this->zombieThreads.Erase(ite);
             ite = this->zombieThreads.Begin();
         }
+		else
+		{
+			continue;
+		}
     }
 	Thread* res  = sched->NextThread(_CPU);
 	lock.Unlock();

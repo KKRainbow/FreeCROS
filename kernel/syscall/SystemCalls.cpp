@@ -325,3 +325,9 @@ SYSCALL_METHOD_CPP(Exit)
 	CPUManager::Instance()->GetCurrentCPU()->ExhaustCurrThread();
 	CPUManager::Instance()->GetCurrentCPU()->Run();
 }
+
+SYSCALL_METHOD_CPP(GiveUp)
+{
+	CPUManager::Instance()->GetCurrentCPU()->ExhaustCurrThread();
+	CPUManager::Instance()->GetCurrentCPU()->Run();
+}
