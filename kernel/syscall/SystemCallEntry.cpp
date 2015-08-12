@@ -18,6 +18,7 @@ SINGLETON_CPP(SystemCallEntry)
 	ADD_SYSTEM_CALL(RegisterChrDev);
 	ADD_SYSTEM_CALL(Open);
 	ADD_SYSTEM_CALL(Read);
+	ADD_SYSTEM_CALL(Write);
 	ADD_SYSTEM_CALL(Signal);
 	ADD_SYSTEM_CALL(Kill);
 	ADD_SYSTEM_CALL(SignalRestore);

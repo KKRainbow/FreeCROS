@@ -21,6 +21,7 @@
 #include"stl/smap.h"
 #include"stl/sstring.h"
 #include"stl/stuple.h"
+class RamDiskItemKernel;
 class RamDisk
 {
 	SINGLETON_H(RamDisk)
@@ -40,4 +41,5 @@ public:
 	RamDiskItem* RegisterCharaterDevice(lr::sstl::AString _Name);
 	IDType MakeDir(lr::sstl::AString _Path,RamDiskItem* _Parent = nullptr,bool _Recursive = false);
 	IDType CreateFile(lr::sstl::AString _Name,RamDiskItem* _Parent = nullptr);
+	IDType CreateKernelDev(RamDiskItemKernel* _Item);
 };

@@ -369,7 +369,7 @@ int tty_write(unsigned channel, char * buf, int nr)
                     CopyDataFromAnotherSpace(*AddressSpaceManager::Instance()->GetKernelAddressSpace(),
                                              &c,
                                              *current->GetAddressSpace() ,
-                                             b++,
+                                             b,
                                              1);
 			if (O_POST(tty)) {
 				if (c=='\r' && O_CRNL(tty))

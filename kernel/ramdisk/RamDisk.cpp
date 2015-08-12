@@ -16,11 +16,13 @@
  */
 
 #include"RamDisk.h"
+
 #include"Global.h"
 #include"stl/svector.h"
 #include"RamDiskItemChrDev.h"
 #include"RamDiskItemDir.h"
 #include"RamDiskItemFile.h"
+#include"RamDiskItemKernel.h"
 #include <cpu/CPUManager.h>
 using namespace lr::sstl;
 
@@ -191,4 +193,18 @@ IDType RamDisk::CreateFile(lr::sstl::AString _Name,RamDiskItem* _Parent)
 	auto id = _Parent->AddChild(newItem);
 	if(id < 0)delete newItem;
 	return id;
+}
+
+IDType RamDisk::CreateKernelDev(RamDiskItemKernel *_Item) {
+	Assert(_Item);
+	RamDiskItem* dev  = this->GetItemByPath("/dev");
+	if(dev == nullptr)
+	{
+		dev = this->GetItemByID(this->MakeDir("dev",this->root));
+		Assert(dev);
+	}
+	LOG("DEV ADDR: 0x%x\n",dev);
+	_Item->id = this->idgen.GetID();
+	this->itemsMap.Insert(MakePair(_Item->id,_Item));
+	return dev->AddChild(_Item);
 }

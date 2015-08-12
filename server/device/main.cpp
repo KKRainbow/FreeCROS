@@ -22,7 +22,7 @@ int main()
 	auto fid = -1;
 	while(1)
 	{
-		fid = SysCallOpen::Invoke((uint32_t)"/dev/keyboard",0,0,0);
+		fid = SysCallOpen::Invoke((uint32_t)"/dev/tty",0,0,0);
 		if(fid >= 0)break;
 	}
 	log("Get dev_t : %d\n",fid);
@@ -30,7 +30,8 @@ int main()
 	for(;;)
 	{
 		auto size = SysCallRead::Invoke(fid,(uint32_t)a,500,0);
-		log(a);
+		SysCallWrite::Invoke(fid,(uint32_t)a,strlen(a));
+		memset(a,0,500);
 	}
 	return 1;
 }

@@ -24,16 +24,14 @@
 
 RamDiskItemChrDev::RamDiskItemChrDev
 (Thread* _Thread,int32_t _Id,Type _Type,lr::sstl::AString _Name)
-:RamDiskItem(_Id,_Type,_Name)
+:RamDiskItem(_Thread,_Id,_Type,_Name)
 {
-	Assert(_Thread);
-	this->pid = _Thread->GetPid();
 }
 
 Thread* RamDiskItemChrDev::BuildMsg(Message& _Msg)
 {
 	auto currThread = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
-	auto devThread = ThreadManager::Instance()->GetThreadByPID(this->pid);
+	auto devThread = this->thread;
 	Assert(currThread);
 	if(!devThread)return nullptr;
 	

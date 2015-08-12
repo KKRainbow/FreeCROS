@@ -209,20 +209,34 @@ SYSCALL_METHOD_CPP(Open)//path
 			if(msg.content[0])return ri->GetID();	
 			else return -1;
 		default:
-			break;
+			return ri->GetID();
 	}
 	return -1;
 }
 
-SYSCALL_METHOD_CPP(Read)//path
+static const int SYSCALL_READ = 0;
+static const int SYSCALL_WRITE = 1;
+static int ReadWrite(int _Id,char* _Buffer,size_t _Size,int _ReadWrite)
 {
 	auto rd = RamDisk::Instance();
 	Message msg;
-	
-	auto ri = rd->GetItemByID(_First);
+
+	auto ri = rd->GetItemByID(_Id);
 	if(ri == nullptr)return -1;
-	
-	auto res = ri->Read((int8_t*)_Sec,_Third);
+
+	int res;
+	if(_ReadWrite == SYSCALL_READ)
+	{
+		res = ri->Read(_Buffer,_Size);
+	}
+	else if(_ReadWrite == SYSCALL_WRITE)
+	{
+		res = ri->Write(_Buffer,_Size);
+	}
+	else
+	{
+		Assert(false);
+	}
 	//如果错误了就不用进行下面的步骤
 	if(res < 0)return res;
 	//判断打开的设备类型
@@ -235,15 +249,27 @@ SYSCALL_METHOD_CPP(Read)//path
 			SysCallReceiveFrom::Invoke((uint32_t)res,(uint32_t)&msg,0,0);
 			//参数: data,size;
 			if(msg.content[0] == 0)return -1;
-			TransferDateFromOtherThread((void*)_Sec,devThread,
-				(void*)msg.content[0],msg.content[1]
-			);
+			if(_ReadWrite == SYSCALL_READ)
+			{
+				TransferDateFromOtherThread((void*)_Buffer,devThread,
+											(void*)msg.content[0],msg.content[1]
+				);
+			}
 // 			LOG("CORE: %d\n",CPUManager::Instance()->GetCurrentCPUID());
 			return msg.content[1];
 		default:
-			break;
+			return res;
 	}
 	return -1;
+}
+SYSCALL_METHOD_CPP(Read)//path
+{
+	return ReadWrite(_First,(char*)_Sec,(size_t)_Third,SYSCALL_READ);
+}
+
+SYSCALL_METHOD_CPP(Write)//path
+{
+	return ReadWrite(_First,(char*)_Sec,(size_t)_Third,SYSCALL_WRITE);
 }
 
 

@@ -17,7 +17,6 @@
 
 
 #include"RamDiskItem.h"
-#include"Threads.h"
 
 class Thread;
 class RamDiskItemChrDev :public  RamDiskItem

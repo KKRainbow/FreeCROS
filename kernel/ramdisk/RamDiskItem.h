@@ -20,8 +20,10 @@
 #include"stl/smap.h"
 #include"stl/stuple.h"
 #include"stl/sstring.h"
+#include"Threads.h"
 
 typedef int32_t IDType;
+class Thread;
 class RamDiskItem
 {
 public:
@@ -30,7 +32,9 @@ public:
 		FILE,
 		DIR,
 		BLOCK,
-		CHAR
+		CHAR,
+		KERNELCHAR,
+		KERNELBLOCK
 	};
 private:
 	typedef lr::sstl::Map<lr::sstl::AString,RamDiskItem*> ItemList;
@@ -40,8 +44,11 @@ private:
 	ItemList children;
 	lr::sstl::AString name;
 	IDType AddChild(RamDiskItem* _Child);
+
+protected:
+	Thread* thread;
 public:
-	RamDiskItem(int32_t _Id,Type _Type,lr::sstl::AString _Name);
+	RamDiskItem(Thread* _Thread,int32_t _Id,Type _Type,lr::sstl::AString _Name);
 	Type GetType();
 	lr::sstl::Pair<ItemList::iterator,ItemList::iterator> GetChildrenIter();
 	RamDiskItem* GetParent();

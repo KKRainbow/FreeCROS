@@ -18,7 +18,7 @@
 #include"RamDiskItemFile.h"
 
 RamDiskItemFile::RamDiskItemFile(int32_t _Id,Type _Type,lr::sstl::AString _Name)
-:RamDiskItem(_Id,_Type,_Name)
+:RamDiskItem(nullptr,_Id,_Type,_Name)
 {
 
 }

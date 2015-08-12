@@ -22,8 +22,8 @@ RamDiskItem::Type RamDiskItem::GetType()
 	return this->type;
 }
 
-RamDiskItem::RamDiskItem(int32_t _Id,Type _Type,AString _Name)
-:id(_Id),type(_Type),name(_Name)
+RamDiskItem::RamDiskItem(Thread* _Thread, int32_t _Id,Type _Type,AString _Name)
+:id(_Id),type(_Type),name(_Name),thread(_Thread)
 {
 	
 }

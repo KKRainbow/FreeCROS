@@ -1,5 +1,5 @@
 #aux_source_directory(./ SRCS)
-set(SRCS Console.cpp TtyIo.cpp Pty.cpp Keyboard.cpp)
+set(SRCS Console.cpp TtyIo.cpp Pty.cpp Keyboard.cpp Tty.cpp)
 
 SET(ASM_SRC Keyboard.S)
 SET(SRCS ${SRCS} ${ASM_SRC})
