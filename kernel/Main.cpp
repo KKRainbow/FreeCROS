@@ -6,7 +6,7 @@
 #include "thread/ThreadManager.h"
 #include"ramdisk/RamDisk.h"
 #include"misc/ServerLoader.h"
-#include"./tty/Tty.h"
+#include"drivers/Drivers.h"
 
 static const int timeToWatiOtherCPU = 8e5;
 //全局变量声明
@@ -56,7 +56,7 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 
 	CPUManager::Instance()->KernelWait(timeToWatiOtherCPU);
 	//初始胡tty
-	InitTty();
+	InitDrivers();
 	LOG("Start service!!!\n",1);
 	m->GetCurrentCPU()->StartService();
 	for(;;);
