@@ -224,6 +224,7 @@ void copy_to_cooked(struct tty_struct * tty)
 			} else
 				PUTCH(c,tty->write_q);
 			tty->write(tty);
+            tty->write_q->wait.Wake();
 		}
 	}
 	tty->secondary->wait.Wake();
@@ -365,13 +366,7 @@ int tty_write(unsigned channel, char * buf, int nr)
 		if (current->hasSignal())
 			break;
 		while (nr>0 && !FULL(tty->write_q)) {
-            AddressSpaceManager::
-            Instance()->
-                    CopyDataFromAnotherSpace(*AddressSpaceManager::Instance()->GetKernelAddressSpace(),
-                                             &c,
-                                             *current->GetAddressSpace() ,
-                                             b,
-                                             1);
+            c = *b;
 			if (O_POST(tty)) {
 				if (c=='\r' && O_CRNL(tty))
 					c='\n';
