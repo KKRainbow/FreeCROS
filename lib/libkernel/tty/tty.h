@@ -14,7 +14,8 @@
 
 extern int NR_CONSOLES;
 
-#include <termios.h>
+#include <tty/termios.h>
+#include <thread/WaitableObj.h>
 
 #define TTY_BUF_SIZE 1024
 
@@ -22,8 +23,8 @@ struct tty_queue {
 	unsigned long data;
 	unsigned long head;
 	unsigned long tail;
-	struct task_struct * proc_list;
 	char buf[TTY_BUF_SIZE];
+	WaitableObj wait;
 };
 
 #define IS_A_CONSOLE(min)	(((min) & 0xC0) == 0x00)

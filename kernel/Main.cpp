@@ -6,6 +6,7 @@
 #include "thread/ThreadManager.h"
 #include"ramdisk/RamDisk.h"
 #include"misc/ServerLoader.h"
+#include"tty/tty.h"
 
 static const int timeToWatiOtherCPU = 8e5;
 //全局变量声明
@@ -51,6 +52,9 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	
 	const size_t stackSize = 4*PAGE_SIZE;
 	m->InitAP((addr_t)apmain,stackSize);
+
+	//初始胡tty
+	tty_init();
 	
 	CPUManager::Instance()->KernelWait(timeToWatiOtherCPU);
 	LOG("Start service!!!\n",1);

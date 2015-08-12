@@ -1,7 +1,7 @@
 #ifndef _TERMIOS_H
 #define _TERMIOS_H
 
-#include <sys/types.h>
+#include "Global.h"
 
 #define TTY_BUF_SIZE 1024
 

@@ -23,10 +23,6 @@
 #define W_OK	2
 #define R_OK	4
 
-/* lseek */
-#define SEEK_SET	0
-#define SEEK_CUR	1
-#define SEEK_END	2
 
 /* _SC stands for System Configuration. We don't use them much */
 #define _SC_ARG_MAX		1

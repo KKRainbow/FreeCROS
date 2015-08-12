@@ -58,6 +58,8 @@ private:
 	unsigned short uid,euid,suid;
 	unsigned short gid,egid,sgid;
 	int priority;
+private:
+	int tty;
 	ThreadType threadType;
 	uint32_t alarmCounter = 0;
 	uint32_t kernelCounter = 0;
@@ -83,6 +85,55 @@ public:
 	
 	void IncKernelCounter(uint32_t _Inc);
 	void IncUserCounter(uint32_t _Inc);
+	pid_t GetPgrp() const {
+		return pgrp;
+	}
+
+	pid_t GetSession() const {
+		return session;
+	}
+
+	pid_t GetLeader() const {
+		return leader;
+	}
+
+	unsigned short GetUid() const {
+		return uid;
+	}
+
+	unsigned short GetEuid() const {
+		return euid;
+	}
+
+	unsigned short GetSuid() const {
+		return suid;
+	}
+
+	unsigned short GetGid() const {
+		return gid;
+	}
+
+	unsigned short GetEgid() const {
+		return egid;
+	}
+
+	unsigned short GetSgid() const {
+		return sgid;
+	}
+
+	int GetPriority() const {
+		return priority;
+	}
+
+	int GetTty() const {
+		return tty;
+	}
+
+	void SetTty(int tty) {
+		Thread::tty = tty;
+	}
+
+
 	/*********************************************************************/
 	
 
@@ -103,7 +154,10 @@ private:
 	bool isSignalProcessFinish = false;
 	bool isSignalProcessing = false;
 public:
+	bool hasSignal();
 	void Alarm(uint32_t _Us);
+	void ResetAlarm();
+	uint32_t GetAlarm();
 	addr_t AddSignalHandler(int _Signum,addr_t _Handler,int _Flag);
 	bool Kill(pid_t _Source,int _Signum);
 	bool RestoreFromSignal();

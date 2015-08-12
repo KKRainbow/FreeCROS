@@ -17,7 +17,7 @@
 
 #ifndef __LIBC_ERRNO_H
 #define __LIBC_ERRNO_H
-#define C
+#define C "C"
 
 #ifndef __HOST__
 
@@ -289,5 +289,7 @@ extern C const char *error_map[];
  * @}
  */
 
+#define ERESTARTSYS 512
+#define ERESTARTNOINTR 513
 #endif /* __HOST__ */
 #endif /* __LIBC_ERRNO_H */

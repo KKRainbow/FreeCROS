@@ -5,6 +5,7 @@
 #include"IPCMessage.h"
 #include <cpu/CPUManager.h>
 #include"Threads.h"
+#include"thread/Signal.h"
 //Create Thread::a thread with a independent address space=
 Thread::Thread(pid_t pid,ThreadType _Type,Thread* _Father):cpuState(_Type),threadType(_Type)
 {
@@ -288,7 +289,7 @@ void Thread::ClockNotify(uint64_t _Counter)
 		if(this->alarmCounter < _Counter)
 		{
 			//信号版本的实现
-			this->Kill(0,SIGALARM);
+			this->Kill(0,SIGALRM);
 // 			Message msg;
 // 			msg.timeStamp = _Counter;
 // 			msg.source = -1;
@@ -336,5 +337,18 @@ bool Thread::RestoreFromSignal()
 
 void Thread::Alarm(uint32_t _Us)
 {
-	this->alarmCounter = CPUManager::Instance()->GetClockCounter() + _Us;
+	this->alarmCounter = (uint32_t)CPUManager::Instance()->GetClockCounter() + _Us;
+}
+
+bool Thread::hasSignal() {
+	//TODO 判断信号是否被阻塞
+	return !this->sigmap.Empty();
+}
+
+void Thread::ResetAlarm() {
+	this->alarmCounter = 0;
+}
+
+uint32_t Thread::GetAlarm() {
+	return this->alarmCounter;
 }

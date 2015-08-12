@@ -1,5 +1,4 @@
-#ifndef _CTYPE_H
-#define _CTYPE_H
+#pragma once
 
 #define _U	0x01	/* upper */
 #define _L	0x02	/* lower */
@@ -31,7 +30,6 @@ extern char _ctmp;
 #define tolower(c) (_ctmp=c,isupper(_ctmp)?_ctmp-('A'-'a'):_ctmp)
 #define toupper(c) (_ctmp=c,islower(_ctmp)?_ctmp-('a'-'A'):_ctmp)
 
-#endif
 /*
 unsigned char _ctype[] = {
 _C,_C,_C,_C,_C,_C,_C,_C,                       
@@ -58,4 +56,4 @@ _U,_U,_U,_U,_U,_U,_U,_U,_U,_U,_U,_U,_U,_U,_U,_U,
 _U,_U,_U,_U,_U,_U,_U,_P,_U,_U,_U,_U,_U,_U,_U,_L,      
 _L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,      
 _L,_L,_L,_L,_L,_L,_L,_P,_L,_L,_L,_L,_L,_L,_L,_L};  
-*/   
+*/

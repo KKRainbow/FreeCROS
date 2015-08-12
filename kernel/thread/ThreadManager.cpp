@@ -160,3 +160,11 @@ void ThreadManager::ClockNotify(uint64_t _Counter)
 		}
 	}
 }
+
+bool ThreadManager::IsOrphaned(pid_t _Pgrp) {
+	return false;
+}
+
+void ThreadManager::KillProcessGroup(pid_t _Pgrp, int _Sig, int _Priv) {
+	return;
+}

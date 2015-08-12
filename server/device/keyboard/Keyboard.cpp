@@ -46,6 +46,7 @@ void KeyboardIntHandler(int num,void*,void*)
 }
 void keyboard()
 {
+	SysCallExit::Invoke();
 	Signal(SIGINT ,(sighandler_t)KeyboardIntHandler,0);
 // 	SysCallAlarm::Invoke(1e3);
 	SysCallRegisterIRQ::Invoke(65);
