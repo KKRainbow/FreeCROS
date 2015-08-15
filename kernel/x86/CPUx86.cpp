@@ -14,7 +14,9 @@ void idle()
 	WaitableObj wait;
 	for(;;)
 	{
-		wait.Wait();
+		Interrupt::Sti();
+		CPUManager::Instance()->GetCurrentCPU()->ExhaustCurrThread();
+		CPUManager::Instance()->GetCurrentCPU()->Run();
 	}
 }
 extern addr_t stack;

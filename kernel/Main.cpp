@@ -48,8 +48,7 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	//也就是我们可以开始写TTY的驱动程序了哈哈哈
 	//加载Server!
 	RamDisk::Instance();
-	
-	
+
 	const size_t stackSize = 4*PAGE_SIZE;
 	m->InitAP((addr_t)apmain,stackSize);
 

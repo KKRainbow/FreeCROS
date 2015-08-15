@@ -30,4 +30,6 @@ typedef int off_t;
 typedef unsigned long tcflag_t;
 typedef unsigned char cc_t;
 typedef unsigned int speed_t;
+
+typedef int dev_t;
 #endif

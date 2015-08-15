@@ -3,7 +3,7 @@
 //
 
 #include"Global.h"
-#include"tty/tty.h"
+#include"driver/tty/tty.h"
 
 extern "C" void WakeUpQueue(struct tty_queue* q)
 {

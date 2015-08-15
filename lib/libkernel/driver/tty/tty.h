@@ -14,7 +14,7 @@
 
 extern int NR_CONSOLES;
 
-#include <tty/termios.h>
+#include "termios.h"
 #include <thread/WaitableObj.h>
 
 #define TTY_BUF_SIZE 1024

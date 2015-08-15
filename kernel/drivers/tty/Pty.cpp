@@ -21,9 +21,9 @@
 
 #define ALRMMASK (1<<(SIGALRM-1))
 
-#include "tty/tty.h"
-#include "tty/termios.h"
-#include "tty/ttymacro.h"
+#include "driver/tty/tty.h"
+#include "driver/tty/termios.h"
+#include "driver/tty/ttymacro.h"
 
 static inline void pty_copy(struct tty_struct * from, struct tty_struct * to)
 {

@@ -20,9 +20,8 @@
 
 #define ALRMMASK (1<<(SIGALRM-1))
 
-#include "tty/tty.h"
-#include "tty/termios.h"
-#include "tty/ttymacro.h"
+#include "driver/tty/tty.h"
+#include "driver/tty/ttymacro.h"
 
 #define _L_FLAG(tty,f)	((tty)->termios.c_lflag & f)
 #define _I_FLAG(tty,f)	((tty)->termios.c_iflag & f)

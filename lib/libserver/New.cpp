@@ -2,6 +2,7 @@
 // Created by ssj on 15-8-9.
 //
 
+#include"Server.h"
 #include "./New.h"
 #include "../libkernel/memory/MemoryListAllocator.h"
 #include "../libkernel/memory/MemoryListAllocator.cpp"

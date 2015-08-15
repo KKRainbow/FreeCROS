@@ -39,9 +39,9 @@
 
 #define ALRMMASK (1<<(SIGALRM-1))
 
-#include "tty/tty.h"
-#include "tty/termios.h"
-#include "tty/ttymacro.h"
+#include "driver/tty/tty.h"
+#include "driver/tty/termios.h"
+#include "driver/tty/ttymacro.h"
 
 
 #define DEF_TERMIOS \

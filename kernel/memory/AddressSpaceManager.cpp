@@ -40,6 +40,7 @@ void AddressSpaceManager::InitKernelAddressSpace()
 	{
 		this->kernelSpace->MapVirtAddrToPhysAddr(a,a);
 	}
+	this->kernelSpace->UnmapVirtAddr(0);
 }
 
 AddressSpace* AddressSpaceManager::GetKernelAddressSpace()
@@ -57,6 +58,7 @@ AddressSpace* AddressSpaceManager::CreateAddressSpace()
 		space->MapVirtAddrToPhysAddr(i,i,0);//0为位内核模式
 	}
 	spaces.Insert(MakePair(space->GetPageDirAddr(),space));
+	space->UnmapVirtAddr(0);
 	return space;
 }
 AddressSpace* AddressSpaceManager::GetAddressSpaceByPageDirAddr(addr_t _DirAddr)
@@ -109,6 +111,9 @@ int AddressSpaceManager::PageFaultHandler(InterruptParams& _Params)
 	__asm__("movl %%cr3,%%eax\n\t":"=a"(cr3):);
 	AddressSpace* kas = AddressSpaceManager::Instance()->GetKernelAddressSpace();
 	AddressSpace* space = AddressSpaceManager::Instance()->GetAddressSpaceByPageDirAddr(cr3);
+
+	Assert(address >= PAGE_SIZE);
+
 	if(kas == space) //Kernel Space
 	{
 		kas->MapVirtAddrToPhysAddr(address,address,0,1);

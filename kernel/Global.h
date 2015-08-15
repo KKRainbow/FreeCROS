@@ -12,6 +12,9 @@ extern unsigned long bss;
 extern unsigned long kernelEnd;
 extern unsigned long kernelObjInitZoneStart;
 extern unsigned long kernelObjInitZoneEnd;
+#ifndef __SERVER
+#define __DEBUG
+#endif
 
 #include"Log.h"
 #ifdef __DEBUG

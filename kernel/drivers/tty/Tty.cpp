@@ -5,7 +5,7 @@
 #include <ramdisk/RamDisk.h>
 #include "Tty.h"
 #include"Global.h"
-#include"tty/tty.h"
+#include"driver/tty/tty.h"
 #include"ramdisk/RamDiskItemKernel.h"
 
 int TtyOpen(RamDiskItemKernel* _Item)
