@@ -352,3 +352,34 @@ void Thread::ResetAlarm() {
 uint32_t Thread::GetAlarm() {
 	return this->alarmCounter;
 }
+
+int Thread::GetNewFileSlot() {
+	int id = fidGen.GetID();
+	auto pair = this->fileTable.Insert(lr::sstl::MakePair(id, File()));
+	if (!pair.second)
+	{
+		LOG("Get file slot error!!!!\n");
+		return -1;
+	}
+	else
+	{
+		return id;
+	}
+}
+
+File* Thread::GetFileStruct(int _Fid) {
+	auto iter = this->fileTable.Find(_Fid);
+	if (iter == fileTable.End())
+	{
+		return nullptr;
+	}
+	else
+	{
+		File* file = &(iter->second);
+		return file->f_redirct_ptr == nullptr ? file : file->f_redirct_ptr;
+	}
+}
+
+void Thread::RemoveFileStruct(int _Fid) {
+	fileTable.Erase(_Fid);
+}

@@ -227,11 +227,11 @@ static int ReadWrite(int _Id,char* _Buffer,size_t _Size,int _ReadWrite)
 	int res;
 	if(_ReadWrite == SYSCALL_READ)
 	{
-		res = ri->Read(_Buffer,_Size);
+		res = ri->Read(nullptr, _Buffer, _Size);
 	}
 	else if(_ReadWrite == SYSCALL_WRITE)
 	{
-		res = ri->Write(_Buffer,_Size);
+		res = ri->Write(_Buffer, _Size, nullptr);
 	}
 	else
 	{

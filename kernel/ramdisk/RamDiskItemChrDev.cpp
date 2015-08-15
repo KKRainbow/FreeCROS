@@ -63,7 +63,7 @@ pid_t RamDiskItemChrDev::Open()
 		return -1;
 	}
 }
-pid_t RamDiskItemChrDev::Read(int8_t* _Buffer,size_t _Size)
+pid_t RamDiskItemChrDev::Read(File *_Fptr, int8_t *_Buffer, size_t _Size)
 {
 	Message msg;
 	auto devThread = this->BuildMsg(msg);
@@ -85,7 +85,7 @@ pid_t RamDiskItemChrDev::Read(int8_t* _Buffer,size_t _Size)
 		return -1;
 	}
 }
-pid_t RamDiskItemChrDev::Write(int8_t* _Buffer,size_t _Size)
+pid_t RamDiskItemChrDev::Write(int8_t *_Buffer, size_t _Size, File *_Fptr)
 {
 	Message msg;
 	auto devThread = this->BuildMsg(msg);
@@ -107,7 +107,7 @@ pid_t RamDiskItemChrDev::Write(int8_t* _Buffer,size_t _Size)
 		return -1;
 	}
 }
-pid_t RamDiskItemChrDev::Seek(off_t _Offset,int _Whence)
+pid_t RamDiskItemChrDev::Seek(File *_Fptr, off_t _Offset, int _Whence)
 {
 	Message msg;
 	auto devThread = this->BuildMsg(msg);

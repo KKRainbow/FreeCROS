@@ -13,12 +13,12 @@ int TtyOpen(RamDiskItemKernel* _Item)
     return 1;
 }
 
-int TtyRead(RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
+int TtyRead(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
 {
     return tty_read((unsigned int)_Item->GetDevnum(), _Buffer, _Size);
 }
 
-int TtyWrite(RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
+int TtyWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
 {
   return tty_write((unsigned int)_Item->GetDevnum(), _Buffer, _Size);
 }

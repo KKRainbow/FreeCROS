@@ -23,17 +23,17 @@ RamDiskItemFile::RamDiskItemFile(int32_t _Id,Type _Type,lr::sstl::AString _Name)
 
 }
 
-pid_t RamDiskItemFile::Seek(off_t _Offset, int _Whence)
+pid_t RamDiskItemFile::Seek(File *_Fptr, off_t _Offset, int _Whence)
 {
 	return 0;
 }
 
-pid_t RamDiskItemFile::Write(int8_t* _Buffer, size_t _Size)
+pid_t RamDiskItemFile::Write(int8_t *_Buffer, size_t _Size, File *_Fptr)
 {
 	return 0;
 }
 
-pid_t RamDiskItemFile::Read(int8_t* _Buffer, size_t _Size)
+pid_t RamDiskItemFile::Read(File *_Fptr, int8_t *_Buffer, size_t _Size)
 {
 	return 0;
 }

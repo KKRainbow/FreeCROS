@@ -8,9 +8,9 @@
 
 class RamDiskItemKernel;
 typedef int (*OpenFunc_t)(RamDiskItemKernel*);
-typedef int (*WriteFunc_t)(RamDiskItemKernel*,int8_t*, size_t );
-typedef int (*ReadFunc_t)(RamDiskItemKernel*,int8_t*, size_t );
-typedef int (*SeekFunc_t)(RamDiskItemKernel*,off_t , int);
+typedef int (*WriteFunc_t)(File* _Fptr, RamDiskItemKernel*,int8_t*, size_t );
+typedef int (*ReadFunc_t)(File* _Fptr, RamDiskItemKernel*,int8_t*, size_t );
+typedef int (*SeekFunc_t)(File* _Fptr, RamDiskItemKernel*,off_t , int);
 class RamDiskItemKernel : public RamDiskItem{
 private:
     OpenFunc_t kopen;
@@ -28,9 +28,9 @@ public:
     RamDiskItemKernel(int32_t _Id,Type _Type,lr::sstl::AString _Name,int _Devnum,
                        OpenFunc_t,ReadFunc_t,WriteFunc_t,SeekFunc_t);
     virtual int Open();
-    virtual int Read(int8_t *_Buffer, size_t _Size);
-    virtual int Write(int8_t *_Buffer, size_t _Size);
-    virtual int Seek(off_t _Offset, int _Whence);
+    virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size);
+    virtual pid_t Write(int8_t *_Buffer, size_t _Size, File *_Fptr);
+    virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence);
 };
 
 

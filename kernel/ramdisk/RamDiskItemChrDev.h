@@ -27,8 +27,8 @@ private:
 public:
 	RamDiskItemChrDev(Thread* _Thread,int32_t _Id,Type _Type,lr::sstl::AString _Name);
 	virtual pid_t Open()override;
-	virtual pid_t Read(int8_t* _Buffer,size_t _Size)override;
-	virtual pid_t Write(int8_t* _Buffer,size_t _Size)override;
-	virtual pid_t Seek(off_t _Offset,int _Whence)override;
+	virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size) override;
+	virtual pid_t Write(int8_t *_Buffer, size_t _Size, File *_Fptr) override;
+	virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence) override;
 };
 

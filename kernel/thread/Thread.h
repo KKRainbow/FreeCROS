@@ -35,12 +35,18 @@ private:
 	static const int MAX_THREAD = 1024;
 	lr::Ptr<uint8_t> childBitMap; //It serves to allocate stack space
 	int mapSlot = -1;
+
+	lr::sstl::Map<int, File> fileTable;
+	lr::sstl::IDGenerator<int> fidGen;
 public:
 	SpinLock threadLock;
 	lr::Ptr<AddressSpace>& GetAddressSpace();
 	lr::Ptr<ThreadState>& State();
 	void ClockNotify(uint64_t _Counter);
 	CPUState& GetCPUState();
+	int GetNewFileSlot();
+	File* GetFileStruct(int _Fid);
+	void RemoveFileStruct(int _Fid);
 	/*********************************************************************/
 	
 
