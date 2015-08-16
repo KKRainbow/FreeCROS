@@ -17,7 +17,6 @@
 
 #ifndef __LIBC_ERRNO_H
 #define __LIBC_ERRNO_H
-#define C "C"
 
 #ifndef __HOST__
 
@@ -29,12 +28,12 @@
 /**
  * The lvalue errno is used by many functions to return error values.
  */
-extern C int errno;
+extern "C" int errno;
 
 /**
  * Contains a array of character strings, representing errno values.
  */
-extern C const char *error_map[];
+extern "C" const char *error_map[];
 
 /** Reports a success operation. */
 #define ESUCCESS        0

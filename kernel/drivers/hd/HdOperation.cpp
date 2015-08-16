@@ -45,7 +45,7 @@ static int recalibrate = 0;
 static int reset = 0;
 
 static void (*DEVICE_INTR)(void) = nullptr;
-static Request* request;
+Request* request;
 static int DEVICE_TIMEOUT = 0;
 void do_hd_request(Request* _ = nullptr);
 
@@ -116,6 +116,8 @@ int init_hd_info(char * BIOS)
 
 		RamDiskItemKernel* dev = new RamDiskItemKernel(0,RamDiskItem::Type::KERNELBLOCK,
 													   name[i],i + 5,HdOpen,HdRead,HdWrite,nullptr);
+		dev->SetSize(hd[5*i].nr_sects * 512);
+		RamDisk::Instance()->CreateKernelDev(dev);
 		hd[i+5].dev_id = i + 5;
 		hd[i+5].dev_item = dev;
 	}
@@ -134,7 +136,7 @@ int init_hd_info(char * BIOS)
 	}
 
 	for (drive=0 ; drive<NR_HD ; drive++) {
-		if (!(bh = HdBlockRead(0, request, hd[i+5].dev_id))){
+		if (!(bh = HdBlockRead(0, request, hd[drive+5].dev_item->GetID()))){
 			LOG("Unable to read partition table of drive %d\n\r",
 				drive);
 			panic("");
@@ -152,6 +154,8 @@ int init_hd_info(char * BIOS)
 														   RamDiskItem::Type::KERNELBLOCK,
 														   name[drive] + ('0' + i),
 														   i + 5 * drive,HdOpen,HdRead,HdWrite,nullptr);
+			dev->SetSize(hd[i+5*drive].nr_sects * 512);
+			RamDisk::Instance()->CreateKernelDev(dev);
 		}
 		BufferManager::Instance()->BufferRelease(bh);
 	}
@@ -334,7 +338,8 @@ void do_hd_request(Request* _Req)
 	unsigned int nsect;
 
 	INIT_REQUEST;
-	dev = (unsigned int)CURRENT->dev;
+	RamDiskItemKernel* item = (RamDiskItemKernel*)RamDisk::Instance()->GetItemByID(CURRENT->dev);
+	dev = (unsigned int)(item ? item->GetDevnum() : 5*NR_HD + 10);
 	block = CURRENT->sector;
 	if (dev >= 5*NR_HD || block+2 > hd[dev].nr_sects) {
 		request->EndRequest(0);

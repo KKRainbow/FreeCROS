@@ -27,7 +27,8 @@ static void AssertFunc(bool cond)
 	}
 }
 #define Assert(cond) do {			\
-	if(!(cond)){	\
+    if(!(cond)){	\
+    LOG(#cond);\
 	LOG(__FILE__);		\
 	LOG(":");		\
 	LOG("%d",__LINE__);		\

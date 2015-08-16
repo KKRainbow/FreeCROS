@@ -1,3 +1,4 @@
+#include <errno.h>
 #include"SystemCalls.h"
 #include"memory/AddressSpaceManager.h"
 #include"cpu/CPUManager.h"
@@ -5,29 +6,6 @@
 #include"Log.h"
 #include"ramdisk/RamDisk.h"
 
-static void ReadDataFromCurrThread(void* dest,void* src,size_t size)
-{
-	AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
-			*AddressSpaceManager::Instance()->GetKernelAddressSpace(),dest,
-			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),src
-			,size);
-}
-
-static void WriteDataToCurrThread(void* dest,void* src,size_t size)
-{
-	AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
-			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),dest,
-			*AddressSpaceManager::Instance()->GetKernelAddressSpace(),src,
-			size);
-}
-static void TransferDateFromOtherThread(void* _DBuffer,Thread* _SThread,
-						void* _SBuffer,size_t size)
-{
-	AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
-			*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),_DBuffer,
-			*_SThread->GetAddressSpace(),_SBuffer,
-			size);
-}
 SYSCALL_METHOD_CPP(CreateThread)
 {
 	Thread* curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
@@ -48,13 +26,13 @@ SYSCALL_METHOD_CPP(CreateThread)
 
 SYSCALL_METHOD_CPP(WriteToPhisicalAddr)
 {
-	ReadDataFromCurrThread((void*)_First,(void*)_Sec,_Third);
+    ThreadManager::ReadDataFromCurrThread((void*)_First,(void*)_Sec,_Third);
 	return 1;
 }
 
 SYSCALL_METHOD_CPP(ReadFromPhisicalAddr)
 {
-	WriteDataToCurrThread((void*)_First,(void*)_Sec,_Third);
+    ThreadManager::WriteDataToCurrThread((void*)_First,(void*)_Sec,_Third);
 	return 1;
 }
 
@@ -62,7 +40,7 @@ SYSCALL_METHOD_CPP(Log)
 {
 	char str[500];
 	if(_Sec>=500)return -1;
-	ReadDataFromCurrThread(str,(void*)_First,_Sec);
+    ThreadManager::ReadDataFromCurrThread(str,(void*)_First,_Sec);
 	LOG(str,1);	
 	return 1;
 }
@@ -70,7 +48,7 @@ SYSCALL_METHOD_CPP(Log)
 SYSCALL_METHOD_CPP(SendMessageTo)
 {
 	Message msg;
-	ReadDataFromCurrThread(&msg,(void*)_First,sizeof(Message));
+    ThreadManager::ReadDataFromCurrThread(&msg,(void*)_First,sizeof(Message));
 
 	auto curr = CPUManager::Instance()->GetCurrentCPU()
 		->GetCurrThreadRunning();
@@ -111,7 +89,7 @@ SYSCALL_METHOD_CPP(ReceiveFrom)
 		curr->waitIPCReceive.Wait();
 	}
 	curr->waitIPCSend.Wake();
-	WriteDataToCurrThread((void*)_Sec,&ipc.msg,sizeof(ipc.msg));	
+    ThreadManager::WriteDataToCurrThread((void*)_Sec,&ipc.msg,sizeof(ipc.msg));
 	return 1;
 }
 
@@ -125,7 +103,7 @@ SYSCALL_METHOD_CPP(ReceiveAll)
 		curr->waitIPCReceive.Wait();	
 	}
 	curr->waitIPCSend.Wake();
-	WriteDataToCurrThread((void*)_First,&ipc.msg,sizeof(ipc.msg));	
+    ThreadManager::WriteDataToCurrThread((void*)_First,&ipc.msg,sizeof(ipc.msg));
 	return 1;
 }
 
@@ -180,7 +158,7 @@ SYSCALL_METHOD_CPP(RegisterChrDev) //devname
 	Assert(rd);
 	
 	char devname[500];
-	ReadDataFromCurrThread(devname,(void*)_First,sizeof(devname) - 1);
+    ThreadManager::ReadDataFromCurrThread(devname,(void*)_First,sizeof(devname) - 1);
 	devname[500] = 0;
 	auto ri = rd->RegisterCharaterDevice(devname);
 	return ri->GetID();
@@ -192,7 +170,7 @@ SYSCALL_METHOD_CPP(Open)//path
 	Message msg;
 	char devname[500];
 	
-	ReadDataFromCurrThread(devname,(void*)_First,sizeof(devname) - 1);
+    ThreadManager::ReadDataFromCurrThread(devname,(void*)_First,sizeof(devname) - 1);
 	devname[500] = 0;
 	auto ri = rd->GetItemByPath(devname);
 	if(ri == nullptr)return -1;
@@ -200,67 +178,78 @@ SYSCALL_METHOD_CPP(Open)//path
 	auto res = ri->Open();
 	//如果错误了就不用进行下面的步骤
 	if(res < 0)return res;
-	//判断打开的设备类型
-	switch(ri->GetType())
-	{
-		case RamDiskItem::Type::CHAR:
-			//获取的是设备进程的pid,要想获取最终结果还需ReceiMsg一下
-			SysCallReceiveFrom::Invoke((uint32_t)res,(uint32_t)&msg,0,0);
-			if(msg.content[0])return ri->GetID();	
-			else return -1;
-		default:
-			return ri->GetID();
-	}
-	return -1;
+
+    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+	auto fid = curr->GetNewFileSlot();
+    if(fid < 0)return fid;
+    File* file = curr->GetFileStruct(fid);
+    Assert(file != nullptr);
+
+    file->f_item = ri;
+    return fid;
 }
 
 static const int SYSCALL_READ = 0;
 static const int SYSCALL_WRITE = 1;
+static const int SYSCALL_SEEK = 2;
 static int ReadWrite(int _Id,char* _Buffer,size_t _Size,int _ReadWrite)
 {
-	auto rd = RamDisk::Instance();
-	Message msg;
+    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
 
-	auto ri = rd->GetItemByID(_Id);
-	if(ri == nullptr)return -1;
+    File* file = curr->GetFileStruct(_Id);
+    if(!file)return -1;
+	auto ri = file->f_item;
+	if(ri == nullptr)
+    {
+        LOG("File struct without ramdisk item\n");
+        return -1;
+    }
 
 	int res;
 	if(_ReadWrite == SYSCALL_READ)
 	{
-		res = ri->Read(nullptr, _Buffer, _Size);
+		res = ri->Read(file, _Buffer, _Size);
 	}
 	else if(_ReadWrite == SYSCALL_WRITE)
 	{
-		res = ri->Write(_Buffer, _Size, nullptr);
+		res = ri->Write(file, _Buffer, _Size);
 	}
+    else if (_ReadWrite == SYSCALL_SEEK)
+    {
+        off_t offset = (off_t)_Buffer;
+        int whence = _Size;
+//        if (fd >= NR_OPEN || !(file=current->filp[fd]) || !(file->f_inode)
+//            || !IS_SEEKABLE(MAJOR(file->f_inode->i_dev)))
+//            return -EBADF;
+//        if (file->f_inode->i_pipe)
+//            return -ESPIPE;
+        switch (whence) {
+            case SEEK_SET:
+                if (offset<0) return -EINVAL;
+                file->f_pos=offset;
+                break;
+            case SEEK_CUR:
+                if (file->f_pos+offset<0) return -EINVAL;
+                file->f_pos += offset;
+                break;
+            case SEEK_END:
+                int tmp;
+                if ((tmp=file->f_item->GetSize()+offset) < 0)
+                    return -EINVAL;
+                file->f_pos = tmp;
+                break;
+            default:
+                return -EINVAL;
+        }
+        ri->Seek(file, offset, whence);
+        return file->f_pos;
+    }
 	else
 	{
 		Assert(false);
 	}
 	//如果错误了就不用进行下面的步骤
-	if(res < 0)return res;
-	//判断打开的设备类型
-	auto devThread = ThreadManager::Instance()->GetThreadByPID(res);
-	if(!devThread)return -1;
-	switch(ri->GetType())
-	{
-		case RamDiskItem::Type::CHAR:
-			//获取的是设备进程的pid,要想获取最终结果还需ReceiMsg一下
-			SysCallReceiveFrom::Invoke((uint32_t)res,(uint32_t)&msg,0,0);
-			//参数: data,size;
-			if(msg.content[0] == 0)return -1;
-			if(_ReadWrite == SYSCALL_READ)
-			{
-				TransferDateFromOtherThread((void*)_Buffer,devThread,
-											(void*)msg.content[0],msg.content[1]
-				);
-			}
-// 			LOG("CORE: %d\n",CPUManager::Instance()->GetCurrentCPUID());
-			return msg.content[1];
-		default:
-			return res;
-	}
-	return -1;
+    return res;
 }
 SYSCALL_METHOD_CPP(Read)//path
 {
@@ -272,6 +261,10 @@ SYSCALL_METHOD_CPP(Write)//path
 	return ReadWrite(_First,(char*)_Sec,(size_t)_Third,SYSCALL_WRITE);
 }
 
+SYSCALL_METHOD_CPP(Seek)
+{
+    return ReadWrite(_First,(char*)_Sec,(size_t)_Third,SYSCALL_SEEK);
+}
 
 
 

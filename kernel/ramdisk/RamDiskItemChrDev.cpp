@@ -56,7 +56,10 @@ pid_t RamDiskItemChrDev::Open()
 	if(devThread->ReceiveMessage(ipc))
 	{
 		devThread->waitIPCReceive.Wake();
-		return devThread->GetPid();
+		auto pid = devThread->GetPid();
+		//获取的是设备进程的pid,要想获取最终结果还需ReceiMsg一下
+		SysCallReceiveFrom::Invoke((uint32_t)pid,(uint32_t)&msg,0,0);
+		return this->GetID();
 	}
 	else
 	{
@@ -78,14 +81,21 @@ pid_t RamDiskItemChrDev::Read(File *_Fptr, int8_t *_Buffer, size_t _Size)
 	if(devThread->ReceiveMessage(ipc))
 	{
 		devThread->waitIPCReceive.Wake();
-		return devThread->GetPid();
+		auto pid = devThread->GetPid();
+		SysCallReceiveFrom::Invoke((uint32_t)pid,(uint32_t)&msg,0,0);
+		//参数: data,size;
+		if(msg.content[0] == 0)return -1;
+		ThreadManager::TransferDateFromOtherThread((void*)_Buffer,devThread,
+												   (void*)msg.content[0],msg.content[1]
+		);
+		return msg.content[1];
 	}
 	else
 	{
 		return -1;
 	}
 }
-pid_t RamDiskItemChrDev::Write(int8_t *_Buffer, size_t _Size, File *_Fptr)
+pid_t RamDiskItemChrDev::Write(File *_Fptr, int8_t *_Buffer, size_t _Size)
 {
 	Message msg;
 	auto devThread = this->BuildMsg(msg);

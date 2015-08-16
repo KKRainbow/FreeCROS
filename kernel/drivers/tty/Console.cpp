@@ -90,7 +90,7 @@ static void init_def_termios(termios& t)
 #define HZ 60
 int NR_CONSOLES = 0;
 
-extern C void keyboard_interrupt(void);
+extern "C" void keyboard_interrupt(void);
 
 static unsigned char	video_type;		/* Type of display being used	*/
 unsigned long	video_num_columns;	/* Number of text columns	*/

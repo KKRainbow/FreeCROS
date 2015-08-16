@@ -31,5 +31,28 @@ public:
 	void ClockNotify(uint64_t _Counter);
 	bool IsOrphaned(pid_t _Pgrp);
 	void KillProcessGroup(pid_t _Pgrp,int _Sig,int _Priv);
+	static void ReadDataFromCurrThread(void* dest,void* src,size_t size)
+	{
+		AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
+				*AddressSpaceManager::Instance()->GetKernelAddressSpace(),dest,
+				*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),src
+				,size);
+	}
+
+	static void WriteDataToCurrThread(void* dest,void* src,size_t size)
+	{
+		AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
+				*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),dest,
+				*AddressSpaceManager::Instance()->GetKernelAddressSpace(),src,
+				size);
+	}
+	static void TransferDateFromOtherThread(void* _DBuffer,Thread* _SThread,
+											void* _SBuffer,size_t size)
+	{
+		AddressSpaceManager::Instance()->CopyDataFromAnotherSpace(
+				*AddressSpaceManager::Instance()->GetCurrentAddressSpace(),_DBuffer,
+				*_SThread->GetAddressSpace(),_SBuffer,
+				size);
+	}
 };
 

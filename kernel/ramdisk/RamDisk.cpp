@@ -203,7 +203,6 @@ IDType RamDisk::CreateKernelDev(RamDiskItemKernel *_Item) {
 		dev = this->GetItemByID(this->MakeDir("dev",this->root));
 		Assert(dev);
 	}
-	LOG("DEV ADDR: 0x%x\n",dev);
 	_Item->id = this->idgen.GetID();
 	this->itemsMap.Insert(MakePair(_Item->id,_Item));
 	return dev->AddChild(_Item);

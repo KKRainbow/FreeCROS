@@ -24,7 +24,7 @@ public:
                        OpenFunc_t,ReadFunc_t,WriteFunc_t,SeekFunc_t);
     virtual int Open();
     virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size);
-    virtual pid_t Write(int8_t *_Buffer, size_t _Size, File *_Fptr);
+    virtual pid_t Write(File *_Fptr, int8_t *_Buffer, size_t _Size);
     virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence);
     int getBlockSize() const
     {
@@ -38,7 +38,6 @@ public:
     {
         return devnum;
     }
-
 };
 
 

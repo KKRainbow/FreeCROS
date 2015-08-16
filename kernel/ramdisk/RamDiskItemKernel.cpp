@@ -20,18 +20,18 @@ int RamDiskItemKernel::Open() {
 
 pid_t RamDiskItemKernel::Read(File *_Fptr, int8_t *_Buffer, size_t _Size) {
     if(kread)
-        return kread(nullptr, this,_Buffer,_Size);
+        return kread(_Fptr, this,_Buffer,_Size);
     return -1;
 }
 
-pid_t RamDiskItemKernel::Write(int8_t *_Buffer, size_t _Size, File *_Fptr) {
+pid_t RamDiskItemKernel::Write(File *_Fptr, int8_t *_Buffer, size_t _Size) {
     if(kwrite)
-        kwrite(nullptr, this,_Buffer,_Size);
+        kwrite(_Fptr, this,_Buffer,_Size);
     return -1;
 }
 
 pid_t RamDiskItemKernel::Seek(File *_Fptr, off_t _Offset, int _Whence) {
     if(kseek)
-        kseek(nullptr, this,_Offset,_Whence);
+        kseek(_Fptr, this,_Offset,_Whence);
     return -1;
 }

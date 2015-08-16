@@ -50,7 +50,8 @@ void BufferManager::InsertIntoQueues(Buffer *_Buf) {
         return;
     _Buf->b_next = hash(_Buf->b_dev,_Buf->b_blocknr);
     hash(_Buf->b_dev,_Buf->b_blocknr) = _Buf;
-    _Buf->b_next->b_prev = _Buf;
+    if(_Buf->b_next)
+        _Buf->b_next->b_prev = _Buf;
 }
 
 Buffer *BufferManager::GetCachedBuffer(dev_t _Dev, uint32_t _Block) {

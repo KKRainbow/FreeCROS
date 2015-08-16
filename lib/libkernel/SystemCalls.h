@@ -58,15 +58,16 @@ SYSCALL_METHOD_H(RegisterChrDev,9); //devname
 SYSCALL_METHOD_H(Open,10); //devname
 SYSCALL_METHOD_H(Read,11); //devname
 SYSCALL_METHOD_H(Write,12); //devname
+SYSCALL_METHOD_H(Seek,13); //devname
 
-SYSCALL_METHOD_H(Signal,13); //signum,handler,flag
-SYSCALL_METHOD_H(Kill,14); //pid,signum
-SYSCALL_METHOD_H(SignalRestore,15);//no params
-SYSCALL_METHOD_H(Alarm,16); //_Us
+SYSCALL_METHOD_H(Signal,18); //signum,handler,flag
+SYSCALL_METHOD_H(Kill,19); //pid,signum
+SYSCALL_METHOD_H(SignalRestore,20);//no params
+SYSCALL_METHOD_H(Alarm,21); //_Us
 
 
-SYSCALL_METHOD_H(Pause,17);
-SYSCALL_METHOD_H(Sleep,18);
-SYSCALL_METHOD_H(WakeUp,19);
-SYSCALL_METHOD_H(Exit,20);
-SYSCALL_METHOD_H(GiveUp,21);
+SYSCALL_METHOD_H(Pause,22);
+SYSCALL_METHOD_H(Sleep,23);
+SYSCALL_METHOD_H(WakeUp,24);
+SYSCALL_METHOD_H(Exit,25);
+SYSCALL_METHOD_H(GiveUp,26);

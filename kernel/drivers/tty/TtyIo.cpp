@@ -82,7 +82,7 @@ struct tty_queue * table_list[]={
 	rs_queues + 3, rs_queues + 4
 	};
 
-extern C void change_console(unsigned int new_console)
+extern "C" void change_console(unsigned int new_console)
 {
 	if (new_console == fg_console || new_console >= NR_CONSOLES)
 		return;
@@ -407,7 +407,7 @@ int tty_write(unsigned channel, char * buf, int nr)
  * anyway, which is good, as the task sleeping might be
  * totally innocent.
  */
-extern C void do_tty_interrupt(int tty)
+extern "C" void do_tty_interrupt(int tty)
 {
 	copy_to_cooked(TTY_TABLE(tty));
 }
