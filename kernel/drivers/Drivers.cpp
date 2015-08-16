@@ -4,7 +4,9 @@
 
 #include "Drivers.h"
 #include "tty/Tty.h"
+#include "hd/HardDrive.h"
 void InitDrivers()
 {
     InitTty();
+    InitHd();
 }

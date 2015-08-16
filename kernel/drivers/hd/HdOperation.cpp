@@ -14,9 +14,20 @@
  */
 
 #define MAJOR_NR 3
+
 #include"Global.h"
-#include "blk.h"
+#include <Multiboot.h>
+#include <Interrupt.h>
+#include <cpu/CPUManager.h>
+#include <Clock.h>
+#include <ramdisk/RamDisk.h>
+#include <ramdisk/RamDiskItemKernel.h>
+#include <drivers/buffer/BufferManager.h>
+#include "BlockDev.h"
+#include"HardDrive.h"
 #include"hdreg.h"
+
+using namespace lr::sstl;
 
 #define CMOS_READ(addr) ({ \
 Outb_p(0x80|addr,0x70); \
@@ -33,11 +44,16 @@ static void bad_rw_intr(void);
 static int recalibrate = 0;
 static int reset = 0;
 
+static void (*DEVICE_INTR)(void) = nullptr;
+static Request* request;
+static int DEVICE_TIMEOUT = 0;
+void do_hd_request(Request* _ = nullptr);
+
 /*
  *  This struct defines the HD's and their types.
  */
 struct hd_i_struct {
-	int head,sect,cyl,wpcom,lzone,ctl;
+	unsigned int head,sect,cyl,wpcom,lzone,ctl;
 	};
 #ifdef HD_TYPE
 struct hd_i_struct hd_info[] = { HD_TYPE };
@@ -50,32 +66,36 @@ static int NR_HD = 0;
 static struct hd_struct {
 	long start_sect;
 	long nr_sects;
+	int dev_id;
+	RamDiskItem* dev_item;
 } hd[5*MAX_HD]={{0,0},};
 
 static int hd_sizes[5*MAX_HD] = {0, };
 
 #define port_read(port,buf,nr) \
-__asm__("cld;rep;insw"::"d" (port),"D" (buf),"c" (nr):"cx","di")
+__asm__("cld;rep;insw"::"d" (port),"D" (buf),"c" (nr))
 
 #define port_write(port,buf,nr) \
-__asm__("cld;rep;outsw"::"d" (port),"S" (buf),"c" (nr):"cx","si")
-
-extern void hd_interrupt(void);
-extern void rd_load(void);
+__asm__("cld;rep;outsw"::"d" (port),"S" (buf),"c" (nr))
 
 /* This may be used only once, enforced by 'static int callable' */
-int sys_setup(void * BIOS)
+int init_hd_info(char * BIOS)
 {
 	static int callable = 1;
 	int i,drive;
 	unsigned char cmos_disks;
 	struct partition *p;
-	struct buffer_head * bh;
+	struct Buffer * bh;
 
 	if (!callable)
 		return -1;
 	callable = 0;
-#ifndef HD_TYPE
+
+	const AString name[] = {
+			"hda",
+			"hdb"
+	};
+
 	for (drive=0 ; drive<2 ; drive++) {
 		hd_info[drive].cyl = *(unsigned short *) BIOS;
 		hd_info[drive].head = *(unsigned char *) (2+BIOS);
@@ -89,34 +109,17 @@ int sys_setup(void * BIOS)
 		NR_HD=2;
 	else
 		NR_HD=1;
-#endif
 	for (i=0 ; i<NR_HD ; i++) {
 		hd[i*5].start_sect = 0;
 		hd[i*5].nr_sects = hd_info[i].head*
 				hd_info[i].sect*hd_info[i].cyl;
+
+		RamDiskItemKernel* dev = new RamDiskItemKernel(0,RamDiskItem::Type::KERNELBLOCK,
+													   name[i],i + 5,HdOpen,HdRead,HdWrite,nullptr);
+		hd[i+5].dev_id = i + 5;
+		hd[i+5].dev_item = dev;
 	}
-
-	/*
-		We querry CMOS about hard disks : it could be that 
-		we have a SCSI/ESDI/etc controller that is BIOS
-		compatable with ST-506, and thus showing up in our
-		BIOS table, but not register compatable, and therefore
-		not present in CMOS.
-
-		Furthurmore, we will assume that our ST-506 drives
-		<if any> are the primary drives in the system, and 
-		the ones reflected as drive 1 or 2.
-
-		The first drive is stored in the high nibble of CMOS
-		byte 0x12, the second in the low nibble.  This will be
-		either a 4 bit drive type or 0xf indicating use byte 0x19 
-		for an 8 bit type, drive 1, 0x1a for drive 2 in CMOS.
-
-		Needless to say, a non-zero value means we have 
-		an AT controller hard disk for that drive.
-
-		
-	*/
+	request = new Request(NR_REQUEST, DEVICE_REQUEST);
 
 	if ((cmos_disks = CMOS_READ(0x12)) & 0xf0)
 		if (cmos_disks & 0x0f)
@@ -129,32 +132,34 @@ int sys_setup(void * BIOS)
 		hd[i*5].start_sect = 0;
 		hd[i*5].nr_sects = 0;
 	}
+
 	for (drive=0 ; drive<NR_HD ; drive++) {
-		if (!(bh = bread(0x300 + drive*5,0))) {
-			printk("Unable to read partition table of drive %d\n\r",
+		if (!(bh = HdBlockRead(0, request, hd[i+5].dev_id))){
+			LOG("Unable to read partition table of drive %d\n\r",
 				drive);
 			panic("");
 		}
 		if (bh->b_data[510] != 0x55 || (unsigned char)
 		    bh->b_data[511] != 0xAA) {
-			printk("Bad partition table on drive %d\n\r",drive);
+			LOG("Bad partition table on drive %d\n\r",drive);
 			panic("");
 		}
-		p = 0x1BE + (void *)bh->b_data;
+		p = (partition*)(0x1BE + (char *)bh->b_data);
 		for (i=1;i<5;i++,p++) {
 			hd[i+5*drive].start_sect = p->start_sect;
 			hd[i+5*drive].nr_sects = p->nr_sects;
+			RamDiskItemKernel* dev = new RamDiskItemKernel(0,
+														   RamDiskItem::Type::KERNELBLOCK,
+														   name[i] + ('0' + i),
+														   i + 5 * drive,HdOpen,HdRead,HdWrite,nullptr);
 		}
-		brelse(bh);
+		BufferManager::Instance()->BufferRelease(bh);
 	}
+
 	for (i=0 ; i<5*MAX_HD ; i++)
 		hd_sizes[i] = hd[i].nr_sects>>1 ;
-	blk_size[MAJOR_NR] = hd_sizes;
 	if (NR_HD)
-		printk("Partition table%s ok.\n\r",(NR_HD>1)?"s":"");
-	rd_load();
-	init_swapping();
-	mount_root();
+		LOG("Partition table%s ok.\n\r",(NR_HD>1)?"s":"");
 	return (0);
 }
 
@@ -162,7 +167,8 @@ static int controller_ready(void)
 {
 	int retries = 100000;
 
-	while (--retries && (Inb_p(HD_STATUS)&0xc0)!=0x40);
+//	while (--retries && (Inb_p(HD_STATUS)&0xc0)!=0x40);
+	while (--retries && (Inb_p(HD_STATUS)&0x80));
 	return (retries);
 }
 
@@ -210,7 +216,7 @@ static int drive_busy(void)
 		if (c == (READY_STAT | SEEK_STAT))
 			return 0;
 	}
-	printk("HD controller times out\n\r");
+	LOG("HD controller times out\n\r");
 	return(1);
 }
 
@@ -219,12 +225,12 @@ static void reset_controller(void)
 	int	i;
 
 	Outb(4,HD_CMD);
-	for(i = 0; i < 1000; i++) nop();
+	for(i = 0; i < 1000; i++) __asm__("nop");
 	Outb(hd_info[0].ctl & 0x0f ,HD_CMD);
 	if (drive_busy())
-		printk("HD-controller still busy\n\r");
+		LOG("HD-controller still busy\n\r");
 	if ((i = Inb(HD_ERROR)) != 1)
-		printk("HD-controller reset failed: %02x\n\r",i);
+		LOG("HD-controller reset failed: %02x\n\r",i);
 }
 
 static void reset_hd(void)
@@ -251,7 +257,7 @@ repeat:
 
 void unexpected_hd_interrupt(void)
 {
-	printk("Unexpected HD interrupt\n\r");
+	LOG("Unexpected HD interrupt\n\r");
 	reset = 1;
 	do_hd_request();
 }
@@ -259,7 +265,7 @@ void unexpected_hd_interrupt(void)
 static void bad_rw_intr(void)
 {
 	if (++CURRENT->errors >= MAX_ERRORS)
-		end_request(0);
+		request->EndRequest(0);
 	if (CURRENT->errors > MAX_ERRORS/2)
 		reset = 1;
 }
@@ -279,7 +285,7 @@ static void read_intr(void)
 		SET_INTR(&read_intr);
 		return;
 	}
-	end_request(1);
+	request->EndRequest(1);
 	do_hd_request();
 }
 
@@ -297,7 +303,7 @@ static void write_intr(void)
 		port_write(HD_DATA,CURRENT->buffer,256);
 		return;
 	}
-	end_request(1);
+	request->EndRequest(1);
 	do_hd_request();
 }
 
@@ -312,15 +318,15 @@ void hd_times_out(void)
 {
 	if (!CURRENT)
 		return;
-	printk("HD timeout");
+	LOG("HD timeout");
 	if (++CURRENT->errors >= MAX_ERRORS)
-		end_request(0);
-	SET_INTR(NULL);
+		request->EndRequest(0);
+	SET_INTR(nullptr);
 	reset = 1;
 	do_hd_request();
 }
 
-void do_hd_request(void)
+void do_hd_request(Request* _Req)
 {
 	int i,r;
 	unsigned int block,dev;
@@ -328,10 +334,10 @@ void do_hd_request(void)
 	unsigned int nsect;
 
 	INIT_REQUEST;
-	dev = MINOR(CURRENT->dev);
+	dev = (unsigned int)CURRENT->dev;
 	block = CURRENT->sector;
 	if (dev >= 5*NR_HD || block+2 > hd[dev].nr_sects) {
-		end_request(0);
+		request->EndRequest(0);
 		goto repeat;
 	}
 	block += hd[dev].start_sect;
@@ -353,7 +359,7 @@ void do_hd_request(void)
 			WIN_RESTORE,&recal_intr);
 		return;
 	}	
-	if (CURRENT->cmd == WRITE) {
+	if (CURRENT->cmd == Req::WRITE) {
 		hd_out(dev,nsect,sec,head,cyl,WIN_WRITE,&write_intr);
 		for(i=0 ; i<10000 && !(r=Inb_p(HD_STATUS)&DRQ_STAT) ; i++)
 			/* nothing */ ;
@@ -362,16 +368,47 @@ void do_hd_request(void)
 			goto repeat;
 		}
 		port_write(HD_DATA,CURRENT->buffer,256);
-	} else if (CURRENT->cmd == READ) {
+	} else if (CURRENT->cmd == Req::READ) {
 		hd_out(dev,nsect,sec,head,cyl,WIN_READ,&read_intr);
 	} else
 		panic("unknown hd-command");
 }
 
+int hd_time_intr(InterruptParams& _Params)
+{
+	if(hd_timeout)
+	{
+		if (--hd_timeout == 0)
+		{
+			hd_times_out();
+		}
+	}
+	return 1;
+}
+
+int hd_interrupt(InterruptParams& _Param)
+{
+	if (DEVICE_INTR == nullptr)
+	{
+		unexpected_hd_interrupt();
+	}
+	else
+	{
+		DEVICE_INTR();
+	}
+	return 1;
+}
+
 void hd_init(void)
 {
-	blk_dev[MAJOR_NR].request_fn = DEVICE_REQUEST;
-	set_intr_gate(0x2E,&hd_interrupt);
-	Outb_p(Inb_p(0x21)&0xfb,0x21);
-	Outb(Inb_p(0xA1)&0xbf,0xA1);
+	uint16_t* intTable = (uint16_t*)globalMultiboot.GetIntTable();
+	void* drive1 = (void*)(((int)intTable[0x41 * 2 + 1] << 4) + (int)intTable[0x41 * 2]);
+	void* drive2 = (void*)(((int)intTable[0x46 * 2 + 1] << 4) + (int)intTable[0x46 * 2]);
+	char* drive_info = new char[32];
+	memcpy(drive_info, drive1, 16);
+	memcpy(drive_info + 16, drive2, 16);
+	CPUManager::Instance()->RegisterIRQ(hd_interrupt, HAL::IRQBase + 0x0E);
+	CPUManager::Instance()->RegisterIRQ(hd_time_intr, Clock::CLOCK_IRQ);
+
+	init_hd_info (drive_info);
 }

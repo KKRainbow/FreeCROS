@@ -16,9 +16,16 @@
  */
 
 #include "Multiboot.h"
+#include "string.h"
 
-Multiboot::Multiboot(){}
-Multiboot::Multiboot(const Multiboot& _x):InfoTable(_x.InfoTable){}
+Multiboot::Multiboot()
+{
+	memcpy(this->intTable, NULL, sizeof(intTable));
+}
+Multiboot::Multiboot(const Multiboot& _x):InfoTable(_x.InfoTable)
+{
+	memcpy(this->intTable, _x.intTable, sizeof(intTable));
+}
 bool Multiboot::TestFlagVBE() { return bitmap[11] == 1;}
 bool Multiboot::TestFlagAPM() { return bitmap[10] == 1;}
 bool Multiboot::TestFlagName() { return bitmap[9] == 1;}
@@ -40,3 +47,6 @@ void Multiboot::SetInfoAddr(MultibootInfo* _Addr)
 	this->bitmap = lr::sstl::Bitmap<unsigned char,1>(reinterpret_cast<unsigned char*>(&(this->InfoTable.flags)),32,false);
 }
 
+char *Multiboot::GetIntTable() {
+	return this->intTable;
+}

@@ -17,12 +17,7 @@ private:
     WriteFunc_t kwrite;
     ReadFunc_t kread;
     SeekFunc_t kseek;
-public:
-    int GetDevnum() const {
-        return devnum;
-    }
-
-private:
+    int blockSize;
     int devnum;
 public:
     RamDiskItemKernel(int32_t _Id,Type _Type,lr::sstl::AString _Name,int _Devnum,
@@ -31,6 +26,19 @@ public:
     virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size);
     virtual pid_t Write(int8_t *_Buffer, size_t _Size, File *_Fptr);
     virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence);
+    int getBlockSize() const
+    {
+        return blockSize;
+    }
+    void setBlockSize(int blockSize)
+    {
+        this->blockSize = blockSize;
+    }
+    int GetDevnum() const
+    {
+        return devnum;
+    }
+
 };
 
 

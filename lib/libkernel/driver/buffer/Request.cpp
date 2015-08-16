@@ -2,24 +2,23 @@
 // Created by ssj on 15-8-13.
 //
 
-#include <drivers/hd/blk.h>
+#include <SystemCalls.h>
 #include "Request.h"
 
-void Request::MakeRequest() {
-
-}
+#define IN_ORDER(s1,s2) \
+((s1)->cmd<(s2)->cmd || (s1)->cmd==(s2)->cmd && \
+(((s1)->sector < (s2)->sector)))
 
 void Request::AddRequest(Req * _Req) {
     Req* tmp;
     Req* req = _Req;
-    BlkDevStruct* dev = this->dev_struct;
 
-    req->next = NULL;
+    req->next = nullptr;
     if (req->bh)
         req->bh->b_dirt = 0;
-    if (!(tmp = dev->current_request)) {
-        dev->current_request = req;
-        (dev->request_fn)();
+    if (!(tmp = this->current_req)) {
+        this->current_req = req;
+        this->CallRequestFunc();
         return;
     }
     for ( ; tmp->next ; tmp=tmp->next) {
@@ -37,10 +36,6 @@ void Request::AddRequest(Req * _Req) {
     tmp->next=req;
 }
 
-
-Request::Request(int _Size,BlkDevStruct* _Dev) :req_size(_Size),dev_struct(_Dev){
-    this->req_head = new Req[req_size];
-}
 
 void Request::MakeRequest(Req::Cmd _Cmd, Buffer *_Buf, pid_t _Pid) {
     Req* req;
@@ -79,17 +74,20 @@ void Request::MakeRequest(Req::Cmd _Cmd, Buffer *_Buf, pid_t _Pid) {
     lock.Lock();
 /* find an empty request */
     while (--req >= this->req_head)
-        if (req->dev<0)
+        if (req->dev < 0)
             break;
 /* if none found, sleep on new requests: check for rw_ahead */
     if (req < this->req_head) {
+        lock.Unlock();
         if (rw_ahead) {
-            lock.Unlock();
             return;
         }
 //        sleep_on(&wait_for_request);
         waiting = true;
-        while(waiting);
+        while(waiting)
+        {
+            SysCallGiveUp::Invoke();
+        }
         goto repeat;
     }
 /* fill up the request-info, and add it to the queue */
@@ -101,12 +99,12 @@ void Request::MakeRequest(Req::Cmd _Cmd, Buffer *_Buf, pid_t _Pid) {
     req->buffer = (char*)bh->b_data;
     req->thread_waiting = _Pid;
     req->bh = bh;
-    req->next = NULL;
+    req->next = nullptr;
     AddRequest(req);
     lock.Unlock();
 }
 
-void Request::MakeRequest(Req::Cmd _Cmd, int _Sector, char *buffer, int _Size, pid_t _Pid) {
+void Request::MakeRequest(Req::Cmd _Cmd, int _Devnum, int _Sector, char *buffer, int _Count, pid_t _Pid) {
     Req* req;
 
     if (_Cmd!=Req::READ && _Cmd!=Req::WRITE)
@@ -114,38 +112,54 @@ void Request::MakeRequest(Req::Cmd _Cmd, int _Sector, char *buffer, int _Size, p
         return;//panic("Bad block dev command, must be R/W");
     }
     repeat:
+    lock.Lock();
     req = req_head+req_size;
     while (--req >= req_head)
-        if (req->dev<0)
+        if (req->dev < 0)
             break;
     if (req < req_head) {
+        lock.Unlock();
         waiting = true;
-        while(waiting);
+        while(waiting)
+        {
+            SysCallGiveUp::Invoke();
+        }
         goto repeat;
     }
 /* fill up the request-info, and add it to the queue */
-    req->dev = dev_struct->dev_num;
+    req->dev = _Devnum;
     req->cmd = _Cmd;
     req->errors = 0;
     req->sector = (unsigned long)_Sector;
-    req->nr_sectors = 8;
+    req->nr_sectors = (unsigned int)_Count;
     req->buffer = buffer;
     req->thread_waiting = _Pid;
     req->bh = nullptr;
     req->next = nullptr;
     AddRequest(req);
+    lock.Unlock();
 }
 
 void Request::EndRequest(bool Uptodate) {
-    if (this->dev_struct->current_request->bh) {
-        this->dev_struct->current_request->bh->b_uptodate = Uptodate;
+    if (this->current_req->bh) {
+        this->current_req->bh->b_uptodate = Uptodate;
+        this->current_req->bh->UnlockBuffer();
     }
     if (!Uptodate) {
 //        printk(DEVICE_NAME " I/O error\n\r");
-//        printk("dev %04x, block %d\n\r",this->dev_struct->current_request->dev,
-//               this->dev_struct->current_request->bh->b_blocknr);
+//        printk("dev %04x, block %d\n\r",this->current_req->dev,
+//               this->current_req->bh->b_blocknr);
     }
     this->waiting = false;
-    this->dev_struct->current_request->dev = -1;
-    this->dev_struct->current_request = this->dev_struct->current_request->next;
+    this->current_req->dev = -1;
+    this->current_req = this->current_req->next;
 }
+
+Req *Request::GetCurrentReq() {
+    return this->current_req;
+}
+
+Request::Request(int _Size, void (*_Func)(Request*)) : req_size(_Size),request_fn(_Func) {
+    this->req_head = new Req[req_size];
+}
+

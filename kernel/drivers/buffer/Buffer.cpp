@@ -3,7 +3,7 @@
 //
 
 #include <Interrupt.h>
-#include "Buffer.h"
+#include "driver/buffer/Buffer.h"
 
 void Buffer::LockBuffer() {
     spinlock.Lock();
@@ -21,7 +21,7 @@ void Buffer::UnlockBuffer() {
     spinlock.Lock();
     Interrupt::Cli();
     this->b_lock = false;
-    this->wait.Wait();
+    this->wait.Wake();
     Interrupt::Sti();
     spinlock.Unlock();
 }

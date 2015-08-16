@@ -35,6 +35,11 @@ static void AssertFunc(bool cond)
 	AssertFunc(cond);\
 }while(0)
 
+#define panic(_Str) \
+do{\
+	LOG(_Str);\
+	Assert(false);\
+}while(0)
 #else
 
 #define Assert(cond) do{if(cond)do{}while(0);}while(0)

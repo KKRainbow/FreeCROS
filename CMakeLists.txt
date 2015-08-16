@@ -49,11 +49,11 @@ ADD_CUSTOM_TARGET(
 	)
 ADD_CUSTOM_TARGET(
 	run
-	COMMAND qemu-system-i386 -cdrom myos.iso -smp 1 -s
+	COMMAND qemu-system-i386 -cdrom myos.iso -smp 1 -s -hda hd1.img -boot order=d
 	)
 ADD_CUSTOM_TARGET(
 	qd	
-	COMMAND qemu-system-i386 -cdrom myos.iso -smp 1 -s -S
+	COMMAND qemu-system-i386 -cdrom myos.iso -smp 1 -s -S -hda hd1.img -boot order=d
 	)
 ADD_CUSTOM_TARGET(
 	cg	

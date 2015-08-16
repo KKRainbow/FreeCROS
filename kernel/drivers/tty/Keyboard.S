@@ -92,8 +92,9 @@ put_queue:
 	shrl $8,%ebx
 	jmp 1b
 2:	movl %ecx,head(%edx)
-
+	push %edx
 	call WakeUpQueue
+	add $4,%esp
 3:	popl %edx
 	popl %ecx
 	ret

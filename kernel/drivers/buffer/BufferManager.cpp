@@ -83,6 +83,19 @@ Buffer *BufferManager::GetBuffer(dev_t _Dev, uint32_t _Block, uint32_t _BlockSiz
             oom_flag = true;
             goto repeat;
         }
+        else
+        {
+            if (!free_list)
+            {
+                free_list = bh;
+                bh->b_next_free = bh;
+                bh->b_prev_free = bh;
+            }
+            else
+            {
+                InsertIntoQueues(bh);
+            }
+        }
     }
     else
     {
@@ -133,7 +146,7 @@ void BufferManager::SyncDev(dev_t _Dev) {
 
 }
 
-void BufferManager::ReadWriteBlock(int _Op,Buffer *_Buf) {
+void BufferManager::PrepareBuffer(Buffer *_Buf) {
     Assert(_Buf);
     if(_Buf->b_blksize > _Buf->b_bufsize)
     {
@@ -147,41 +160,24 @@ void BufferManager::ReadWriteBlock(int _Op,Buffer *_Buf) {
         this->curr_buf_size += _Buf->b_blksize - _Buf->b_bufsize;
         _Buf->b_bufsize = _Buf->b_blksize;
     }
-    switch (_Op)
-    {
-        case READ:
-            break;
-        case WRITE:
-            break;
-        default:
-            LOG("Unknown param,Error!!!!");
-            Assert(false);
-            return;
-    }
 }
 
-Buffer *BufferManager::BlockRead(dev_t _Dev, uint32_t _Block, uint32_t _BlockSize) {
-    Buffer* bh;
-
-    if (!(bh=GetBuffer(_Dev,_Block,_BlockSize)))
-    {
-        LOG("bread: getblk returned NULL\n");
-        Assert(false);
-        return nullptr;
-    }
-    if (bh->b_uptodate)
-        return bh;
-    ReadWriteBlock(READ,bh);
-    bh->WaitOn();
-    if (bh->b_uptodate)
-        return bh;
-    BlockRelease(bh);
-    return nullptr;
-}
-
-void BufferManager::BlockRelease(Buffer *_Buf) {
+void BufferManager::BufferRelease(Buffer *_Buf){
     if(!_Buf)return;
     _Buf->WaitOn();
     Assert(_Buf->b_count-- > 0);
     _Buf->wait.Wake();
+}
+
+bool BufferManager::IsReadNecessary(Buffer* _Buf) {
+    if (_Buf->b_uptodate)
+    {
+        Assert(_Buf->b_data);
+        return false;
+    }
+    else
+    {
+        this->PrepareBuffer(_Buf);
+        return true;
+    }
 }

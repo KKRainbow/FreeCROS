@@ -46,8 +46,8 @@ typedef struct AoutSymbolTable
 	uint32_t strSize;
 	uint32_t address;
 	uint32_t reserved;
-}		
-AoutSymbolTable;
+}
+		AoutSymbolTable;
 
 /**
  *  * The section header table for ELF.
@@ -59,7 +59,7 @@ typedef struct ElfSectionHeaderTable
 	uint32_t address;
 	uint32_t shndx;
 }
-ElfSectionHeaderTable;          
+		ElfSectionHeaderTable;
 
 /**
  *  * The Multiboot information.
@@ -86,15 +86,15 @@ typedef struct MultibootInfo
 	uint32_t configTable;
 	uint32_t bootLoaderName;
 	uint32_t apmTable;
-	
+
 	uint32_t vbe_control_info;
-        uint32_t vbe_mode_info;
-        uint16_t vbe_mode;
-        uint16_t vbe_interface_seg;
-        uint16_t vbe_interface_off;
-        uint16_t vbe_interface_len;
+	uint32_t vbe_mode_info;
+	uint16_t vbe_mode;
+	uint16_t vbe_interface_seg;
+	uint16_t vbe_interface_off;
+	uint16_t vbe_interface_len;
 }
-MultibootInfo;
+		MultibootInfo;
 
 /**
  *  * The module class.
@@ -106,7 +106,7 @@ typedef struct MultibootModule
 	uint32_t string;
 	uint32_t reserved;
 }
-MultibootModule;
+		MultibootModule;
 
 /**
  *  * The memory map. Be careful that the offset 0 is base_addr_low
@@ -121,12 +121,12 @@ typedef struct MultibootMemoryMap
 	uint32_t lengthHigh;
 	uint32_t type;
 }__attribute__((packed))
-MultibootMemoryMap;
+		MultibootMemoryMap;
 
 typedef struct MultibootVbe
 {
 	uint32_t vbe_control_info;
-	uint32_t vbe_mode_info; 
+	uint32_t vbe_mode_info;
 	uint32_t vbe_interface_seg;
 	uint32_t vbe_interface_off;
 	uint32_t vbe_interface_len;
@@ -142,25 +142,27 @@ extern MultibootInfo multibootInfo;
 
 class Multiboot
 {
-	private:
-		lr::sstl::Bitmap<unsigned char,1> bitmap;	
-		MultibootInfo InfoTable;
-	public:
-		Multiboot();
-		Multiboot(const Multiboot& _x);
-		bool TestFlagVBE() ;
-		bool TestFlagAPM() ;
-		bool TestFlagName() ;
-		bool TestFlagConfig() ;
-		bool TestFlagDrives() ;
-		bool TestFlagMmap() ;
-		bool TestFlagSyms() ;
-		bool TestFlagMods() ;
-		bool TestFlagCmd() ;
-		bool TestFlagBootDev() ;
-		bool TestFlagMem() ;
-		const MultibootInfo& GetMultibootInfo();
-		void SetInfoAddr(MultibootInfo* _Addr);
+private:
+	lr::sstl::Bitmap<unsigned char,1> bitmap;
+	MultibootInfo InfoTable;
+	char intTable[1024];
+public:
+	Multiboot();
+	Multiboot(const Multiboot& _x);
+	bool TestFlagVBE() ;
+	bool TestFlagAPM() ;
+	bool TestFlagName() ;
+	bool TestFlagConfig() ;
+	bool TestFlagDrives() ;
+	bool TestFlagMmap() ;
+	bool TestFlagSyms() ;
+	bool TestFlagMods() ;
+	bool TestFlagCmd() ;
+	bool TestFlagBootDev() ;
+	bool TestFlagMem() ;
+	const MultibootInfo& GetMultibootInfo();
+	void SetInfoAddr(MultibootInfo* _Addr);
+	char* GetIntTable();
 };
 
 extern class Multiboot globalMultiboot;

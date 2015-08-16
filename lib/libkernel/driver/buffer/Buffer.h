@@ -19,7 +19,7 @@ private:
     Buffer* b_next = nullptr,*b_prev = nullptr;
     Buffer* b_next_free = nullptr,*b_prev_free = nullptr;
 public:
-    void* b_data;
+    char* b_data;
     dev_t b_dev = 0;
     uint32_t b_blocknr = 0;
     bool b_dirt = 0;

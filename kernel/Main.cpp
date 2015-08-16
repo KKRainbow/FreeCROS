@@ -34,7 +34,7 @@ extern "C" int bspmain(MultibootInfo* multibootAddr,uint32_t magic)
 	globalMultiboot.SetInfoAddr(multibootAddr);
 	
 	new(&globalMemoryManager)MemoryManager(true);
-	
+
 	ServerLoader::Instance()->LoadModules();
 	
 	auto m = CPUManager::Instance();
