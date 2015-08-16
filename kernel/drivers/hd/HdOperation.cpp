@@ -150,7 +150,7 @@ int init_hd_info(char * BIOS)
 			hd[i+5*drive].nr_sects = p->nr_sects;
 			RamDiskItemKernel* dev = new RamDiskItemKernel(0,
 														   RamDiskItem::Type::KERNELBLOCK,
-														   name[i] + ('0' + i),
+														   name[drive] + ('0' + i),
 														   i + 5 * drive,HdOpen,HdRead,HdWrite,nullptr);
 		}
 		BufferManager::Instance()->BufferRelease(bh);

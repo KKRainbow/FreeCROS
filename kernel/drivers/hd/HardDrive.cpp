@@ -9,6 +9,8 @@
 #include <driver/buffer/Request.h>
 #include "HardDrive.h"
 
+#define BLOCK_SIZE 1024
+
 int HdOpen(RamDiskItemKernel* _Item)
 {
     return 1;
@@ -18,7 +20,7 @@ Buffer* HdBlockRead(uint32_t _Blocknr, Request* _Request, int _Devnum)
 {
     Buffer* bh;
 
-    if (!(bh=BufferManager::Instance()->GetBuffer(_Devnum,_Blocknr,1024)))
+    if (!(bh=BufferManager::Instance()->GetBuffer(_Devnum,_Blocknr,BLOCK_SIZE)))
     {
         LOG("bread: getblk returned NULL\n");
         Assert(false);
