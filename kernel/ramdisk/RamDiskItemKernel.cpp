@@ -8,7 +8,7 @@ RamDiskItemKernel::RamDiskItemKernel(int32_t _Id,Type _Type,lr::sstl::AString _N
                                      ReadFunc_t _Read,
                                      WriteFunc_t _Write,
                                      SeekFunc_t _Seek)
-:RamDiskItem(nullptr,_Id,_Type,_Name),kopen(_Open),kread(_Read),kwrite(_Write),kseek(_Seek)
+:RamDiskItem(nullptr,_Id,_Type,_Name),kopen(_Open),kread(_Read),kwrite(_Write),kseek(_Seek),devnum(_Devnum)
 {
 
 }

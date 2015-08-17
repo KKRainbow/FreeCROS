@@ -115,7 +115,7 @@ int init_hd_info(char * BIOS)
 				hd_info[i].sect*hd_info[i].cyl;
 
 		RamDiskItemKernel* dev = new RamDiskItemKernel(0,RamDiskItem::Type::KERNELBLOCK,
-													   name[i],i + 5,HdOpen,HdRead,HdWrite,nullptr);
+													   name[i],i * 5,HdOpen,HdRead,HdWrite,nullptr);
 		dev->SetSize(hd[5*i].nr_sects * 512);
 		RamDisk::Instance()->CreateKernelDev(dev);
 		hd[i+5].dev_id = i + 5;
@@ -156,6 +156,8 @@ int init_hd_info(char * BIOS)
 														   i + 5 * drive,HdOpen,HdRead,HdWrite,nullptr);
 			dev->SetSize(hd[i+5*drive].nr_sects * 512);
 			RamDisk::Instance()->CreateKernelDev(dev);
+			hd[i+5 * drive].dev_id = i + 5;
+			hd[i+5 * drive].dev_item = dev;
 		}
 		BufferManager::Instance()->BufferRelease(bh);
 	}

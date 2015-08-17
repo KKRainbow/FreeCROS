@@ -7,23 +7,19 @@
 
 void Buffer::LockBuffer() {
     spinlock.Lock();
-    Interrupt::Cli();
     while(this->b_lock)
     {
+        spinlock.Unlock();
         this->wait.Wait();
+        spinlock.Lock();
     }
     this->b_lock = true;
-    Interrupt::Sti();
     spinlock.Unlock();
 }
 
 void Buffer::UnlockBuffer() {
-    spinlock.Lock();
-    Interrupt::Cli();
     this->b_lock = false;
     this->wait.Wake();
-    Interrupt::Sti();
-    spinlock.Unlock();
 }
 
 bool Buffer::IsLocked() {
@@ -31,12 +27,8 @@ bool Buffer::IsLocked() {
 }
 
 void Buffer::WaitOn() {
-    spinlock.Lock();
-    Interrupt::Cli();
     while(this->b_lock)
     {
         this->wait.Wait();
     }
-    Interrupt::Sti();
-    spinlock.Unlock();
 }

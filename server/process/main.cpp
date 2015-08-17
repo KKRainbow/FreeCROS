@@ -3,14 +3,18 @@
 #include"UserLog.h"
 int main()
 {
-	auto fid = SysCallOpen::Invoke((uint32_t)"/dev/hda");
-	char data[30];
-    SysCallSeek::Invoke(fid,0xc00,SEEK_SET);
+	auto fid = SysCallOpen::Invoke((uint32_t)"/dev/hda1");
+	char data[512];
 	auto size = SysCallRead::Invoke(fid,(uint32_t)data,sizeof(data));
-    for( int i = 0;i<sizeof(data);i++)
-        if(data[i] == '\0')data[i] = ' ';
-    data[29] = '\0';
-    log(data);
+    int* tmp = (int*)data;
+    for( int i = 0;i<sizeof(data)/sizeof(int);i++)
+    {
+        log("%x ",tmp[i]);
+        if(i%10 == 0)
+        {
+            log("\n");
+        }
+    }
 	for(;;);
 	return 1;
 }
