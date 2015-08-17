@@ -16,44 +16,44 @@
  */
 
 #include"RamDiskItem.h"
+
 using namespace lr::sstl;
-RamDiskItem::Type RamDiskItem::GetType()
-{
-	return this->type;
+
+RamDiskItem::Type RamDiskItem::GetType() {
+    return this->type;
 }
 
-RamDiskItem::RamDiskItem(Thread* _Thread, int32_t _Id,Type _Type,AString _Name)
-:id(_Id),type(_Type),name(_Name),thread(_Thread)
-{
-	
+RamDiskItem::RamDiskItem(Thread *_Thread, int32_t _Id, Type _Type, AString _Name)
+        : id(_Id), type(_Type), name(_Name), thread(_Thread) {
+
 }
-lr::sstl::Pair<RamDiskItem::ItemList::iterator,RamDiskItem::ItemList::iterator> 
-	RamDiskItem::GetChildrenIter()
-{
-	return MakePair(this->children.Begin(),this->children.End());
+
+lr::sstl::Pair<RamDiskItem::ItemList::iterator, RamDiskItem::ItemList::iterator>
+RamDiskItem::GetChildrenIter() {
+    return MakePair(this->children.Begin(), this->children.End());
 }
-RamDiskItem* RamDiskItem::GetParent()
-{
-	return this->parent;
+
+RamDiskItem *RamDiskItem::GetParent() {
+    return this->parent;
 }
-IDType RamDiskItem::GetID()
-{
-	return this->id;
+
+IDType RamDiskItem::GetID() {
+    return this->id;
 }
-RamDiskItem* RamDiskItem::FindChildByName(lr::sstl::AString _Name)
-{
-	auto i = this->children.Find(_Name);
-	if(i == this->children.End())return nullptr;
-	else return i->second;
+
+RamDiskItem *RamDiskItem::FindChildByName(lr::sstl::AString _Name) {
+    auto i = this->children.Find(_Name);
+    if ( i == this->children.End())return nullptr;
+    else return i->second;
 }
-IDType RamDiskItem::AddChild(RamDiskItem* _Child)
-{
-	Assert(this->type == DIR);
-	_Child->parent = this;
-	auto i = this->children.Insert(MakePair(_Child->name,_Child));
-	return i.second == false ? -1 : _Child->id;
+
+IDType RamDiskItem::AddChild(RamDiskItem *_Child) {
+    Assert(this->type == DIR);
+    _Child->parent = this;
+    auto i = this->children.Insert(MakePair(_Child->name, _Child));
+    return i.second == false ? -1 : _Child->id;
 }
-AString RamDiskItem::GetName()
-{
-	return this->name;
+
+AString RamDiskItem::GetName() {
+    return this->name;
 }

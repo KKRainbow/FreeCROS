@@ -16,16 +16,20 @@
  */
 
 #pragma once
+
 #include"Global.h"
 #include"stl/smap.h"
 #include"./heap/Heap.h"
-class HeapManager
-{
-	SINGLETON_H(HeapManager)
-	lr::sstl::Map<pid_t, lr::Ptr<Heap>> heapmap;
+
+class HeapManager {
+SINGLETON_H(HeapManager)
+
+    lr::sstl::Map<pid_t, lr::Ptr<Heap>> heapmap;
 private:
-	Heap* GetHeapOfThread(Thread* _Thread);
+    Heap *GetHeapOfThread(Thread *_Thread);
+
 public:
-	Heap* GetHeapOfThisThread();
-	void CreateHeapForThread(Thread* _Thread);
+    Heap *GetHeapOfThisThread();
+
+    void CreateHeapForThread(Thread *_Thread);
 };

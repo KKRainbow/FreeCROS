@@ -19,8 +19,7 @@
 #include "cpu/CPUManager.h"
 #include "thread/Thread.h"
 
-SINGLETON_CPP(HeapManager)
-{
+SINGLETON_CPP(HeapManager) {
 
 }
 
@@ -33,15 +32,14 @@ Heap *HeapManager::GetHeapOfThisThread() {
 }
 
 void HeapManager::CreateHeapForThread(Thread *_Thread) {
-    while (_Thread->belongTo != nullptr) _Thread = _Thread->belongTo;
-    if (GetHeapOfThread(_Thread) == nullptr)
-    {
+    while ( _Thread->belongTo != nullptr ) _Thread = _Thread->belongTo;
+    if ( GetHeapOfThread(_Thread) == nullptr ) {
         this->heapmap.Insert(lr::sstl::MakePair(_Thread->GetPid(), new Heap(_Thread)));
     }
 }
 
 Heap *HeapManager::GetHeapOfThread(Thread *_Thread) {
-    while (_Thread->belongTo != nullptr) _Thread = _Thread->belongTo;
+    while ( _Thread->belongTo != nullptr ) _Thread = _Thread->belongTo;
     auto itr = heapmap.Find(_Thread->GetPid());
     return itr == heapmap.End() ? nullptr : itr->second.Obj();
 }

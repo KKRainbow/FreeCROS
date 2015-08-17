@@ -16,25 +16,38 @@
  */
 
 #pragma once
+
 #include"Global.h"
 
 class Thread;
-class CPU
-{
+
+class CPU {
 protected:
-	friend class CPUManager;
-	addr_t kernelStackAddr;
-	size_t kernelStackSize;
-	int id;
+    friend class CPUManager;
+
+    addr_t kernelStackAddr;
+    size_t kernelStackSize;
+    int id;
 public:
-	enum Type{BSP,AP,UNKNOWN}type;
-	virtual void Run() = 0;
-	virtual ~CPU(){};
-	virtual Thread* GetCurrThreadRunning() = 0;
-	virtual Type GetType() = 0;
-	virtual void StartService() = 0;
-	virtual void ExhaustCurrThread() = 0;
-	virtual void SetIdleThread(Thread* _Thread) = 0;
-	void SetID(int _Id);
-	int GetID()const;
+    enum Type {
+        BSP, AP, UNKNOWN
+    } type;
+
+    virtual void Run() = 0;
+
+    virtual ~CPU() { };
+
+    virtual Thread *GetCurrThreadRunning() = 0;
+
+    virtual Type GetType() = 0;
+
+    virtual void StartService() = 0;
+
+    virtual void ExhaustCurrThread() = 0;
+
+    virtual void SetIdleThread(Thread *_Thread) = 0;
+
+    void SetID(int _Id);
+
+    int GetID() const;
 };

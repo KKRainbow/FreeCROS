@@ -13,27 +13,22 @@ extern unsigned long kernelEnd;
 extern unsigned long kernelObjInitZoneStart;
 extern unsigned long kernelObjInitZoneEnd;
 #ifndef __SERVER
-#define __DEBUG
+//#define __DEBUG
 #endif
 
 #include"Log.h"
 #ifdef __DEBUG
 //Die
-static void AssertFunc(bool cond)
-{
-	if(!cond)
-	{
-		for(;;);
-	}
-}
 #define Assert(cond) do {			\
-    if(!(cond)){	\
+bool res = cond;\
+if(!(res)){	\
     LOG(#cond);\
 	LOG(__FILE__);		\
 	LOG(":");		\
 	LOG("%d",__LINE__);		\
-	LOG("\n");}		\
-	AssertFunc(cond);\
+	LOG("\n");\
+for(;;);\
+}		\
 }while(0)
 
 #define panic(_Str) \
@@ -44,5 +39,6 @@ do{\
 #else
 
 #define Assert(cond) do{if(cond)do{}while(0);}while(0)
+#define panic(_Str) do{if(true)do{}while(0);}while(0)
 
 #endif

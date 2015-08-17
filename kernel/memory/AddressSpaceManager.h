@@ -15,25 +15,32 @@
  * 
  */
 #pragma once
+
 #include"Global.h"
 #include"AddressSpace.h"
 #include"stl/smap.h"
 
-class AddressSpaceManager
-{
-	SINGLETON_H(AddressSpaceManager)
-	private:
-		lr::sstl::Map<addr_t,AddressSpace*> spaces;	
-		AddressSpace* kernelSpace;
-		static int PageFaultHandler(InterruptParams& _Params);
-		void InitKernelAddressSpace();
-	public:
-		AddressSpace* CreateAddressSpace();
-		AddressSpace* GetAddressSpaceByPageDirAddr(addr_t _DirAddr);
-		AddressSpace* GetCurrentAddressSpace();
-		AddressSpace* GetKernelAddressSpace();
-		void CopyDataFromAnotherSpace
-			(AddressSpace& _DesSpace,void* _Dest,
-			 AddressSpace& _SrcSpace,void* _Src
-			 ,size_t _Size);
+class AddressSpaceManager {
+SINGLETON_H(AddressSpaceManager)
+
+private:
+    lr::sstl::Map<addr_t, AddressSpace *> spaces;
+    AddressSpace *kernelSpace;
+
+    static int PageFaultHandler(InterruptParams &_Params);
+
+    void InitKernelAddressSpace();
+
+public:
+    AddressSpace *CreateAddressSpace();
+
+    AddressSpace *GetAddressSpaceByPageDirAddr(addr_t _DirAddr);
+
+    AddressSpace *GetCurrentAddressSpace();
+
+    AddressSpace *GetKernelAddressSpace();
+
+    void CopyDataFromAnotherSpace
+            (AddressSpace &_DesSpace, void *_Dest,
+             AddressSpace &_SrcSpace, void *_Src, size_t _Size);
 };

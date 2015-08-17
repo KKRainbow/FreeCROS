@@ -19,16 +19,21 @@
 #include"RamDiskItem.h"
 
 class Thread;
-class RamDiskItemChrDev :public  RamDiskItem
-{
+
+class RamDiskItemChrDev : public RamDiskItem {
 private:
-	pid_t pid;  //所有对这个节点的操作会转移到该线程
-	Thread* BuildMsg(Message& _Msg);
+    pid_t pid;  //所有对这个节点的操作会转移到该线程
+    Thread *BuildMsg(Message &_Msg);
+
 public:
-	RamDiskItemChrDev(Thread* _Thread,int32_t _Id,Type _Type,lr::sstl::AString _Name);
-	virtual pid_t Open()override;
-	virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size) override;
-	virtual pid_t Write(File *_Fptr, int8_t *_Buffer, size_t _Size) override;
-	virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence) override;
+    RamDiskItemChrDev(Thread *_Thread, int32_t _Id, Type _Type, lr::sstl::AString _Name);
+
+    virtual pid_t Open() override;
+
+    virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size) override;
+
+    virtual pid_t Write(File *_Fptr, int8_t *_Buffer, size_t _Size) override;
+
+    virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence) override;
 };
 

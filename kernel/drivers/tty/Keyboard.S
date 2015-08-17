@@ -446,6 +446,7 @@ alt_map:
  * and which have just one character returns.
  */
 do_self:
+	push %ebx
 	lea alt_map,%ebx
 	testb $0x20,mode		/* alt-gr */
 	jne 1f
@@ -476,6 +477,7 @@ do_self:
 4:	andl $0xff,%eax
 	xorl %ebx,%ebx
 	call put_queue
+    pop %ebx   /*不保存ebx会在O1优化时出错*/
 none:	ret
 
 /*

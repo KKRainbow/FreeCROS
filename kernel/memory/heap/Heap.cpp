@@ -29,7 +29,7 @@ Heap::Heap(Thread* _Thread):Heap()
 {
 	Assert(_Thread != nullptr);
 	Assert(_Thread->belongTo == nullptr);//如果不是一个进程,就直接报错
-	this->space = _Thread->GetAddressSpace().Obj();
+	this->space = _Thread->GetAddressSpace();
 }
 
 

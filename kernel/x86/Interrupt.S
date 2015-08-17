@@ -29,8 +29,9 @@ AsmHandler\IntrNum:
 	movw %ax,%es
 	movw %ax,%ss
 
-	
+	push %esp
 	call \EndFunc
+	addl $4,%esp
 
 	addl $4,%esp
 

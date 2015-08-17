@@ -16,6 +16,7 @@
  */
 
 #pragma once
+
 #include"Global.h"
 #include"stl/smap.h"
 #include"stl/stuple.h"
@@ -23,50 +24,64 @@
 #include"Threads.h"
 
 typedef int32_t IDType;
+
 class Thread;
-class RamDiskItem
-{
+
+class RamDiskItem {
 public:
-	friend class RamDisk;
-	enum Type{
-		FILE,
-		DIR,
-		BLOCK,
-		CHAR,
-		KERNELCHAR,
-		KERNELBLOCK
-	};
+    friend class RamDisk;
+
+    enum Type {
+        FILE,
+        DIR,
+        BLOCK,
+        CHAR,
+        KERNELCHAR,
+        KERNELBLOCK
+    };
 private:
-	typedef lr::sstl::Map<lr::sstl::AString,RamDiskItem*> ItemList;
-	Type type;
-	RamDiskItem* parent = nullptr;//暂不支持硬链接,为DAG
-	IDType id; //每个文件唯一一个ID
-	ItemList children;
-	lr::sstl::AString name;
-	IDType AddChild(RamDiskItem* _Child);
+    typedef lr::sstl::Map<lr::sstl::AString, RamDiskItem *> ItemList;
+    Type type;
+    RamDiskItem *parent = nullptr;
+    //暂不支持硬链接,为DAG
+    IDType id; //每个文件唯一一个ID
+    ItemList children;
+    lr::sstl::AString name;
+
+    IDType AddChild(RamDiskItem *_Child);
 
 protected:
-	Thread* thread;
-	int size = 0;
+    Thread *thread;
+    int size = 0;
 public:
-	RamDiskItem(Thread* _Thread,int32_t _Id,Type _Type,lr::sstl::AString _Name);
-	Type GetType();
-	lr::sstl::Pair<ItemList::iterator,ItemList::iterator> GetChildrenIter();
-	RamDiskItem* GetParent();
-	IDType GetID();
-	RamDiskItem* FindChildByName(lr::sstl::AString _Name);
-	lr::sstl::AString GetName();
-	int GetSize() const {
-		return size;
-	}
+    RamDiskItem(Thread *_Thread, int32_t _Id, Type _Type, lr::sstl::AString _Name);
 
-	void SetSize(int size) {
-		this->size = size;
-	}
+    Type GetType();
+
+    lr::sstl::Pair<ItemList::iterator, ItemList::iterator> GetChildrenIter();
+
+    RamDiskItem *GetParent();
+
+    IDType GetID();
+
+    RamDiskItem *FindChildByName(lr::sstl::AString _Name);
+
+    lr::sstl::AString GetName();
+
+    int GetSize() const {
+        return size;
+    }
+
+    void SetSize(int size) {
+        this->size = size;
+    }
 
 public:
-	virtual pid_t Open() = 0;
-	virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size) = 0;
-	virtual pid_t Write(File *_Fptr, int8_t *_Buffer, size_t _Size) = 0;
-	virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence) = 0;
+    virtual pid_t Open() = 0;
+
+    virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size) = 0;
+
+    virtual pid_t Write(File *_Fptr, int8_t *_Buffer, size_t _Size) = 0;
+
+    virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence) = 0;
 };

@@ -3,8 +3,29 @@ project(freecros)
 
 SET(ARCHITECT "x86")
 
-SET(CMAKE_CXX_FLAGS "-fomit-frame-pointer -g -O0 -ffreestanding -fno-builtin -fno-rtti -std=c++11 -m32 -fno-exceptions -nostdlib -nodefaultlibs -nostartfiles -nostdinc -nostdinc++ -Wreturn-type")
-SET(CMAKE_C_FLAGS "-fomit-frame-pointer -g -O0 -m32 -ffreestanding -fno-builtin -nostdlib -nodefaultlibs -nostartfiles -nostdinc -Wreturn-type")
+SET(O_FLAG "-O1 \
+  -falign-functions  -falign-jumps -falign-loops  -falign-labels -fcaller-saves \
+  -fcrossjumping -fcse-follow-jumps  -fcse-skip-blocks \
+  -fdelete-null-pointer-checks -fdevirtualize -fdevirtualize-speculatively -fexpensive-optimizations -fgcse  -fgcse-lm \
+  -finline-small-functions -findirect-inlining -fhoist-adjacent-loads -fisolate-erroneous-paths-dereference -fipa-sra \
+  -fsched-interblock  -fsched-spec -fschedule-insns -fschedule-insns2 \
+  -fstrict-overflow -ftree-switch-conversion \
+  -ftree-tail-merge -ftree-pre -ftree-vrp \
+  -foptimize-sibling-calls -fpartial-inlining -fpeephole2 -freorder-blocks  -freorder-functions -frerun-cse-after-loop \
+  -fno-inline\
+   -fno-strict-aliasing -fno-cprop-registers\
+  -fomit-frame-pointer -fno-stack-protector -fno-ipa-pure-const -fno-dce -fno-dse -fno-tree-dce -fno-tree-dse \
+  ")
+SET(CMAKE_CXX_FLAGS "\
+  ${O_FLAG} -g\
+  -ffreestanding -fno-builtin -fno-rtti -std=c++11 -m32 -fno-exceptions \
+  -nostdlib -nodefaultlibs -nostartfiles -nostdinc -nostdinc++ -Wreturn-type \
+  \
+  ")
+SET(CMAKE_C_FLAGS " \
+-fomit-frame-pointer -g -O0 -m32 -ffreestanding -fno-builtin -nostdlib -nodefaultlibs \
+-nostartfiles -nostdinc -Wreturn-type \
+")
 
 SET(Link_Script ${PROJECT_SOURCE_DIR}/config/${ARCHITECT}/kernel.ld)
 SET(CMAKE_EXE_LINKER_FLAGS "-T${Link_Script}")
@@ -49,7 +70,7 @@ ADD_CUSTOM_TARGET(
 	)
 ADD_CUSTOM_TARGET(
 	run
-	COMMAND qemu-system-i386 -cdrom myos.iso -smp 1 -s -hda hd1.img -boot order=d
+	COMMAND qemu-system-i386 -cdrom myos.iso -smp 3 -s -hda hd1.img -boot order=d
 	)
 ADD_CUSTOM_TARGET(
 	qd	

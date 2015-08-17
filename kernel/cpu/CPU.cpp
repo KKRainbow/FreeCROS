@@ -16,11 +16,10 @@
  */
 #include"CPU.h"
 
-void CPU::SetID(int _Id)
-{
-	id = _Id;
+void CPU::SetID(int _Id) {
+    id = _Id;
 }
-int CPU::GetID()const
-{
-	return id;
+
+int CPU::GetID() const {
+    return id;
 }

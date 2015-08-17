@@ -18,12 +18,10 @@
 #include"HAL.h"
 #include"apci/APCI.h"
 
-HAL* HAL::GetProperHAL()
-{
-	HAL* res = APCI::Instance();
-	if(res->Initialize())
-	{
-		return res;
-	}
-	return nullptr;
+HAL *HAL::GetProperHAL() {
+    HAL *res = APCI::Instance();
+    if ( res->Initialize()) {
+        return res;
+    }
+    return nullptr;
 }

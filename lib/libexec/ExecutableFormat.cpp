@@ -1,22 +1,17 @@
 #include"Global.h"
-#include "stl/slinkedlist.h"
 #include"ExecutableFormat.h"
 #include"ELF.h"
 
-ExecutableFormat::ExecutableFormat(const char *p) : path(p)
-{
+ExecutableFormat::ExecutableFormat(const char *p) : path(p) {
 }
 
-ExecutableFormat::ExecutableFormat(void *m) : mem(m)
-{
+ExecutableFormat::ExecutableFormat(void *m) : mem(m) {
 }
 
-ExecutableFormat::~ExecutableFormat()
-{
+ExecutableFormat::~ExecutableFormat() {
 }
 
-ExecutableFormat * ExecutableFormat::findForPath(const char *path)
-{
+ExecutableFormat *ExecutableFormat::findForPath(const char *path) {
 /*
  *    ExecutableFormat *fmt = ZERO;
  *    List<FormatDetectorForPath> formats;
@@ -48,24 +43,21 @@ ExecutableFormat * ExecutableFormat::findForPath(const char *path)
  *    errno = ENOEXEC;
  *    return ZERO;
  */
-	return nullptr;
+    return nullptr;
 }
 
-ExecutableFormat * ExecutableFormat::findForMem(void* mem)
-{
+ExecutableFormat *ExecutableFormat::findForMem(void *mem) {
     ExecutableFormat *fmt = nullptr;
-	lr::sstl::List<FormatDetectorForMem> formats;
+    lr::sstl::List<FormatDetectorForMem> formats;
 
     /* Insert known formats. */
     formats.PushBack(ELF::detectMem);
 
     /* Search for the corresponding executable format. */
-	for(auto& i : formats)
-    {
-		if ((fmt = i(mem)))
-		{
-			return fmt;
-		}
+    for ( auto &i : formats ) {
+        if ((fmt = i(mem))) {
+            return fmt;
+        }
     }
     return nullptr;
 }

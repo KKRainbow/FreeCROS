@@ -17,7 +17,6 @@
 
 #include "stdlib.h"
 
-int atoi(const char *nptr)
-{
+int atoi(const char *nptr) {
     return (int) strtol(nptr, 0, 0);
 }

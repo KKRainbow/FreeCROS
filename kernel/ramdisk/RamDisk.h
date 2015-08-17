@@ -16,30 +16,45 @@
  */
 
 #pragma once
+
 #include"RamDiskItem.h"
 #include"stl/sidgen.h"
 #include"stl/smap.h"
 #include"stl/sstring.h"
 #include"stl/stuple.h"
+
 class RamDiskItemKernel;
-class RamDisk
-{
-	SINGLETON_H(RamDisk)
+
+class RamDisk {
+SINGLETON_H(RamDisk)
+
 private:
-	lr::sstl::Map<IDType,RamDiskItem*> itemsMap;
-	RamDiskItem* root = nullptr;
-	lr::sstl::IDGenerator<IDType> idgen;
-	RamDiskItem* GetNewItem(lr::sstl::AString _Name,RamDiskItem::Type _Type);
+    lr::sstl::Map<IDType, RamDiskItem *> itemsMap;
+    RamDiskItem *root = nullptr;
+    lr::sstl::IDGenerator<IDType> idgen;
+
+    RamDiskItem *GetNewItem(lr::sstl::AString _Name, RamDiskItem::Type _Type);
+
 public:
-	lr::sstl::Pair<lr::sstl::AString,lr::sstl::AString> AnalysePath(lr::sstl::AString _Path);
-	const static IDType INVALIDATE_ID = -1;
-	RamDiskItem* GetItemByID(IDType _Id);
-	bool RemoveItemByID(IDType _Id);
-	bool RemoveItemByPtr(RamDiskItem* _Ptr);
-	RamDiskItem* GetItemByPath(lr::sstl::AString _Path,RamDiskItem* _Root = nullptr);
-	RamDiskItem* RegisterBlockDevice(lr::sstl::AString _Name);
-	RamDiskItem* RegisterCharaterDevice(lr::sstl::AString _Name);
-	IDType MakeDir(lr::sstl::AString _Path,RamDiskItem* _Parent = nullptr,bool _Recursive = false);
-	IDType CreateFile(lr::sstl::AString _Name,RamDiskItem* _Parent = nullptr);
-	IDType CreateKernelDev(RamDiskItemKernel* _Item);
+    lr::sstl::Pair<lr::sstl::AString, lr::sstl::AString> AnalysePath(lr::sstl::AString _Path);
+
+    const static IDType INVALIDATE_ID = -1;
+
+    RamDiskItem *GetItemByID(IDType _Id);
+
+    bool RemoveItemByID(IDType _Id);
+
+    bool RemoveItemByPtr(RamDiskItem *_Ptr);
+
+    RamDiskItem *GetItemByPath(lr::sstl::AString _Path, RamDiskItem *_Root = nullptr);
+
+    RamDiskItem *RegisterBlockDevice(lr::sstl::AString _Name);
+
+    RamDiskItem *RegisterCharaterDevice(lr::sstl::AString _Name);
+
+    IDType MakeDir(lr::sstl::AString _Path, RamDiskItem *_Parent = nullptr, bool _Recursive = false);
+
+    IDType CreateFile(lr::sstl::AString _Name, RamDiskItem *_Parent = nullptr);
+
+    IDType CreateKernelDev(RamDiskItemKernel *_Item);
 };

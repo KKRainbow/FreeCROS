@@ -155,7 +155,7 @@ void LocalAPIC::InitAPs(int APICID,void (*entry)(),addr_t _StackAddr,size_t _Sta
 		uint32_t main_entry;
 		uint32_t stack_addr;
 		uint32_t stack_size;
-		uint32_t flag;//上一个AP初始化好后会将这一位置为0
+		volatile uint32_t flag;//上一个AP初始化好后会将这一位置为0
 		uint32_t flag_absolute_addr;
 	}*boot_data = (BootData*)&aps_boot_data;
 	Assert(boot_data);

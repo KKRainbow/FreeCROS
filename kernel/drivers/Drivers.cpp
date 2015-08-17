@@ -5,8 +5,8 @@
 #include "Drivers.h"
 #include "tty/Tty.h"
 #include "hd/HardDrive.h"
-void InitDrivers()
-{
+
+void InitDrivers() {
     InitTty();
     InitHd();
 }

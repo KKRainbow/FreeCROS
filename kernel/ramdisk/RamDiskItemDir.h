@@ -18,13 +18,16 @@
 
 #include"RamDisk.h"
 
-class RamDiskItemDir :public RamDiskItem
-{
+class RamDiskItemDir : public RamDiskItem {
 public:
-	RamDiskItemDir(int32_t _Id,Type _Type,lr::sstl::AString _Name);
-	virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence);
-	virtual pid_t Write(File *_Fptr, int8_t *_Buffer, size_t _Size);
-	virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size);
-	virtual pid_t Open();
+    RamDiskItemDir(int32_t _Id, Type _Type, lr::sstl::AString _Name);
+
+    virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence);
+
+    virtual pid_t Write(File *_Fptr, int8_t *_Buffer, size_t _Size);
+
+    virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size);
+
+    virtual pid_t Open();
 };
 

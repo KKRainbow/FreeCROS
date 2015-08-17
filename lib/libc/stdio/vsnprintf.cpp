@@ -15,17 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include"stdlib.h"
 #include "stdarg.h"
 #include "stdio.h"
 
-extern "C" int vsnprintf(char *buffer, unsigned int size, const char *fmt, va_list args)
-{
-    char buf[size+1];
-    for(unsigned int i = 0;i<size;i++)buf[i] = fmt[i];
+extern "C" int vsnprintf(char *buffer, unsigned int size, const char *fmt, va_list args) {
+    char buf[size + 1];
+    for ( unsigned int i = 0; i < size; i++ )buf[i] = fmt[i];
     buf[size] = '\0';
-    
-    return vsprintf(buffer,buf,args);
+
+    return vsprintf(buffer, buf, args);
 }
 
 

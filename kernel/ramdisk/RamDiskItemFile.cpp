@@ -17,28 +17,23 @@
 
 #include"RamDiskItemFile.h"
 
-RamDiskItemFile::RamDiskItemFile(int32_t _Id,Type _Type,lr::sstl::AString _Name)
-:RamDiskItem(nullptr,_Id,_Type,_Name)
-{
+RamDiskItemFile::RamDiskItemFile(int32_t _Id, Type _Type, lr::sstl::AString _Name)
+        : RamDiskItem(nullptr, _Id, _Type, _Name) {
 
 }
 
-pid_t RamDiskItemFile::Seek(File *_Fptr, off_t _Offset, int _Whence)
-{
-	return 0;
+pid_t RamDiskItemFile::Seek(File *_Fptr, off_t _Offset, int _Whence) {
+    return 0;
 }
 
-pid_t RamDiskItemFile::Write(File *_Fptr, int8_t *_Buffer, size_t _Size)
-{
-	return 0;
+pid_t RamDiskItemFile::Write(File *_Fptr, int8_t *_Buffer, size_t _Size) {
+    return 0;
 }
 
-pid_t RamDiskItemFile::Read(File *_Fptr, int8_t *_Buffer, size_t _Size)
-{
-	return 0;
+pid_t RamDiskItemFile::Read(File *_Fptr, int8_t *_Buffer, size_t _Size) {
+    return 0;
 }
 
-pid_t RamDiskItemFile::Open()
-{
-	return 0;
+pid_t RamDiskItemFile::Open() {
+    return 0;
 }
