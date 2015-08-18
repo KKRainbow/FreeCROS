@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-ENTRY(main)
+ENTRY(start)
 TARGET("elf32-i386")
 OUTPUT_FORMAT("elf32-i386")
 

@@ -16,13 +16,13 @@ SET(O_FLAG "-O1 \
    -fno-strict-aliasing -fno-cprop-registers\
   -fomit-frame-pointer -fno-stack-protector -fno-ipa-pure-const -fno-dce -fno-dse -fno-tree-dce -fno-tree-dse \
   ")
-#SET(O_FLAG "-O0")
-SET(CMAKE_CXX_FLAGS "\
-  ${O_FLAG} -g\
+SET(N_FLAG " \
   -ffreestanding -fno-builtin -fno-rtti -std=c++11 -m32 -fno-exceptions \
   -nostdlib -nodefaultlibs -nostartfiles -nostdinc -nostdinc++ -Wreturn-type \
-  \
+  -g\
   ")
+SET(CMAKE_CXX_FLAGS "${O_FLAG} ${N_FLAG}")
+#SET(CMAKE_CXX_FLAGS "-O0 ${N_FLAG}")
 SET(CMAKE_C_FLAGS " \
 -fomit-frame-pointer -g -O0 -m32 -ffreestanding -fno-builtin -nostdlib -nodefaultlibs \
 -nostartfiles -nostdinc -Wreturn-type \

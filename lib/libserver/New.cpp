@@ -3,26 +3,13 @@
 //
 
 #include "./New.h"
-#include "../libkernel/memory/MemoryListAllocator.h"
-#include "../libkernel/memory/MemoryListAllocator.cpp"
-
-static MemoryListAllocator globalAlloc(0, 0, MemoryZoneType::ORDINARY_PAGE_ALLOC);
-static bool flag = false;
-
-void init() {
-    if ( !flag ) {
-        new(&globalAlloc)MemoryListAllocator(0x30000000, 1 << 30, (MemoryZoneType::ORDINARY_PAGE_ALLOC));
-        globalAlloc.Initialize();
-    }
-}
+#include "stdlib.h"
 
 void *operator new(unsigned int _Size) {
-    init();
-    return globalAlloc.Allocate(_Size, 0);
+    return malloc((size_t)_Size);
 }
 
 void *operator new(unsigned int _Size, void *_Ptr) {
-    _Size = 0;
     return _Ptr;
 }
 
@@ -35,6 +22,5 @@ void *operator new[](unsigned int _Size, void *_Ptr) {
 }
 
 void operator delete(void *_Ptr) throw() {
-    init();
-    globalAlloc.Deallocate(_Ptr);
+    free(_Ptr);
 }
