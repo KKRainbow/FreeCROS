@@ -22,27 +22,11 @@
 #include <stdarg.h>
 #include<stddef.h>
 
+#include "stdio/fileops.h"
+
 /**
  * @defgroup libc libc (ISO C99)
  * @{
- */
-
-/**
- * @brief Seek operations
- * @{
- */
-
-/** Seek relative to current position. */
-#define SEEK_CUR	0
-
-/** Seek relative to end-of-file. */
-#define SEEK_END	1
-
-/** Seek relative to start-of-file. */
-#define SEEK_SET	2
-
-/**
- * @}
  */
 
 /**
@@ -99,13 +83,12 @@ extern "C" int printf(const char *format, ...);
  */
 extern "C" int vprintf(const char *format, va_list args);
 
+extern "C" int fprintf(FILE *stream, const char *format, ...);
+
+extern "C" int scanf(const char *format, ...);
 /**
  * @}
  */
-
-#define stdin 0
-#define stdout 1
-#define stderr 2
 
 #endif /* __ASSEMBLER__ */
 #endif /* __LIBC_STDIO_H */

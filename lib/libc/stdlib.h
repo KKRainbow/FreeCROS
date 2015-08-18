@@ -122,6 +122,7 @@ extern "C" void * malloc(size_t size);
  */
 extern "C" void free(void *ptr);
 
+extern "C" int start(int argc, char* argv[],char* env[]);
 /**
  * @}
  */

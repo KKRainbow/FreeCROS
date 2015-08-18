@@ -3,18 +3,24 @@
 #include"UserLog.h"
 
 int main() {
-    auto fid = SysCallOpen::Invoke((uint32_t) "/dev/hda1");
-    log("fid: %d\n", fid);
+    auto fp = fopen("/dev/hda", "rw");
+    printf("fid: %d\n", fp);
     char data[512];
-    auto size = SysCallRead::Invoke(fid, (uint32_t) data, sizeof(data));
+    auto size = fread(data,sizeof(data),1,fp);
     int *tmp = (int *) data;
-    log("read: %d", size);
+    printf("read: %d", size);
     for ( int i = 0; i < sizeof(data) / sizeof(int); i++ ) {
-        log("%x ", tmp[i]);
-        if ( i % 10 == 0 ) {
-            log("\n");
+        printf("%.8x ", tmp[i]);
+        if ( i % 8 == 0 ) {
+            printf("\n");
         }
     }
-    for ( ; ; );
+    while(1)
+    {
+        char str[100];
+        printf("please input a num\n");
+        int n = scanf("%s",str);
+        printf("your num is%s\n",str);
+    }
     return 1;
 }

@@ -1,11 +1,33 @@
 //
 // Created by ssj on 15-8-18.
 //
+#pragma once
 #include "stdio.h"
+
+#define FP_TABLE_SIZE 32
 
 /**
  * @defgroup libc libc (ISO C99)
  * @{
+ */
+
+
+/**
+ * @brief Seek operations
+ * @{
+ */
+
+/** Seek relative to current position. */
+#define SEEK_CUR	0
+
+/** Seek relative to end-of-file. */
+#define SEEK_END	1
+
+/** Seek relative to start-of-file. */
+#define SEEK_SET	2
+
+/**
+ * @}
  */
 
 /**
@@ -16,12 +38,12 @@
 /**
  * A structure containing information about a file.
  */
-typedef struct FILE
+struct FILE
 {
     /** File descriptor. */
     int fd;
-}
-        FILE;
+};
+extern FILE fp_table[FP_TABLE_SIZE];
 
 /**
  * @brief Open a stream.
@@ -77,7 +99,7 @@ extern "C" FILE * fopen(const char *filename,
  */
 extern "C" size_t fread(void *ptr, size_t size,
                         size_t nitems, FILE *stream);
-
+extern "C" size_t fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream);
 /**
  * @brief Close a stream.
  *
@@ -95,10 +117,15 @@ extern "C" size_t fread(void *ptr, size_t size,
  */
 extern "C" int fclose(FILE *stream);
 
+
+extern "C" int fseek(FILE *stream, long offset, int whence);
 /**
  * @}
  */
 
+extern FILE* stdin;
+extern FILE* stderr;
+extern FILE* stdout;
 /**
  * @}
  */

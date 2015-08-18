@@ -9,25 +9,20 @@ int main() {
     int i = 0;
     char a[500];
     void *test = new char[500];
-    log("new: %x \n,", test);
+    printf("new: %x \n,", test);
 
     int pid = SysCallCreateThread::Invoke((uint32_t) keyboard, 0, 0, 0);
-    log("pid: %d\n", pid);
+    printf("pid: %d\n", pid);
 
     int *tmp = (int *) 0x20000000;
     *tmp = 5;
 
-    log("start open\n");
-    auto fid = -1;
-    while ( 1 ) {
-        fid = SysCallOpen::Invoke((uint32_t) "/dev/tty", 0, 0, 0);
-        if ( fid >= 0 )break;
-    }
-    log("Get dev_t : %d\n", fid);
+    printf("start open\n");
+    return 1;
 
     for ( ; ; ) {
-        auto size = SysCallRead::Invoke(fid, (uint32_t) a, 500, 0);
-        SysCallWrite::Invoke(fid, (uint32_t) a, strlen(a));
+        auto size = fread(a, sizeof(a),1,stdin);
+        fwrite(a, strlen(a), 1,stdout);
         memset(a, 0, 500);
     }
     return 1;
