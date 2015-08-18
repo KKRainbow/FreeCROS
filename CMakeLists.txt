@@ -16,6 +16,7 @@ SET(O_FLAG "-O1 \
    -fno-strict-aliasing -fno-cprop-registers\
   -fomit-frame-pointer -fno-stack-protector -fno-ipa-pure-const -fno-dce -fno-dse -fno-tree-dce -fno-tree-dse \
   ")
+#SET(O_FLAG "-O0")
 SET(CMAKE_CXX_FLAGS "\
   ${O_FLAG} -g\
   -ffreestanding -fno-builtin -fno-rtti -std=c++11 -m32 -fno-exceptions \
@@ -70,7 +71,7 @@ ADD_CUSTOM_TARGET(
 	)
 ADD_CUSTOM_TARGET(
 	run
-	COMMAND qemu-system-i386 -cdrom myos.iso -smp 3 -s -hda hd1.img -boot order=d
+	COMMAND qemu-system-i386 -cdrom myos.iso -smp 1 -s -hda hd1.img -boot order=d
 	)
 ADD_CUSTOM_TARGET(
 	qd	
@@ -79,6 +80,10 @@ ADD_CUSTOM_TARGET(
 ADD_CUSTOM_TARGET(
 	cg	
 	COMMAND cgdb -command=gdbcommand
+	)
+ADD_CUSTOM_TARGET(
+	stat
+	COMMAND find ${PROJECT_SOURCE_DIR} -name \"*.cpp\" -or -name \"*.h\" -or -name \"*.c\"|xargs wc -l
 	)
 
 add_subdirectory(server)
