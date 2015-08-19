@@ -13,12 +13,12 @@ int main() {
 
     int pid = SysCallCreateThread::Invoke((uint32_t) keyboard, 0, 0, 0);
     printf("pid: %d\n", pid);
+    for(;;);
 
     int *tmp = (int *) 0x20000000;
     *tmp = 5;
 
     printf("start open\n");
-    return 1;
 
     for ( ; ; ) {
         auto size = fread(a, sizeof(a),1,stdin);

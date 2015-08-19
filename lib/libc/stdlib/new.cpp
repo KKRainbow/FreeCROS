@@ -15,6 +15,7 @@ void init() {
     if ( !flag ) {
         new(&globalAlloc)MemoryListAllocator(0x30000000, 1 << 30, (MemoryZoneType::ORDINARY_PAGE_ALLOC));
         globalAlloc.Initialize();
+        flag = true;
     }
 }
 extern "C" void * malloc(size_t _Size)

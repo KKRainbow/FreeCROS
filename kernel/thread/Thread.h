@@ -38,8 +38,8 @@ private:
     uint8_t* childBitMap; //It serves to allocate stack space
     int mapSlot = -1;
 
-    lr::sstl::Map<int, File> fileTable;
-    lr::sstl::IDGenerator<int> fidGen;
+    lr::sstl::Map<int, File>* fileTable = nullptr;
+    lr::sstl::IDGenerator<int>* fidGen;
 public:
     SpinLock threadLock;
 

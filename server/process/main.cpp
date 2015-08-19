@@ -15,6 +15,7 @@ int main() {
             printf("\n");
         }
     }
+    for(;;);
     while(1)
     {
         char str[100];

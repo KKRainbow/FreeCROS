@@ -21,8 +21,8 @@ SET(N_FLAG " \
   -nostdlib -nodefaultlibs -nostartfiles -nostdinc -nostdinc++ -Wreturn-type \
   -g\
   ")
-SET(CMAKE_CXX_FLAGS "${O_FLAG} ${N_FLAG}")
-#SET(CMAKE_CXX_FLAGS "-O0 ${N_FLAG}")
+#SET(CMAKE_CXX_FLAGS "${O_FLAG} ${N_FLAG}")
+SET(CMAKE_CXX_FLAGS "-O0 ${N_FLAG}")
 SET(CMAKE_C_FLAGS " \
 -fomit-frame-pointer -g -O0 -m32 -ffreestanding -fno-builtin -nostdlib -nodefaultlibs \
 -nostartfiles -nostdinc -Wreturn-type \

@@ -225,7 +225,7 @@ static int ReadWrite(int _Id, char *_Buffer, size_t _Size, int _ReadWrite) {
     else {
         Assert(false);
     }
-    //如果错误了就不用进行下面的步骤
+    file->f_pos += res;
     return res;
 }
 

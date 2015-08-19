@@ -29,6 +29,8 @@ Thread::Thread(pid_t pid, ThreadType _Type, Thread *_Father) : cpuState(_Type), 
         father = _Father;
         _Father->children.PushBack(this);
     }
+    this->fileTable = new lr::sstl::Map<int, File>();
+    this->fidGen = new lr::sstl::IDGenerator<int>();
     this->kernelStackAddr =
             (addr_t) MemoryManager::Instance()->KernelPageAllocate(kernelStackSize >> PAGE_SHIFT);
     cpuState.tss.esp0 = this->kernelStackAddr + this->kernelStackSize;
@@ -65,6 +67,8 @@ Thread::Thread(Thread &_Thread, int _Pid) : cpuState(_Thread.threadType),
         return;
     }
     else {
+        this->fileTable = _Thread.fileTable;
+        this->fidGen = _Thread.fidGen;
         //设置内核栈
         this->kernelStackAddr =
                 (addr_t) MemoryManager::Instance()->KernelPageAllocate(kernelStackSize >> PAGE_SHIFT);
@@ -313,8 +317,8 @@ uint32_t Thread::GetAlarm() {
 }
 
 int Thread::GetNewFileSlot() {
-    int id = fidGen.GetID();
-    auto pair = this->fileTable.Insert(lr::sstl::MakePair(id, File()));
+    int id = fidGen->GetID();
+    auto pair = this->fileTable->Insert(lr::sstl::MakePair(id, File()));
     if ( !pair.second ) {
         LOG("Get file slot error!!!!\n");
         return -1;
@@ -325,8 +329,8 @@ int Thread::GetNewFileSlot() {
 }
 
 File *Thread::GetFileStruct(int _Fid) {
-    auto iter = this->fileTable.Find(_Fid);
-    if ( iter == fileTable.End()) {
+    auto iter = fileTable->Find(_Fid);
+    if ( iter == fileTable->End()) {
         return nullptr;
     }
     else {
@@ -336,5 +340,5 @@ File *Thread::GetFileStruct(int _Fid) {
 }
 
 void Thread::RemoveFileStruct(int _Fid) {
-    fileTable.Erase(_Fid);
+    fileTable->Erase(_Fid);
 }

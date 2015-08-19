@@ -203,7 +203,7 @@ extern "C" int scanf(const char *format, ...)
 
     FILE *fp = stdin;
 
-    fread(str,sizeof(str),1,fp);
+    int count = fread(str,sizeof(str),1,fp);
 
     va_start(pArg,format);//让pArg指向函数参数列表中的最后一个明确的参数,这里就是format参数.
 
@@ -245,7 +245,13 @@ extern "C" int scanf(const char *format, ...)
                     int8_t j = 0;
                     char *d = va_arg(pArg,char *);
                     while ((d[j++] = str[i++]) != 0)
-                        ;
+                    {
+                        if(--count == 0)break;
+                        if(d[j-1] == '\n'){
+                            d[j-1] = '\0';
+                            break;
+                        }
+                    }
                 }
                     break;
                     /* long */
