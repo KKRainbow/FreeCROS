@@ -19,6 +19,8 @@
 #include"RamDisk.h"
 
 class RamDiskItemDir : public RamDiskItem {
+private:
+    Thread* mounted = nullptr;
 public:
     RamDiskItemDir(int32_t _Id, Type _Type, lr::sstl::AString _Name);
 
@@ -29,5 +31,7 @@ public:
     virtual pid_t Read(File *_Fptr, int8_t *_Buffer, size_t _Size);
 
     virtual pid_t Open();
+
+    void mount(Thread* _Thread);
 };
 
