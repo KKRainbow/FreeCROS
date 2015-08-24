@@ -16,13 +16,12 @@
  */
 
 
+#include <dirent.h>
 #include"RamDisk.h"
 
 class RamDiskItemDir : public RamDiskItem {
-private:
-    Thread* mounted = nullptr;
 public:
-    RamDiskItemDir(int32_t _Id, Type _Type, lr::sstl::AString _Name);
+    RamDiskItemDir(int32_t _Id, lr::sstl::AString _Name);
 
     virtual pid_t Seek(File *_Fptr, off_t _Offset, int _Whence);
 
@@ -32,6 +31,6 @@ public:
 
     virtual pid_t Open();
 
-    void mount(Thread* _Thread);
+    void Mount(Thread* _Thread);
 };
 

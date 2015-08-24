@@ -1,4 +1,5 @@
 #include <stl/sstl/sstl_vector.h>
+#include <SystemCalls.h>
 #include"stdio.h"
 #include"stl/sstring.h"
 using namespace lr::sstl;
@@ -277,6 +278,7 @@ int keyboard() {
 
 
         if(command == "quit"){
+			SysCallExit::Invoke();
             return 0;
         }
         else if(command == "info"){
@@ -420,5 +422,6 @@ int keyboard() {
                 cout << "No such an entry" << endl;
         }
     }
+    SysCallExit::Invoke();
     return 0;
 }

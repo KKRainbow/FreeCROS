@@ -32,4 +32,6 @@ typedef unsigned char cc_t;
 typedef unsigned int speed_t;
 
 typedef int dev_t;
+
+typedef int ino_t;
 #endif
