@@ -21,8 +21,8 @@ SET(N_FLAG " \
   -nostdlib -nodefaultlibs -nostartfiles -nostdinc -nostdinc++ -Wreturn-type \
   -g\
   ")
-SET(CMAKE_CXX_FLAGS "${O_FLAG} ${N_FLAG}")
-#SET(CMAKE_CXX_FLAGS "-O0 ${N_FLAG}")
+#SET(CMAKE_CXX_FLAGS "${O_FLAG} ${N_FLAG}")
+SET(CMAKE_CXX_FLAGS "-O0 ${N_FLAG}")
 SET(CMAKE_C_FLAGS " \
 -fomit-frame-pointer -g -O0 -m32 -ffreestanding -fno-builtin -nostdlib -nodefaultlibs \
 -nostartfiles -nostdinc -Wreturn-type \
@@ -56,6 +56,7 @@ ADD_CUSTOM_TARGET(
 	COMMAND mkdir ${ISO_DIR}/boot/grub -p
 	COMMAND cp ./kernel/kernel ${ISO_DIR}/boot/myos.bin 
 	COMMAND cp ${PROJECT_SOURCE_DIR}/config/${ARCHITECT}/gdbcommand ${PROJECT_BINARY_DIR}/
+    COMMAND cp ${PROJECT_SOURCE_DIR}/config/${ARCHITECT}/gdbcommand-server ${PROJECT_BINARY_DIR}/
 	COMMAND cp ${PROJECT_SOURCE_DIR}/config/${ARCHITECT}/bochs.bxrc ${PROJECT_BINARY_DIR}/
 	COMMAND grub-mkrescue -o ${PROJECT_BINARY_DIR}/myos.iso ${ISO_DIR}
 	COMMENT "generating iso file"
@@ -81,6 +82,10 @@ ADD_CUSTOM_TARGET(
 	cg	
 	COMMAND cgdb -command=gdbcommand
 	)
+ADD_CUSTOM_TARGET(
+    scg
+    COMMAND cgdb -command=gdbcommand-server
+)
 ADD_CUSTOM_TARGET(
 	stat
 	COMMAND find ${PROJECT_SOURCE_DIR} -name \"*.cpp\" -or -name \"*.h\" -or -name \"*.c\"|xargs wc -l

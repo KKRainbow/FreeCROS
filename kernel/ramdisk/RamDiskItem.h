@@ -45,12 +45,12 @@ private:
     RamDiskItem *parent = nullptr;
     //暂不支持硬链接,为DAG
     IDType id; //每个文件唯一一个ID
-    ItemList children;
     lr::sstl::AString name;
 
     IDType AddChild(RamDiskItem *_Child);
 
 protected:
+    ItemList children;
     Thread *thread;
     int size = 0;
 public:

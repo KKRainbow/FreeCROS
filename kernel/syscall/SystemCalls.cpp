@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <ramdisk/RamDiskItemDir.h>
 #include"SystemCalls.h"
 #include"memory/AddressSpaceManager.h"
 #include"cpu/CPUManager.h"
@@ -148,26 +149,41 @@ SYSCALL_METHOD_CPP(RegisterChrDev) //devname
 
 SYSCALL_METHOD_CPP(Open)//path
 {
+    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
     auto rd = RamDisk::Instance();
     Message msg;
-    char devname[500];
+    lr::sstl::AString path = (char*)_First;
+    lr::sstl::AString mode = (char*)_Sec;
 
-    ThreadManager::ReadDataFromCurrThread(devname, (void *) _First, sizeof(devname) - 1);
-    devname[500] = 0;
-    auto ri = rd->GetItemByPath(devname);
+    if (path.CharAt(0) != '/')
+    {
+        path = curr->cwd + path;
+    }
+
+    auto ri = rd->GetItemByPath(path);
     if ( ri == nullptr )return -1;
 
-    auto res = ri->Open();
+    RamDiskItemDir* dir = (RamDiskItemDir*)ri;
+    int res = -1;
+    if(dir->IsMounted())
+    {
+        res = dir->Open(path,-1,(char*)_Sec);
+    }
+    else
+    {
+        res = dir->Open();
+    }
     //如果错误了就不用进行下面的步骤
     if ( res < 0 )return res;
 
-    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
     auto fid = curr->GetNewFileSlot();
     if ( fid < 0 )return fid;
     File *file = curr->GetFileStruct(fid);
     Assert(file != nullptr);
 
     file->f_item = ri;
+    if(dir->IsMounted())file->f_inner = res;
+
     return fid;
 }
 
@@ -319,4 +335,42 @@ SYSCALL_METHOD_CPP(Exit) {
 SYSCALL_METHOD_CPP(GiveUp) {
     CPUManager::Instance()->GetCurrentCPU()->ExhaustCurrThread();
     CPUManager::Instance()->GetCurrentCPU()->Run();
+}
+
+SYSCALL_METHOD_CPP(MountFs)
+{
+    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+    char* dev = (char*)_Sec;
+    char* dir = (char*)_First;
+
+    RamDiskItem* root = nullptr;
+    if (dev[0] != '/')
+    {
+        root = RamDisk::Instance()->GetItemByPath(curr->cwd);
+    }
+    else
+    {
+        root = nullptr;
+    }
+
+    auto dirItem = RamDisk::Instance()->GetItemByPath(dir, root);
+    if (!dirItem)return -1;
+    ((RamDiskItemDir*)dirItem)->Mount(curr);
+    return 1;
+}
+
+SYSCALL_METHOD_CPP(Mkdir)
+{
+    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+    char* path = (char*)_First;
+    RamDiskItem* root = nullptr;
+    if (path[0] != '/')
+    {
+        root = RamDisk::Instance()->GetItemByPath(curr->cwd);
+    }
+    else
+    {
+        root = nullptr;
+    }
+    return RamDisk::Instance()->MakeDir(path, nullptr, _Sec);
 }

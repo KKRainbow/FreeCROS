@@ -88,6 +88,7 @@ private:
     size_t kernelStackSize = 4 << PAGE_SHIFT;
 
 public:
+    lr::sstl::AString cwd;
     Thread *father = nullptr;
     Thread *belongTo = nullptr; //该线程所属的进程，如果是进程，那么这个就是空的。
     int cpuRunningOn = 0;

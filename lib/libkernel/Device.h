@@ -8,49 +8,40 @@
 #define MSG_DEVICE_READ_OPERATION 12
 #define MSG_DEVICE_SEEK_OPERATION 13
 
+#define DEFINE_FUNC(Oper) \
+static void Dev##Oper() \
+{ \
+Message ret; \
+Message msg = globalMsg; \
+ret = globalDevOp-> \
+Oper (msg); \
+ret.destination = msg.source; \
+SysCallSendMessageTo::Invoke((uint32_t)&ret, SEND_MESSAGE_FLAG_PROXY_FATHER); \
+SysCallExit::Invoke(); \
+}
+
 class DeviceOperation
 {
 public:
-	virtual bool Open(pid_t _Pid) = 0;
-	virtual size_t Read(char* _Buffer,size_t _Size) = 0;
-	virtual size_t Write(char* _Buffer,size_t _Size) = 0;
+	virtual Message Open(Message& _Msg) = 0;
+	virtual Message Read(Message& _Msg) = 0;
+	virtual Message Write(Message& _Msg) = 0;
 };
 static DeviceOperation* globalDevOp = nullptr;
 static Message globalMsg;
-static void DevOpen()
-{
-	Message ret;
-	Message msg = globalMsg;
-	ret.destination = msg.source;
-	ret.content[0] = (uint32_t)globalDevOp->Open(msg.source);
-	SysCallSendMessageTo::Invoke((uint32_t)&ret, SEND_MESSAGE_FLAG_PROXY_FATHER);
-	log("open~~~~!!!!~~~\n");
-	SysCallExit::Invoke();
-}
 
-static void DevRead()
-{
-	Message ret;
-	Message msg = globalMsg;
-	char* tmpbuffer = new char[msg.content[2]];
-	tmpbuffer[3] = 0;
-
-	ret.destination = msg.source;
-	ret.content[0] = (uint32_t)tmpbuffer;
-	ret.content[1] = (uint32_t)globalDevOp->Read(tmpbuffer,msg.content[2]);
-	delete tmpbuffer;
-	SysCallSendMessageTo::Invoke((uint32_t)&ret, SEND_MESSAGE_FLAG_PROXY_FATHER);
-	SysCallExit::Invoke();
-}
+DEFINE_FUNC(Open)
+DEFINE_FUNC(Read)
+DEFINE_FUNC(Write)
 
 static void device_loop(DeviceOperation& _Op)
 {
 	char a[500];
-	char tmpbuffer[500];
-	Message msg;
 	int i = 0;
 	globalDevOp = &_Op;
 	int pid;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
 	for(;;)
 	{
 		SysCallReceiveAll::Invoke((uint32_t)&globalMsg,0,0,0);
@@ -63,8 +54,12 @@ static void device_loop(DeviceOperation& _Op)
 			case MSG_DEVICE_READ_OPERATION :
 				pid = SysCallCreateThread::Invoke((uint32_t) DevRead);
 				break;
+			case MSG_DEVICE_WRITE_OPERATION :
+				pid = SysCallCreateThread::Invoke((uint32_t) DevWrite);
+				break;
 		}
 		i++;
 	}
+#pragma clang diagnostic pop
 }
 

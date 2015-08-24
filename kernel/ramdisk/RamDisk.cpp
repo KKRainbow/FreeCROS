@@ -80,6 +80,7 @@ RamDiskItem *RamDisk::GetItemByPath(AString _Path, RamDiskItem *_Root) {
     for ( auto &name : names ) {
         _Root = _Root->FindChildByName(name);
         if ( _Root == nullptr )return nullptr;
+        if (_Root->thread != nullptr)return _Root;
     }
     return _Root;
 }
@@ -113,7 +114,7 @@ RamDiskItem *RamDisk::GetNewItem(AString _Name, RamDiskItem::Type _Type) {
                     (currThread, this->idgen.GetID(), _Type, _Name);
             break;
         case RamDiskItem::Type::DIR:
-            i = new RamDiskItemDir(this->idgen.GetID(), _Type, _Name);
+            i = new RamDiskItemDir(this->idgen.GetID(),  _Name);
             break;
         case RamDiskItem::Type::FILE:
             i = new RamDiskItemFile(this->idgen.GetID(), _Type, _Name);

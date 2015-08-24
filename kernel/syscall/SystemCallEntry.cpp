@@ -11,6 +11,7 @@ SINGLETON_CPP(SystemCallEntry) {
     ADD_SYSTEM_CALL(ReceiveFrom);
     ADD_SYSTEM_CALL(ReadDataFromThread);
     ADD_SYSTEM_CALL(WriteToPhisicalAddr);
+    ADD_SYSTEM_CALL(ReadFromPhisicalAddr);
     ADD_SYSTEM_CALL(RegisterIRQ);
     ADD_SYSTEM_CALL(RegisterChrDev);
     ADD_SYSTEM_CALL(Open);
@@ -25,6 +26,8 @@ SINGLETON_CPP(SystemCallEntry) {
     ADD_SYSTEM_CALL(Sleep);
     ADD_SYSTEM_CALL(Exit);
     ADD_SYSTEM_CALL(GiveUp);
+    ADD_SYSTEM_CALL(MountFs);
+    ADD_SYSTEM_CALL(Mkdir);
     Interrupt::Instance()->RegisterIRQ(Call, SYSCALL_IRQ_NUM);
     Interrupt::Instance()->SetDPLOfIRQ(SYSCALL_IRQ_NUM, 3);
 }

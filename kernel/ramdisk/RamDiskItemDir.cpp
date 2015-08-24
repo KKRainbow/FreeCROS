@@ -20,6 +20,7 @@
 #include <SystemCalls.h>
 #include "RamDiskItemDir.h"
 #include "thread/Thread.h"
+#include "Device.h"
 #include "dirent.h"
 
 RamDiskItemDir::RamDiskItemDir(int32_t _Id, lr::sstl::AString _Name)
@@ -28,18 +29,21 @@ RamDiskItemDir::RamDiskItemDir(int32_t _Id, lr::sstl::AString _Name)
 }
 
 pid_t RamDiskItemDir::Seek(File *_Fptr, off_t _Offset, int _Whence) {
+    return 1;
 }
 
 pid_t RamDiskItemDir::Write(File *_Fptr, int8_t *_Buffer, size_t _Size) {
     if (_Fptr && this->thread && _Fptr->f_inner > 0)
     {
         Message msg;
+        msg.content[0] = MSG_DEVICE_WRITE_OPERATION;
         msg.content[FsMsg::W_FD] = (uint32_t)_Fptr->f_inner;
         msg.content[FsMsg::W_BUF] = (uint32_t)_Buffer;
         msg.content[FsMsg::W_POS] = (uint32_t)_Fptr->f_pos;
         msg.content[FsMsg::W_SIZE] = (uint32_t)_Size;
         pid_t pid = this->thread->GetPid();
-        SysCallSendMessageTo::Invoke((uint32_t)pid, (uint32_t)&msg);
+        msg.destination = pid;
+        SysCallSendMessageTo::Invoke((uint32_t)&msg);
         SysCallReceiveFrom::Invoke((uint32_t) pid, (uint32_t) &msg, 0, 0);
         return msg.content[0];
     }
@@ -52,20 +56,25 @@ pid_t RamDiskItemDir::Read(File *_Fptr, int8_t *_Buffer, size_t _Size) {
     {
         return -1;
     }
-    if (_Size % sizeof(dirent) != 0 || _Fptr->f_pos % sizeof(dirent) != 0)
+    if (!this->IsMounted() && (_Size % sizeof(dirent) != 0 || _Fptr->f_pos % sizeof(dirent) != 0))
     {
         return -1;
     }
     if (this->thread && _Fptr->f_inner > 0)
     {
         Message msg;
+        char* buffer = new char[_Size];
+        msg.content[0] = MSG_DEVICE_READ_OPERATION;
         msg.content[FsMsg::R_FD] = (uint32_t)_Fptr->f_inner;
-        msg.content[FsMsg::R_BUF] = (uint32_t)_Buffer;
+        msg.content[FsMsg::R_BUF] = (uint32_t)buffer;
         msg.content[FsMsg::R_POS] = (uint32_t)_Fptr->f_pos;
         msg.content[FsMsg::R_SIZE] = (uint32_t)_Size;
         pid_t pid = this->thread->GetPid();
-        SysCallSendMessageTo::Invoke((uint32_t)pid, (uint32_t)&msg);
+        msg.destination = pid;
+        SysCallSendMessageTo::Invoke((uint32_t)&msg);
         SysCallReceiveFrom::Invoke((uint32_t) pid, (uint32_t) &msg, 0, 0);
+        memcpy(_Buffer, buffer, msg.content[0]);
+        delete buffer;
         return msg.content[0];
     }
 
@@ -101,9 +110,33 @@ pid_t RamDiskItemDir::Open() {
 
     }
     return 1;
-    return 0;
 }
 
 void RamDiskItemDir::Mount(Thread *_Thread) {
     this->thread = _Thread;
+}
+
+pid_t RamDiskItemDir::Open(lr::sstl::AString name, ino_t rootInode, lr::sstl::AString mode) {
+    //只有此为挂载点时才可以
+    if(!this->thread)
+    {
+        return -1;
+    }
+    char nameStr[sizeof(dirent)];
+    name.CStr(nameStr);
+    char modeStr[10];
+    mode.CStr(modeStr);
+
+    pid_t pid = this->thread->GetPid();
+    Message msg;
+    msg.destination = pid;
+    msg.content[0] = MSG_DEVICE_OPEN_OPERATION;
+    msg.content[FsMsg::O_PATH] = (uint32_t)nameStr;
+    msg.content[FsMsg::O_PATH_SIZE] = (uint32_t)strlen(nameStr);
+    msg.content[FsMsg::O_MODE] = (uint32_t)modeStr;
+    msg.content[FsMsg::O_MODE_SIZE] = (uint32_t)strlen(modeStr);
+    msg.content[FsMsg::O_ROOTID] = (uint32_t)rootInode;
+    SysCallSendMessageTo::Invoke((uint32_t)&msg);
+    SysCallReceiveFrom::Invoke((uint32_t) pid, (uint32_t) &msg, 0, 0);
+    return msg.content[0];
 }

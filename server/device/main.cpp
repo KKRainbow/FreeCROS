@@ -2,7 +2,8 @@
 #include"Threads.h"
 #include"UserLog.h"
 
-void keyboard();
+int keyboard();
+int fat32();
 
 int main() {
     Message msg;
@@ -12,7 +13,8 @@ int main() {
     printf("new: %x \n,", test);
 
     int pid = SysCallCreateThread::Invoke((uint32_t) keyboard, 0, 0, 0);
-    printf("pid: %d\n", pid);
+    int pid2 = SysCallCreateThread::Invoke((uint32_t) fat32, 0, 0, 0);
+    log("pid: %d\n", pid2);
     for(;;);
 
     int *tmp = (int *) 0x20000000;

@@ -31,6 +31,10 @@ public:
 
     virtual pid_t Open();
 
+    pid_t Open(lr::sstl::AString name, ino_t rootInode, lr::sstl::AString mode);
+
     void Mount(Thread* _Thread);
+
+    bool IsMounted(){return this->thread != nullptr;};
 };
 

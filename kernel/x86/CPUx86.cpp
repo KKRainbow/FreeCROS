@@ -144,7 +144,7 @@ void CPUx86::InitGDT() {
             "g:"::"i"(0x8));
     __asm__("movw %0,%%ds\n\t"
             "movw %0,%%es\n\t"
-            "movw %0,%%fsserver\n\t"
+            "movw %0,%%fs\n\t"
             "movw %0,%%gs\n\t"
             "movw %0,%%ss\n\t"
     ::"a"(16));
