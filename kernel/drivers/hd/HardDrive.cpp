@@ -38,7 +38,8 @@ Buffer* HdBlockRead(uint32_t _Blocknr, Request* _Request, int _Devnum)
     BufferManager::Instance()->BufferRelease(bh);
     return nullptr;
 }
-int HdRead(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
+enum ComType{READ,WRITE};
+static int HdReadWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size,ComType command)
 {
     if(_Size <= 0)return 0;
     //计算所属块号
@@ -58,7 +59,18 @@ int HdRead(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
         int offset = start % BLOCK_SIZE;
         int size = BLOCK_SIZE - offset;
         if(size > left)size = left;
-        memcpy(_Buffer, bh->b_data + offset, size);
+        if (command == READ)
+        {
+            memcpy(_Buffer, bh->b_data + offset, size);
+        }
+        else
+        {
+            bh->LockBuffer();
+            memcpy(bh->b_data + offset,_Buffer, size);
+            bh->b_dirt = 1;
+            bh->UnlockBuffer();
+        }
+        _Buffer += size;
         left -= size;
         BufferManager::Instance()->BufferRelease(bh);
     }
@@ -72,18 +84,35 @@ int HdRead(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
         else
         {
             int size = left > BLOCK_SIZE ? BLOCK_SIZE : left;
-            memcpy(_Buffer, bh->b_data, size);
+            if (command == READ)
+            {
+                memcpy(_Buffer, bh->b_data, size);
+            }
+            else
+            {
+                bh->LockBuffer();
+                memcpy(bh->b_data,_Buffer, size);
+                bh->b_dirt = 1;
+                bh->UnlockBuffer();
+            }
+            _Buffer += size;
             left -= size;
             BufferManager::Instance()->BufferRelease(bh);
         }
     }
     end:
     return _Size - left;
+
+}
+
+int HdRead(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
+{
+    return HdReadWrite(_Fptr, _Item, _Buffer, _Size, READ);
 }
 
 int HdWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
 {
-    return 1;
+    return HdReadWrite(_Fptr, _Item, _Buffer, _Size, WRITE);
 }
 
 void hd_init();

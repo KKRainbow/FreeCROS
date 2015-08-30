@@ -49,6 +49,12 @@ extern "C" int fseek(FILE *stream, long offset, int whence)
     return res;
 }
 
+extern "C" long ftell(FILE* stream)
+{
+    int res = SysCallSeek::Invoke((uint32_t)stream->fd,(uint32_t)0,(uint32_t)SEEK_CUR);
+    return res;
+}
+
 extern "C" int fclose(FILE *stream)
 {
     return 0;

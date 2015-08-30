@@ -24,7 +24,7 @@ int main() {
 
     FILE* dp = fopen("/mnt/", "rb");
 
-    dirent dir[2];
+    dirent dir[6];
     fread(dir, sizeof(dir[0]), 6, dp);
     int i = 0;
     while (i++ != 6)

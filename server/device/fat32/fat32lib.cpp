@@ -11,36 +11,9 @@
 #include "stl/sstring.h"
 #include "stl/svector.h"
 #include "fat32.h"
-
-static BootSector bs;
-static DirectoryEntry rootDir;
-FILE* fat32img;
-
 using namespace lr::sstl;
 
-int Fat32Init(const char* _Dev)
-{
-    fat32img = fopen(_Dev,"rb");
-    if (!fat32img)
-    {
-        return false;
-    }
-
-    fseek(fat32img, 0, SEEK_SET);
-    fread(&bs, sizeof(BootSector), 1, fat32img);
-
-    // find the root directory
-    uint32_t rootCluster = bs.cluster_number_for_the_root_directory;
-    rootDir.low_starting_cluster = (unsigned short)(rootCluster & 0xffff);
-    rootDir.high_starting_cluster = 0;
-    rootDir.attributes = 0;
-    rootDir.file_size = 0;
-    rootDir.attributes |= 0x10;
-
-    return true;
-}
-
-static AString getFilename( DirectoryEntry Dentries){
+AString Fat32::getFilename( DirectoryEntry Dentries){
     AString filename;
 
 
@@ -61,81 +34,57 @@ static AString getFilename( DirectoryEntry Dentries){
     return filename;
 }
 
-static bool FindEntry(AString _Name, DirectoryEntry* _Dir, Fat32Entry& _Res, Vector<Fat32Entry>* _Vec = nullptr)
+bool Fat32::FindEntry(AString _Name, DirectoryEntry* _Dir, Fat32Entry& _Res, Vector<Fat32Entry>* _Vec)
 {
-    uint32_t CurrentCluster;
-    CurrentCluster = (uint32_t)(
-            _Dir->high_starting_cluster*256*256 + _Dir->low_starting_cluster);
-
-    unsigned int FirstDataSector 	=    bs.reserved_sectors + ( bs.number_of_fats * bs.sectos_per_one_FAT) ;
-    unsigned int FirstSectorofCluster  =  (CurrentCluster-2) * bs.sectors_per_cluster  + FirstDataSector;
-    unsigned int FAT_First_Sector = bs.reserved_sectors;
-    DirectoryEntry directory_entry ;
-    unsigned int count=0;
-    unsigned int NextCluster;
-    fseek(fat32img,(FirstSectorofCluster)*bs.sector_size,SEEK_SET);
-    AString name,temp;
-    Fat32Entry fat32entry;
+    uint32_t currentCluster = GET_CLUSTER_BEGIN(*_Dir);
+    Fat32Iterator iter(this, sizeof(DirectoryEntry),{currentCluster,0}, false,false);
+    DirectoryEntry directoryEntry;
     bool readLongFile = true;
-    while(1){
+    int count = 0;
+    AString temp,name;
+    while(!iter.IsEnd()){
+        iter.Read(&directoryEntry);
 
-        if(count * 32 >= bs.sector_size * bs.sectors_per_cluster){
-
-            count = 0;
-
-            fseek(fat32img , bs.sector_size*FAT_First_Sector + CurrentCluster*4  ,  SEEK_SET);
-
-            fread(&NextCluster ,  4  ,1,fat32img );
-
-            if(NextCluster > 0 &&  NextCluster < ( bs.total_sectors - bs.reserved_sectors - bs.fat_size_sectors*bs.number_of_fats)/bs.sectors_per_cluster ){
-
-                fseek(fat32img , bs.sector_size*(FirstDataSector + (NextCluster-2)*bs.sectors_per_cluster) ,  SEEK_SET);
-                CurrentCluster = NextCluster;
-
-            }
-            else{
-                break;
-            }
-        }
-
-        fread(&directory_entry,sizeof(directory_entry),1,fat32img);
-
-        if( directory_entry.filename[0] == 0x00)
+        if( directoryEntry.filename[0] == 0x00)
             break;
-        if(directory_entry.filename[0] == 0xE5){
+        if(directoryEntry.filename[0] == 0xE5){
             count++;
+            ++iter;
             continue;
         }
-        if(directory_entry.filename[0] == 0x2E){
+        if(directoryEntry.filename[0] == 0x2E){
             count++;
+            ++iter;
             continue;
         }
-        if(directory_entry.attributes == 0xf0)
+        if(directoryEntry.attributes == 0xf0)
         {
+            ++iter;
             continue;
         }
         //有可能是卷标 Volume label
-        if(directory_entry.attributes & 0x8 && directory_entry.attributes != 0x0f)
+        if(directoryEntry.attributes & 0x8 && directoryEntry.attributes != 0x0f)
         {
+            ++iter;
             continue;
         }
 
         if(readLongFile){
-            temp = getFilename(directory_entry);
+//            if(_Res.begin.IsEnd())
+//            {
+//                _Res.begin = iter;
+//            }
+            temp = getFilename(directoryEntry);
             name = temp + name;
-            if((directory_entry.filename[0] & 0x41) == 0x41 || directory_entry.filename[0] == 0x01){
+            if((directoryEntry.filename[0] & 0x41) == 0x41 || directoryEntry.filename[0] == 0x01){
                 readLongFile = false;
-
             }
         }
         else{
             _Res.filename = name;
-            _Res.dirEntry = directory_entry;
-            if(_Vec)_Vec->PushBack(_Res);
-            char tmp[40];
-            char tmp2[40];
-            name.CStr(tmp);
-            _Name.CStr(tmp2);
+            _Res.dirEntry = directoryEntry;
+//            _Res.end = iter;
+            if(_Vec)_Vec->Insert(_Vec->Begin(),_Res);
             if(name == _Name)
             {
                 return true;
@@ -144,41 +93,13 @@ static bool FindEntry(AString _Name, DirectoryEntry* _Dir, Fat32Entry& _Res, Vec
             name = AString::Empty;
             temp = AString::Empty;
         }
-
         count++;
+        ++iter;
     }
     return false;
 }
 
-
-bool GetDirectoryEntry(lr::sstl::AString _Path, DirectoryEntry* _Root, Fat32Entry& _Res)
-{
-    if (!_Root)
-    {
-        _Root = &rootDir;
-    }
-    AString currName;
-    Vector<AString> pathSplit;
-    _Path.Split(pathSplit, '/');
-
-    Fat32Entry nextEntry;
-    nextEntry.dirEntry = *_Root;
-
-    for (auto& tmpname : pathSplit)
-    {
-        if(tmpname.Length() == 0)continue;
-        char tmp[50];
-        tmpname.CStr(tmp);
-        if(!FindEntry(tmpname, &nextEntry.dirEntry, nextEntry))
-        {
-            return false;
-        }
-    }
-    _Res = nextEntry;
-    return true;
-}
-
-int GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Buf)
+int Fat32::GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Buf)
 {
     if(IS_DIR(_Entry->dirEntry))
     {
@@ -203,6 +124,7 @@ int GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Buf)
             _Entry = &vec[tmpbegin];
             dir.d_ino = GET_CLUSTER_BEGIN(_Entry->dirEntry);
             _Entry->filename.CStr(dir.d_name);
+            printf("Get dir name : %s\n",dir.d_name);
             dir.d_reclen = (unsigned  short)_Entry->dirEntry.file_size;
             SysCallWriteToPhisicalAddr::Invoke((uint32_t)tmpbuf++, (uint32_t)&dir, sizeof(dir));
         }
@@ -210,33 +132,224 @@ int GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Buf)
         return (tmpbegin - begin) * sizeof(dirent);
     }
 
-    unsigned int FirstDataSector 	=    bs.reserved_sectors + ( bs.number_of_fats * bs.sectos_per_one_FAT) ;
-    unsigned int fileStartCluster = GET_CLUSTER_BEGIN(_Entry->dirEntry);
+    char* buffer = new char[_Size];
+    uint32_t cluster = GET_CLUSTER_BEGIN(_Entry->dirEntry);
+    uint32_t size = this->ReadCluster(this->NextPosition({cluster,0},_Offset,false), _Size, buffer);
+    SysCallWriteToPhisicalAddr::Invoke((uint32_t)_Buf++, (uint32_t)buffer,size);
+    return size;
+}
 
-    unsigned int FirstSectorofThisFile  =  (fileStartCluster-2) * bs.sectors_per_cluster  + FirstDataSector;
-    unsigned int FAT_First_Sector = bs.reserved_sectors;
-    unsigned int filesize = _Entry->dirEntry.file_size;
-    unsigned int NextCluster;
-
-    fseek(fat32img,(FirstSectorofThisFile)*bs.sector_size,SEEK_SET);
-
+uint32_t Fat32::ReadWriteCluster(Fat32Position _Pos, size_t _Size, void* _Buffer,Com rw)
+{
     size_t size = _Size;
-    unsigned char c;
-    for(unsigned i=0;i<filesize;i++){
-        if (i < _Offset)continue;
-        if( i > 0 && i % (bs.sector_size*bs.sectors_per_cluster) == 0)
-        {
-            fseek(fat32img , bs.sector_size*FAT_First_Sector + fileStartCluster*4  ,  SEEK_SET);
-            fread(&NextCluster , 4 ,1,fat32img );
-            if(NextCluster > 0 && NextCluster < ( bs.total_sectors - bs.reserved_sectors - bs.fat_size_sectors*bs.number_of_fats)/bs.sectors_per_cluster ){
-                fseek(fat32img , bs.sector_size*(FirstDataSector + (NextCluster-2)*bs.sectors_per_cluster) ,  SEEK_SET);
-                fileStartCluster = NextCluster;
-            }
-        }
-        fread(&c,sizeof(c),1,fat32img);
-        SysCallWriteToPhisicalAddr::Invoke((uint32_t)_Buf++, (uint32_t)&c, sizeof(c));
-        size--;
+    size_t bytesPerCluster =  bs.sectors_per_cluster * bs.sector_size ;
+    //看当前簇能读多少
+    uint32_t currClusterSize = bytesPerCluster - _Pos.currentOffset;
+    size_t currSize = currClusterSize > _Size ? _Size : (size_t)currClusterSize;
+    this->SeekToDateCluster(_Pos);
+    int res =  0;
+    if(rw == READ)
+        res = fread(_Buffer, currSize, 1, this->fp);
+    else
+        res = fwrite(_Buffer, currSize, 1, this->fp);
+    size -= res;
+    if (res < currSize || size == 0)
+    {
+        return (uint32_t)res;
     }
 
-    return _Size - size;
+    do {
+        _Pos = this->NextPosition(_Pos, currClusterSize);
+        if((_Pos.currentCluster == 0))
+        {
+            break;
+        }
+        this->SeekToDateCluster(_Pos);
+        size_t sizeToOp = size > bytesPerCluster ? bytesPerCluster :size;
+        if(rw == READ)
+            res = fread(_Buffer, sizeToOp, 1,  this->fp);
+        else
+            res = fwrite(_Buffer, sizeToOp, 1,  this->fp);
+        if (res > 0)
+            size -= sizeToOp;
+        else
+            break;
+
+        if (size == 0)
+            break;
+    } while (1);
+    return (uint32_t)_Size - size;
+}
+
+uint32_t Fat32::WriteCluster(Fat32Position _Pos, size_t _Size, void *_Buffer) {
+    return this->ReadWriteCluster(_Pos, _Size, _Buffer, WRITE);
+}
+uint32_t Fat32::ReadCluster(Fat32Position _Pos, size_t _Size, void* _Buffer)
+{
+    return this->ReadWriteCluster(_Pos, _Size, _Buffer, READ);
+}
+
+void Fat32::WriteFatItem(uint32_t _ClusterNum, uint32_t value) {
+    fseek(this->fp , bs.sector_size*bs.reserved_sectors + (long)_ClusterNum*4  ,  SEEK_SET);
+    fwrite(&value ,  4  ,1,this->fp);
+}
+
+uint32_t Fat32::ReadFatItem(uint32_t _ClusterNum) {
+    uint32_t res;
+    fseek(this->fp , bs.sector_size*bs.reserved_sectors + (long)_ClusterNum*4  ,  SEEK_SET);
+    fread(&res ,  4  ,1,this->fp);
+    return res;
+}
+
+
+Fat32Position Fat32::NextPosition(Fat32Position _Pos, uint32_t _Offset, bool _AutoAlloc)
+{
+    Fat32Position res = _Pos;
+    uint32_t bytesPerCluster = bs.sectors_per_cluster * bs.sector_size;
+    find:
+    if (_Pos.currentOffset + _Offset >= bytesPerCluster)
+    {
+        //需要读取下一个cluster
+        uint32_t nextCluster = ReadFatItem(_Pos.currentCluster);
+        if(nextCluster > 0 &&
+                nextCluster < this->totalClusters)
+        {
+            res.currentCluster = nextCluster;
+            res.currentOffset = (_Pos.currentOffset + _Offset) % bytesPerCluster;
+        }
+        else
+        {
+            res.currentCluster = 0;
+        }
+    }
+    else
+    {
+        res.currentOffset += _Offset;
+    }
+    if(_AutoAlloc)
+    {
+        uint32_t next = this->FindNextAvailCluster(true);
+        if (!next)
+        {
+            WriteFatItem(_Pos.currentCluster, next);
+            _AutoAlloc = false;
+            goto find;
+        }
+    }
+    return res;
+}
+
+void Fat32::SeekToDateCluster(Fat32Position _Pos)
+{
+    uint32_t firstDataSector = bs.reserved_sectors + (bs.sectos_per_one_FAT * bs.number_of_fats);
+    fseek(this->fp
+            , bs.sector_size*
+              ((long)firstDataSector + ((long)_Pos.currentCluster-2)*bs.sectors_per_cluster)
+              + (long)_Pos.currentOffset
+            , SEEK_SET);
+}
+
+int Fat32Iterator::Read(void *_Buffer) {
+    return fat32->ReadCluster(pos, step, _Buffer);
+}
+
+int Fat32Iterator::Write(void *_Buffer)
+{
+    return 0;
+}
+
+bool Fat32Iterator::HasNext() {
+    return (fat32->NextPosition(this->pos,this->step).currentCluster != 0);
+}
+
+Fat32Iterator &Fat32Iterator::operator+=(size_t _Size) {
+    this->pos = fat32->NextPosition(this->pos, _Size * this->step, this->autoAlloc);
+    return *this;
+}
+
+Fat32Iterator &Fat32Iterator::operator++() {
+    return *this += 1;
+}
+
+const Fat32Iterator Fat32Iterator::operator++(int) {
+    auto tmp = *this;
+    *this += 1;
+    return tmp;
+}
+
+bool Fat32Iterator::IsEnd() {
+    return this->pos.currentCluster == 0;
+}
+
+Fat32::Fat32(FILE *_Fp) {
+    this->fp = _Fp;
+    fseek(fp, 0, SEEK_SET);
+    fread(&bs, sizeof(BootSector), 1, fp);
+
+    // find the root directory
+    uint32_t rootCluster = bs.cluster_number_for_the_root_directory;
+    this->rootDir.low_starting_cluster = (unsigned short)(rootCluster & 0xffff);
+    this->rootDir.high_starting_cluster = 0;
+    this->rootDir.attributes = 0;
+    this->rootDir.file_size = 0;
+    this->rootDir.attributes |= 0x10;
+
+    uint32_t totalSectors = bs.total_sectors - bs.reserved_sectors - bs.fat_size_sectors*bs.number_of_fats;
+    this->totalClusters = totalSectors / bs.sectors_per_cluster;
+}
+
+uint32_t Fat32::FindNextAvailCluster(bool _Clean) {
+    uint32_t i = 0;
+    for (; i < totalClusters ; i++)
+    {
+        if (this->ReadFatItem(this->lastAvailCluster++) == 0)
+        {
+            break;
+        }
+        if (this->lastAvailCluster >= this->totalClusters + 2)
+            this->lastAvailCluster %= this->totalClusters;
+    }
+    if (i >= totalClusters)
+    {
+        return 0;
+    }
+    else
+    {
+        if (_Clean)
+        {
+            uint32_t size = bs.sectors_per_cluster * bs.sector_size;
+            char *tmp = new char[size];
+            memset(tmp,0,size);
+            this->WriteCluster({this->lastAvailCluster, 0},size,tmp);
+            delete tmp;
+        }
+        return this->lastAvailCluster;
+    }
+}
+
+bool Fat32::GetDirectoryEntry(lr::sstl::AString _Path, DirectoryEntry *_Root, Fat32Entry &_Res)
+{
+    if (!_Root)
+    {
+        _Root = &rootDir;
+    }
+    AString currName;
+    Vector<AString> pathSplit;
+    _Path.Split(pathSplit, '/');
+
+    Fat32Entry nextEntry;
+    nextEntry.dirEntry = *_Root;
+
+    for (auto& tmpname : pathSplit)
+    {
+        if(tmpname.Length() == 0)continue;
+        char tmp[50];
+        tmpname.CStr(tmp);
+        if(!FindEntry(tmpname, &nextEntry.dirEntry, nextEntry))
+        {
+            return false;
+        }
+    }
+    _Res = nextEntry;
+    return true;
 }

@@ -119,6 +119,7 @@ extern "C" int fclose(FILE *stream);
 
 
 extern "C" int fseek(FILE *stream, long offset, int whence);
+extern "C" long ftell(FILE* stream);
 /**
  * @}
  */

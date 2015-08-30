@@ -18,6 +18,7 @@ private:
     Map<ino_t, Fat32Entry> inodeTable;
     IDGenerator<int> idGen;
     AString dir;
+    Fat32* fat32;
 private:
     AString GetRealPath(AString _Path)
     {
@@ -34,10 +35,8 @@ private:
 public:
     Fat32Device(const char* _Dir, const char* _Dev ):idGen(1)
     {
-        if(!Fat32Init(_Dev))
-        {
-            printf("Open dev failed!!!\n");
-        }
+        FILE* fp = fopen(_Dev,"rb");
+        fat32 = new Fat32(fp);
         dir = _Dir;
         SysCallMountFs::Invoke((uint32_t)_Dir, (uint32_t)_Dev);
     };
@@ -70,7 +69,7 @@ public:
 
 
         Fat32Entry entry;
-        bool res = GetDirectoryEntry(this->GetRealPath(name), r, entry);
+        bool res = fat32->GetDirectoryEntry(this->GetRealPath(name), r, entry);
 
         if(!res)
         {
@@ -96,7 +95,7 @@ public:
         }
         Fat32Entry* root = &iter->second;
 
-        msg.content[0] = GetContent(root, _Msg.content[FsMsg::R_POS],
+        msg.content[0] = fat32->GetContent(root, _Msg.content[FsMsg::R_POS],
                                     _Msg.content[FsMsg::R_SIZE], (char*)_Msg.content[FsMsg::R_BUF]);
         return msg;
     }
