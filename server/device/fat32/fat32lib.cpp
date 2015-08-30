@@ -70,10 +70,10 @@ bool Fat32::FindEntry(AString _Name, DirectoryEntry* _Dir, Fat32Entry& _Res, Vec
         }
 
         if(readLongFile){
-//            if(_Res.begin.IsEnd())
-//            {
-//                _Res.begin = iter;
-//            }
+            if(_Res.begin.IsEnd())
+            {
+                _Res.begin = iter;
+            }
             temp = getFilename(directoryEntry);
             name = temp + name;
             if((directoryEntry.filename[0] & 0x41) == 0x41 || directoryEntry.filename[0] == 0x01){
@@ -83,8 +83,18 @@ bool Fat32::FindEntry(AString _Name, DirectoryEntry* _Dir, Fat32Entry& _Res, Vec
         else{
             _Res.filename = name;
             _Res.dirEntry = directoryEntry;
-//            _Res.end = iter;
-            if(_Vec)_Vec->Insert(_Vec->Begin(),_Res);
+            _Res.end = iter;
+            if(_Vec)
+            {
+                _Vec->Insert(_Vec->Begin(),_Res);
+                for(auto& i : *_Vec)
+                {
+                    char a[30];
+
+                    printf("name: %s\t ", i.filename.CStr(a));
+                }
+                printf("\n");
+            }
             if(name == _Name)
             {
                 return true;
@@ -110,6 +120,7 @@ int Fat32::GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Bu
         Vector<Fat32Entry> vec;
         Fat32Entry tmp;
         FindEntry(AString::Empty, &_Entry->dirEntry, tmp,&vec);
+
 
         int begin = _Offset / sizeof(dirent);
         int end = (_Offset + _Size) / sizeof(dirent);

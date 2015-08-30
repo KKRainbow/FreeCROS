@@ -2,7 +2,7 @@
 #include"Threads.h"
 #include"UserLog.h"
 
-int keyboard();
+//int keyboard();
 int fat32();
 
 int main() {
@@ -12,7 +12,7 @@ int main() {
     void *test = new char[500];
     printf("new: %x \n,", test);
 
-    int pid = SysCallCreateThread::Invoke((uint32_t) keyboard, 0, 0, 0);
+//    int pid = SysCallCreateThread::Invoke((uint32_t) keyboard, 0, 0, 0);
     int pid2 = SysCallCreateThread::Invoke((uint32_t) fat32, 0, 0, 0);
     log("pid: %d\n", pid2);
     for(;;);

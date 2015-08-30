@@ -105,8 +105,8 @@ public:
 typedef struct {
     DirectoryEntry dirEntry;
     lr::sstl::AString filename;
-//    Fat32Iterator begin;
-//    Fat32Iterator end;
+    Fat32Iterator begin;
+    Fat32Iterator end;
 }  Fat32Entry  ;
 
 class Fat32
