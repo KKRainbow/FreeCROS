@@ -165,7 +165,6 @@ void BufferManager::PrepareBuffer(Buffer *_Buf) {
 
 void BufferManager::BufferRelease(Buffer *_Buf){
     if(!_Buf)return;
-    _Buf->WaitOn();
     Assert(_Buf->b_count-- > 0);
     _Buf->wait.Wake();
 }
@@ -181,4 +180,29 @@ bool BufferManager::IsReadNecessary(Buffer* _Buf) {
         this->PrepareBuffer(_Buf);
         return true;
     }
+}
+
+int BufferManager::SyncBuffers(void (*_Callback)(Buffer *),int& succ,int& totalDirt) {
+    Buffer* tmp = this->free_list;
+    succ = totalDirt = 0;
+    do{
+        if (tmp->b_dirt)totalDirt++;
+        if (tmp->b_count == 0 && tmp->b_dirt && !tmp->IsLocked())
+        {
+            tmp->LockBuffer();
+            if (!(tmp->b_count == 0 && tmp->b_dirt))
+            {
+                tmp->UnlockBuffer();
+            }
+            tmp->b_count++;
+            _Callback(tmp);
+            tmp->WaitOn();
+            if(!tmp->b_dirt)
+            {
+                succ++;
+            }
+            this->BufferRelease(tmp);
+        }
+    } while ((tmp = tmp->b_next_free) != free_list);
+    return succ;
 }

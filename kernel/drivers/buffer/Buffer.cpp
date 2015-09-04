@@ -7,6 +7,7 @@
 
 void Buffer::LockBuffer() {
     spinlock.Lock();
+    Interrupt::EnterCritical(eflags);
     while(this->b_lock)
     {
         spinlock.Unlock();
@@ -14,12 +15,15 @@ void Buffer::LockBuffer() {
         spinlock.Lock();
     }
     this->b_lock = true;
+    Interrupt::LeaveCritical(eflags);
     spinlock.Unlock();
 }
 
 void Buffer::UnlockBuffer() {
+    spinlock.Lock();
     this->b_lock = false;
     this->wait.Wake();
+    spinlock.Unlock();
 }
 
 bool Buffer::IsLocked() {
@@ -27,8 +31,12 @@ bool Buffer::IsLocked() {
 }
 
 void Buffer::WaitOn() {
+    spinlock.Lock();
     while(this->b_lock)
     {
+        spinlock.Unlock();
         this->wait.Wait();
+        spinlock.Lock();
     }
+    spinlock.Unlock();
 }

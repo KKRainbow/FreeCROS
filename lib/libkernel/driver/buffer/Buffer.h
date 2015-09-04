@@ -18,12 +18,13 @@ private:
 
     Buffer* b_next = nullptr,*b_prev = nullptr;
     Buffer* b_next_free = nullptr,*b_prev_free = nullptr;
+    uint32_t eflags;
 public:
+    int32_t b_count = 0;
     char* b_data;
     dev_t b_dev = 0;
     uint32_t b_blocknr = 0;
     bool b_dirt = 0;
-    int32_t b_count = 0;
     bool b_lock = 0;
     bool b_uptodate = 0;
     WaitableObj wait;

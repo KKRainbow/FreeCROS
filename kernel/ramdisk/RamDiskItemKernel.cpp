@@ -28,8 +28,7 @@ pid_t RamDiskItemKernel::Read(File *_Fptr, int8_t *_Buffer, size_t _Size) {
 
 pid_t RamDiskItemKernel::Write(File *_Fptr, int8_t *_Buffer, size_t _Size) {
     if ( kwrite )
-        kwrite(_Fptr, this, _Buffer, _Size);
-    return -1;
+        return kwrite(_Fptr, this, _Buffer, _Size);
 }
 
 pid_t RamDiskItemKernel::Seek(File *_Fptr, off_t _Offset, int _Whence) {

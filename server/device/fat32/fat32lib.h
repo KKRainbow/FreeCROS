@@ -5,6 +5,7 @@
 
 #include <stl/sstl/sstl_wstring.h>
 #include <stl/sstl/sstl_vector.h>
+#include <stl/sstl/sstl_tuple.h>
 #include"fat32.h"
 
 #define IS_DIR(dir) (dir.attributes & 0x10)
@@ -12,6 +13,9 @@
 
 #define GET_CLUSTER_BEGIN(dir) ((uint32_t)(dir).high_starting_cluster*256*256 + \
                                     (dir).low_starting_cluster)
+#define SET_CLUSTER_BEGIN(dir,cluster) do{\
+(dir).high_starting_cluster = (cluster >> 16) & 0xff; \
+(dir).low_starting_cluster = cluster & 0xff;}while(0)
 
 struct Fat32Position
 {
@@ -111,6 +115,8 @@ typedef struct {
 
 class Fat32
 {
+public:
+    static const int FILENAME_LENGTH_PER_ENTRY = 26;
 private:
     BootSector bs;
     FILE* fp;
@@ -123,6 +129,7 @@ private:
     uint32_t ReadWriteCluster(Fat32Position _Pos, size_t _Size, void* _Buffer, Com rw);
     uint32_t FindNextAvailCluster(bool _Clean);
 protected:
+    unsigned char Get83FilenameChecksum(char* _Name);
     uint32_t ReadFatItem(uint32_t _ClusterNum);
     uint32_t ReadCluster(Fat32Position _Pos, size_t _Size, void* _Buffer);
     void WriteFatItem(uint32_t _ClusterNum,uint32_t value);
@@ -131,10 +138,19 @@ protected:
     bool FindEntry(lr::sstl::AString _Name, DirectoryEntry* _Dir,
                    Fat32Entry& _Res,
                    lr::sstl::Vector<Fat32Entry>* _Vec = nullptr);
-    lr::sstl::AString getFilename( DirectoryEntry Dentries);
+    lr::sstl::AString GetFilename( DirectoryEntry Dentries);
+    DirectoryEntry GetFilenameEntry(const lr::sstl::AString& _Name, int _Offset, unsigned char _Checksum);
+    lr::sstl::Pair<Fat32Iterator,Fat32Iterator> FindProperIteratorForDirectory(const lr::sstl::AString& _Name,
+                                                                               DirectoryEntry* _Root);
+    bool MakeEntryInDir(lr::sstl::AString _Name, DirectoryEntry* _Root, DirectoryEntry& _Entry);
+    lr::sstl::AString BaseName(lr::sstl::AString _Str);
+    lr::sstl::AString DirName(lr::sstl::AString _Str);
 public:
     Fat32(FILE* _Fp);
 
-    bool GetDirectoryEntry(lr::sstl::AString _Path, DirectoryEntry* _Root, Fat32Entry& _Res);
+    bool GetDirectoryEntry(lr::sstl::AString _Path, DirectoryEntry* _Root, Fat32Entry& _Res,
+                           bool _Create = true);
     int GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Buf);
+    bool MakeDirectory(lr::sstl::AString _Path, DirectoryEntry* _Root,bool _Recursive, Fat32Entry& _Res);
+    bool CreateFile(lr::sstl::AString _Path, DirectoryEntry* _Root,Fat32Entry& _Res);
 };

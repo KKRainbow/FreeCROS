@@ -25,9 +25,9 @@ int main() {
     FILE* dp = fopen("/mnt/", "rb");
 
     dirent dir[6];
-    fread(dir, sizeof(dir[0]), 6, dp);
+    fread(dir, sizeof(dir[0]), 7, dp);
     int i = 0;
-    while (i++ != 6)
+    while (i++ != 7)
     {
         printf("dir :   %s\n", dir[i-1].d_name);
     }

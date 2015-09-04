@@ -39,6 +39,8 @@ public:
         fat32 = new Fat32(fp);
         dir = _Dir;
         SysCallMountFs::Invoke((uint32_t)_Dir, (uint32_t)_Dev);
+        Fat32Entry entry;
+        fat32->MakeDirectory("/shitg/a/b/c/d", nullptr,true,entry);
     };
     virtual Message Open(Message &_Msg)
     {

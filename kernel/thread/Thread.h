@@ -33,7 +33,7 @@ private:
     AddressSpace* addressSpace;
     CPUState cpuState;
 
-    ThreadState* state;
+    lr::Ptr<ThreadState> state;
     static const int MAX_THREAD = 1024;
     uint8_t* childBitMap; //It serves to allocate stack space
     int mapSlot = -1;
@@ -45,7 +45,7 @@ public:
 
     AddressSpace* &GetAddressSpace();
 
-    ThreadState* &State();
+    lr::Ptr<ThreadState> &State();
 
     void ClockNotify(uint64_t _Counter);
 

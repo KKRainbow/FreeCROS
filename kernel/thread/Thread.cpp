@@ -106,7 +106,7 @@ AddressSpace* &Thread::GetAddressSpace() {
     return addressSpace;
 }
 
-ThreadState* &Thread::State() {
+lr::Ptr<ThreadState> &Thread::State() {
     return state;
 }
 

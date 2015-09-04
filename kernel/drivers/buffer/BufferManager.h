@@ -40,4 +40,5 @@ public:
     bool IsReadNecessary(Buffer* _Buf);
     void SyncDev(dev_t _Dev);
     void BufferRelease(Buffer* _Buf);
+    int SyncBuffers(void (*_Callback)(Buffer *),int& succ,int& totalDirt);
 };

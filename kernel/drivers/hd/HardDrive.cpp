@@ -3,14 +3,18 @@
 //
 
 #include "Global.h"
+#include "stl/slinkedlist.h"
 #include "ramdisk/RamDiskItemKernel.h"
 #include <ramdisk/RamDisk.h>
 #include <drivers/buffer/BufferManager.h>
 #include <driver/buffer/Request.h>
+#include <thread/ThreadManager.h>
 #include "HardDrive.h"
 
 #define BLOCK_SIZE 1024
+using namespace lr::sstl;
 extern Request* request;
+static List<Buffer*> dirtyBufferList;
 
 int HdOpen(RamDiskItemKernel* _Item)
 {
@@ -27,7 +31,6 @@ Buffer* HdBlockRead(uint32_t _Blocknr, Request* _Request, int _Devnum)
         Assert(false);
         return nullptr;
     }
-    bh->b_count++;
     if (!BufferManager::Instance()->IsReadNecessary(bh))
         return bh;
     bh->LockBuffer();
@@ -49,6 +52,7 @@ static int HdReadWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,siz
     int block_end = (end + BLOCK_SIZE) / BLOCK_SIZE;
     int left = _Size;
     Buffer* bh;
+    uint32_t eflags;
     //读第一个
     if (!(bh = HdBlockRead(block_start, request, _Item->GetID())))
     {
@@ -65,10 +69,8 @@ static int HdReadWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,siz
         }
         else
         {
-            bh->LockBuffer();
             memcpy(bh->b_data + offset,_Buffer, size);
             bh->b_dirt = 1;
-            bh->UnlockBuffer();
         }
         _Buffer += size;
         left -= size;
@@ -90,10 +92,8 @@ static int HdReadWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,siz
             }
             else
             {
-                bh->LockBuffer();
                 memcpy(bh->b_data,_Buffer, size);
                 bh->b_dirt = 1;
-                bh->UnlockBuffer();
             }
             _Buffer += size;
             left -= size;
@@ -116,7 +116,39 @@ int HdWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
 }
 
 void hd_init();
+
+void hd_callback(Buffer* _Bh)
+{
+    request->MakeRequest(Req::WRITE, _Bh, -1);
+}
+void hd_sync()
+{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+    uint32_t eflags;
+    while(1)
+    {
+        int succ,total;
+        int i = BufferManager::Instance()->SyncBuffers(hd_callback,succ,total);
+        if(i)
+        {
+            LOG("Sync %d buffers\n",i);
+        }
+        if(total)
+        {
+            LOG("Total %d buffers\n",total);
+        }
+    }
+#pragma clang diagnostic pop
+}
+
 void InitHd()
 {
+    new(&dirtyBufferList)List<Buffer*>();
     hd_init();
+    Thread *t = ThreadManager::Instance()->CreateThread(ThreadType::KERNEL);
+    if(!t)return;
+
+    t->SetEntry((addr_t)hd_sync);
+    t->State()->ToReady(t);
 }

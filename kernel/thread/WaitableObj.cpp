@@ -4,6 +4,8 @@
 
 
 void WaitableObj::Wait() {
+    uint32_t eflags;
+    Interrupt::EnterCritical(eflags);
     lock.Lock();
     CPU *cpu = CPUManager::Instance()->GetCurrentCPU();
     Thread *prev = wait;
@@ -26,6 +28,7 @@ void WaitableObj::Wait() {
         prev->State()->ToReady(prev);
     }
     lock.Unlock();
+    Interrupt::LeaveCritical(eflags);
 }
 
 void WaitableObj::Wake() {
