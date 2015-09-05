@@ -40,6 +40,10 @@ extern "C" size_t fread(void *ptr, size_t size,
 extern "C" size_t fwrite(const void *ptr, size_t size, size_t nitems,FILE *stream)
 {
     size_t res = SysCallWrite::Invoke((uint32_t)stream->fd,(uint32_t)ptr,(uint32_t)(size * nitems));
+    if (res == 0)
+    {
+        printf("\nwhat the fuck?!!!\n");
+    }
     return res - (res % size);
 }
 

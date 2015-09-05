@@ -58,9 +58,9 @@ DirectoryEntry Fat32::GetFilenameEntry(const lr::sstl::AString& _Name, int _Offs
     return entry;
 }
 
-bool Fat32::FindEntry(AString _Name, DirectoryEntry* _Dir, Fat32Entry& _Res, Vector<Fat32Entry>* _Vec)
+bool Fat32::FindEntry(AString _Name, Fat32Entry* _Dir, Fat32Entry& _Res, Vector<Fat32Entry>* _Vec)
 {
-    uint32_t currentCluster = GET_CLUSTER_BEGIN(*_Dir);
+    uint32_t currentCluster = this->GetStartDataClusterForEntry(_Dir,false);
     Fat32Iterator iter(this, sizeof(DirectoryEntry),{currentCluster,0}, false,false);
     DirectoryEntry directoryEntry;
     bool readLongFile = true;
@@ -138,7 +138,7 @@ int Fat32::GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Bu
         }
         Vector<Fat32Entry> vec;
         Fat32Entry tmp;
-        FindEntry(AString::Empty, &_Entry->dirEntry, tmp,&vec);
+        FindEntry(AString::Empty, _Entry, tmp,&vec);
 
 
         int begin = _Offset / sizeof(dirent);
@@ -152,7 +152,7 @@ int Fat32::GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Bu
         {
             dirent dir;
             _Entry = &vec[tmpbegin];
-            dir.d_ino = GET_CLUSTER_BEGIN(_Entry->dirEntry);
+            dir.d_ino = this->GetStartDataClusterForEntry(_Entry);
             _Entry->filename.CStr(dir.d_name);
             dir.d_reclen = (unsigned  short)_Entry->dirEntry.file_size;
             SysCallWriteToPhisicalAddr::Invoke((uint32_t)tmpbuf++, (uint32_t)&dir, sizeof(dir));
@@ -162,9 +162,10 @@ int Fat32::GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Bu
     }
 
     char* buffer = new char[_Size];
-    uint32_t cluster = GET_CLUSTER_BEGIN(_Entry->dirEntry);
+    uint32_t cluster = this->GetStartDataClusterForEntry(_Entry);
     uint32_t size = this->ReadCluster(this->NextPosition({cluster,0},_Offset,false), _Size, buffer);
     SysCallWriteToPhisicalAddr::Invoke((uint32_t)_Buf++, (uint32_t)buffer,size);
+    delete buffer;
     return size;
 }
 
@@ -317,11 +318,11 @@ Fat32::Fat32(FILE *_Fp) {
 
     // find the root directory
     uint32_t rootCluster = bs.cluster_number_for_the_root_directory;
-    this->rootDir.low_starting_cluster = (unsigned short)(rootCluster & 0xffff);
-    this->rootDir.high_starting_cluster = 0;
-    this->rootDir.attributes = 0;
-    this->rootDir.file_size = 0;
-    this->rootDir.attributes |= 0x10;
+    this->rootEntry.dirEntry.low_starting_cluster = (unsigned short)(rootCluster & 0xffff);
+    this->rootEntry.dirEntry.high_starting_cluster = 0;
+    this->rootEntry.dirEntry.attributes = 0;
+    this->rootEntry.dirEntry.file_size = 0;
+    this->rootEntry.dirEntry.attributes |= 0x10;
 
     uint32_t totalSectors = bs.total_sectors - bs.reserved_sectors - bs.fat_size_sectors*bs.number_of_fats;
     this->totalClusters = totalSectors / bs.sectors_per_cluster;
@@ -359,42 +360,47 @@ uint32_t Fat32::FindNextAvailCluster(bool _Clean) {
             delete tmp;
         }
         WriteFatItem(this->lastAvailCluster, 0x0ffffff8);
+        if (ReadFatItem(this->lastAvailCluster) == 0)
+        {
+            printf("NONDOFNKOJDOSFIJOIDS\n");
+        }
         return this->lastAvailCluster;
     }
 }
 
-bool Fat32::GetDirectoryEntry(lr::sstl::AString _Path, DirectoryEntry *_Root, Fat32Entry &_Res,
+bool Fat32::GetDirectoryEntry(lr::sstl::AString _Path, Fat32Entry *_Root, Fat32Entry &_Res,
                               bool _Create)
 {
     if (!_Root)
     {
-        _Root = &rootDir;
+        _Root = &rootEntry;
     }
-    AString currName;
     Vector<AString> pathSplit;
     _Path.Split(pathSplit, '/');
 
     Fat32Entry nextEntry;
-    nextEntry.dirEntry = *_Root;
+    nextEntry = *_Root;
 
     for (auto& tmpname : pathSplit)
     {
         if(tmpname.Length() == 0)continue;
         char tmp[50];
         tmpname.CStr(tmp);
-        if(!FindEntry(tmpname, &nextEntry.dirEntry, nextEntry))
+        if(!FindEntry(tmpname, &nextEntry, nextEntry))
         {
             if (_Create)
             {
-                DirectoryEntry entry = {0,};
-                memset(&entry,0,sizeof(entry));
-                memset(entry.filename,0x20,8+3);
-                entry.attributes |= 0x10;
-                entry.filename[0] = 'F';
+                Fat32Entry entry;
+                memset(&entry.dirEntry,0,sizeof(entry.dirEntry));
+                memset(entry.dirEntry.filename,0x20,8+3);
+                entry.dirEntry.attributes = 0;
+                entry.dirEntry.attributes |= 0x10;
+                entry.dirEntry.filename[0] = 'F';
+                entry.filename = tmpname;
 
-                if (!this->MakeEntryInDir(tmpname, &nextEntry.dirEntry,entry))
+                if (!this->MakeEntryInDir(&nextEntry,entry))
                     return false;
-                if(!FindEntry(tmpname, &nextEntry.dirEntry, nextEntry))
+                if(!FindEntry(tmpname, &nextEntry, nextEntry))
                     return false;
             }
             else
@@ -408,9 +414,9 @@ bool Fat32::GetDirectoryEntry(lr::sstl::AString _Path, DirectoryEntry *_Root, Fa
 }
 
 lr::sstl::Pair<Fat32Iterator, Fat32Iterator> Fat32::FindProperIteratorForDirectory(const lr::sstl::AString &_Name,
-                                                                                   DirectoryEntry *_Root) {
+                                                                                   Fat32Entry *_Root) {
     auto empty = MakePair(Fat32Iterator(),Fat32Iterator());
-    if (!_Root)return empty;
+    if (!_Root || !IS_DIR(_Root->dirEntry))return empty;
 
     int len = _Name.Length();
     if(len == 0)return empty;
@@ -418,7 +424,12 @@ lr::sstl::Pair<Fat32Iterator, Fat32Iterator> Fat32::FindProperIteratorForDirecto
     const int count =( (len + FILENAME_LENGTH_PER_ENTRY - 1) / FILENAME_LENGTH_PER_ENTRY ) + 1;
     //count肯定大于0
     int counter = 0;
-    Fat32Iterator iter(this,sizeof(DirectoryEntry),{GET_CLUSTER_BEGIN(*_Root),0},false,true);
+    Fat32Iterator iter(this,sizeof(DirectoryEntry),
+                       {
+                               this->GetStartDataClusterForEntry(_Root,true), 0
+                       },
+                       false,
+                       true);
     Fat32Iterator begin,end;
     while (1)
     {
@@ -452,16 +463,19 @@ lr::sstl::Pair<Fat32Iterator, Fat32Iterator> Fat32::FindProperIteratorForDirecto
     }
 }
 
-bool Fat32::MakeEntryInDir(lr::sstl::AString _Name, DirectoryEntry *_Root, DirectoryEntry& _Entry)
+bool Fat32::MakeEntryInDir(Fat32Entry *_Root, Fat32Entry& _Entry)
 {
-    auto pair = this->FindProperIteratorForDirectory(_Name,_Root);
+    auto& _Name = _Entry.filename;
+    auto pair = this->FindProperIteratorForDirectory(_Entry.filename,_Root);
     auto begin = pair.first;
     auto end = pair.second;
+    _Entry.begin = begin;
+    _Entry.end = end;
     if(begin.IsEnd())return false;
 
     int offset = 0;
     uint8_t first = 0x40;
-    unsigned char checksum = this->Get83FilenameChecksum((char*)_Entry.filename);
+    unsigned char checksum = this->Get83FilenameChecksum((char*)_Entry.dirEntry.filename);
     for(offset = (_Name.Length()/FILENAME_LENGTH_PER_ENTRY) * FILENAME_LENGTH_PER_ENTRY;
             offset >= 0;
             offset -= FILENAME_LENGTH_PER_ENTRY)
@@ -474,8 +488,7 @@ bool Fat32::MakeEntryInDir(lr::sstl::AString _Name, DirectoryEntry *_Root, Direc
     }
 
     //开始写入数据entry
-    uint32_t cluster = this->FindNextAvailCluster(true);
-    SET_CLUSTER_BEGIN(_Entry, cluster);
+    this->GetStartDataClusterForEntry(&_Entry,true);
     //此时begin应该等于end
     end.Write(&_Entry);
     return true;
@@ -505,7 +518,7 @@ lr::sstl::AString Fat32::DirName(lr::sstl::AString _Str) {
     return _Str.Sub(++iter, _Str.End());
 }
 
-bool Fat32::MakeDirectory(lr::sstl::AString _Path, DirectoryEntry *_Root, bool _Recursive, Fat32Entry &_Res) {
+bool Fat32::MakeDirectory(lr::sstl::AString _Path, Fat32Entry *_Root, bool _Recursive, Fat32Entry &_Res) {
     Fat32Entry dirEntry;
     if (_Recursive)
     {
@@ -519,19 +532,37 @@ bool Fat32::MakeDirectory(lr::sstl::AString _Path, DirectoryEntry *_Root, bool _
         }
         else
         {
-            return this->GetDirectoryEntry(BaseName(_Path), &dirEntry.dirEntry,_Res,true);
+            return this->GetDirectoryEntry(BaseName(_Path), &dirEntry,_Res,true);
         }
     }
 }
 
-bool Fat32::CreateFile(lr::sstl::AString _Path, DirectoryEntry *_Root, Fat32Entry &_Res) {
-    DirectoryEntry entry = {0,};
-    memset(entry.filename,0x20,8+3);
-    entry.attributes &= 0x20;
+bool Fat32::CreateFile(lr::sstl::AString _Path, Fat32Entry *_Root, Fat32Entry &_Res) {
+    Fat32Entry entry;
+    memset(&entry.dirEntry,0,sizeof(entry.dirEntry));
+    memset(entry.dirEntry.filename,0x20,8+3);
+    entry.dirEntry.attributes |= 0x20;
+    entry.filename = BaseName(_Path);
 
     Fat32Entry dirEntry;
     if (!this->GetDirectoryEntry(BaseName(_Path),_Root,dirEntry))
         return false;
 
-    return this->MakeEntryInDir(BaseName(_Path), &dirEntry.dirEntry,entry);
+    return this->MakeEntryInDir(&dirEntry,entry);
+}
+
+uint32_t Fat32::GetStartDataClusterForEntry(Fat32Entry *_Entry, bool _AutoAlloc) {
+    if (_AutoAlloc && (GET_CLUSTER_BEGIN(_Entry->dirEntry) == 0))
+    {
+        SET_CLUSTER_BEGIN(_Entry->dirEntry, this->FindNextAvailCluster(true));
+        if(!_Entry->end.IsEnd())
+        {
+            _Entry->end.Write(&_Entry->dirEntry);
+        }
+        else
+        {
+            printf("Why end is end?\n");
+        }
+    }
+    return GET_CLUSTER_BEGIN(_Entry->dirEntry);
 }

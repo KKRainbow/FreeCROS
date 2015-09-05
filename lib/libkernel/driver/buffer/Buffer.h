@@ -22,7 +22,7 @@ private:
 public:
     int32_t b_count = 0;
     char* b_data;
-    dev_t b_dev = 0;
+    dev_t b_dev = -1;
     uint32_t b_blocknr = 0;
     bool b_dirt = 0;
     bool b_lock = 0;

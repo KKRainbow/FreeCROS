@@ -21,6 +21,7 @@ void Buffer::LockBuffer() {
 
 void Buffer::UnlockBuffer() {
     spinlock.Lock();
+    Assert(this->b_lock);
     this->b_lock = false;
     this->wait.Wake();
     spinlock.Unlock();

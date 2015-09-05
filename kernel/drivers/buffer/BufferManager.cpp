@@ -182,24 +182,27 @@ bool BufferManager::IsReadNecessary(Buffer* _Buf) {
     }
 }
 
-int BufferManager::SyncBuffers(void (*_Callback)(Buffer *),int& succ,int& totalDirt) {
+int BufferManager::SyncBuffers(bool (*_Callback)(Buffer *),int& succ,int& totalDirt) {
     Buffer* tmp = this->free_list;
     succ = totalDirt = 0;
     do{
+        if (tmp->b_dev < 0) continue;
         if (tmp->b_dirt)totalDirt++;
-        if (tmp->b_count == 0 && tmp->b_dirt && !tmp->IsLocked())
+        if (tmp->b_dirt && !tmp->IsLocked())
         {
             tmp->LockBuffer();
-            if (!(tmp->b_count == 0 && tmp->b_dirt))
+            if (!tmp->b_dirt || tmp->b_dev < 0)
             {
                 tmp->UnlockBuffer();
             }
             tmp->b_count++;
-            _Callback(tmp);
-            tmp->WaitOn();
-            if(!tmp->b_dirt)
+            if (_Callback(tmp))
             {
-                succ++;
+                tmp->WaitOn();
+                if(!tmp->b_dirt)
+                {
+                    succ++;
+                }
             }
             this->BufferRelease(tmp);
         }

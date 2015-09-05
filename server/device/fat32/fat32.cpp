@@ -40,7 +40,7 @@ public:
         dir = _Dir;
         SysCallMountFs::Invoke((uint32_t)_Dir, (uint32_t)_Dev);
         Fat32Entry entry;
-        fat32->MakeDirectory("/shitg/a/b/c/d", nullptr,true,entry);
+        fat32->MakeDirectory("/makabdafa/a/b/c/d", nullptr,true,entry);
     };
     virtual Message Open(Message &_Msg)
     {
@@ -67,11 +67,8 @@ public:
             }
             root = &iter->second;
         }
-        DirectoryEntry* r = root != nullptr ? &root->dirEntry : nullptr;
-
-
         Fat32Entry entry;
-        bool res = fat32->GetDirectoryEntry(this->GetRealPath(name), r, entry);
+        bool res = fat32->GetDirectoryEntry(this->GetRealPath(name), root, entry);
 
         if(!res)
         {

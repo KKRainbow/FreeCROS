@@ -9,12 +9,13 @@
 #include <drivers/buffer/BufferManager.h>
 #include <driver/buffer/Request.h>
 #include <thread/ThreadManager.h>
+#include <Clock.h>
+#include <cpu/CPUManager.h>
 #include "HardDrive.h"
 
 #define BLOCK_SIZE 1024
 using namespace lr::sstl;
 extern Request* request;
-static List<Buffer*> dirtyBufferList;
 
 int HdOpen(RamDiskItemKernel* _Item)
 {
@@ -31,11 +32,11 @@ Buffer* HdBlockRead(uint32_t _Blocknr, Request* _Request, int _Devnum)
         Assert(false);
         return nullptr;
     }
+    bh->LockBuffer();
     if (!BufferManager::Instance()->IsReadNecessary(bh))
         return bh;
-    bh->LockBuffer();
     _Request->MakeRequest(Req::READ, bh, -1);
-    bh->WaitOn();
+    bh->LockBuffer();
     if (bh->b_uptodate)
         return bh;
     BufferManager::Instance()->BufferRelease(bh);
@@ -69,11 +70,12 @@ static int HdReadWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,siz
         }
         else
         {
+            bh->b_dirt = true;
             memcpy(bh->b_data + offset,_Buffer, size);
-            bh->b_dirt = 1;
         }
         _Buffer += size;
         left -= size;
+        bh->UnlockBuffer();
         BufferManager::Instance()->BufferRelease(bh);
     }
 
@@ -92,11 +94,12 @@ static int HdReadWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,siz
             }
             else
             {
+                bh->b_dirt = true;
                 memcpy(bh->b_data,_Buffer, size);
-                bh->b_dirt = 1;
             }
             _Buffer += size;
             left -= size;
+            bh->UnlockBuffer();
             BufferManager::Instance()->BufferRelease(bh);
         }
     }
@@ -117,9 +120,12 @@ int HdWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,size_t _Size)
 
 void hd_init();
 
-void hd_callback(Buffer* _Bh)
+bool hd_callback(Buffer* _Bh)
 {
+    if (RamDisk::Instance()->GetItemByID(_Bh->b_dev)->GetName().Sub(0,2) != "hd")
+        return false;
     request->MakeRequest(Req::WRITE, _Bh, -1);
+    return true;
 }
 void hd_sync()
 {
@@ -136,15 +142,15 @@ void hd_sync()
         }
         if(total)
         {
-            LOG("Total %d buffers\n",total);
+//            LOG("Total %d buffers\n",total);
         }
+        LOG("Total %d buffers,at: %d\n",total, CPUManager::Instance()->GetClockCounter());
     }
 #pragma clang diagnostic pop
 }
 
 void InitHd()
 {
-    new(&dirtyBufferList)List<Buffer*>();
     hd_init();
     Thread *t = ThreadManager::Instance()->CreateThread(ThreadType::KERNEL);
     if(!t)return;
