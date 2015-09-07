@@ -57,6 +57,7 @@ static int HdReadWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,siz
     //读第一个
     if (!(bh = HdBlockRead(block_start, request, _Item->GetID())))
     {
+        LOG("Failed to get buffer\n");
         return 0;
     }
     else
@@ -83,6 +84,7 @@ static int HdReadWrite(File* _Fptr, RamDiskItemKernel* _Item,int8_t* _Buffer,siz
     {
         if (!(bh = HdBlockRead(i, request, _Item->GetDevnum())))
         {
+            LOG("Failed to get buffer\n");
             goto end;
         }
         else

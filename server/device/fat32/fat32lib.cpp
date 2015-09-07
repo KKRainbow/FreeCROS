@@ -156,6 +156,7 @@ int Fat32::GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Bu
             dir.d_ino = this->GetStartDataClusterForEntry(_Entry);
             _Entry->filename.CStr(dir.d_name);
             dir.d_reclen = (unsigned  short)_Entry->dirEntry.file_size;
+            dir.d_type = IS_DIR(_Entry->dirEntry) ? DT_DIR : DT_REG;
             SysCallWriteToPhisicalAddr::Invoke((uint32_t)tmpbuf++, (uint32_t)&dir, sizeof(dir));
         }
 
@@ -224,17 +225,29 @@ uint32_t Fat32::ReadCluster(Fat32Position _Pos, size_t _Size, void* _Buffer)
 }
 
 void Fat32::WriteFatItem(uint32_t _ClusterNum, uint32_t value) {
+    if(value == 0)
+    {
+        fprintf(stderr,"Write 0 item\n");
+    }
     flock(this->fp);
     fseek(this->fp , bs.sector_size*bs.reserved_sectors + (long)_ClusterNum*4  ,  SEEK_SET);
-    fwrite(&value ,  4  ,1,this->fp);
+    int i = fwrite(&value ,  4  ,1,this->fp);
     funlock(this->fp);
+    if (i != 4)
+    {
+        fprintf(stderr,"Write failed\n");
+    }
 }
 
 uint32_t Fat32::ReadFatItem(uint32_t _ClusterNum) {
-    uint32_t res;
+    uint32_t res = 0;
     flock(this->fp);
     fseek(this->fp , bs.sector_size*bs.reserved_sectors + (long)_ClusterNum*4  ,  SEEK_SET);
-    fread(&res ,  4  ,1,this->fp);
+    int i = fread(&res ,  4  ,1,this->fp);
+    if (i != 4)
+    {
+        fprintf(stderr,"Read failed\n");
+    }
     funlock(this->fp);
     return res;
 }
@@ -367,7 +380,7 @@ uint32_t Fat32::FindNextAvailCluster(bool _Clean) {
             this->WriteCluster({this->lastAvailCluster, 0},size,tmp);
             delete tmp;
         }
-        WriteFatItem(this->lastAvailCluster, 0x0ffffff8);
+        WriteFatItem(this->lastAvailCluster, 0x0ffffff9);
         if (ReadFatItem(this->lastAvailCluster) == 0)
         {
             printf("NONDOFNKOJDOSFIJOIDS\n");

@@ -23,7 +23,7 @@ int main() {
 //    log("%s", tmp);
 
     FILE* dp = fopen("/mnt/", "rb");
-    SysCallMkdir::Invoke((uint32_t)"/mnt/Mkdir/a/b/c",(uint32_t)true);
+    SysCallMkdir::Invoke((uint32_t)"/mnt/shiti/a/b/c",(uint32_t)true);
 
     dirent dir[6];
     fread(dir, sizeof(dir[0]), 7, dp);

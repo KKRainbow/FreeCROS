@@ -149,7 +149,7 @@ public:
     Fat32(FILE* _Fp);
 
     bool GetDirectoryEntry(lr::sstl::AString _Path, Fat32Entry* _Root, Fat32Entry& _Res,
-                           bool _Create = true);
+                           bool _Create = false);
     int GetContent(Fat32Entry* _Entry, off_t _Offset, size_t _Size, char* _Buf);
     bool MakeDirectory(lr::sstl::AString _Path, Fat32Entry* _Root,bool _Recursive, Fat32Entry& _Res);
     bool CreateFile(lr::sstl::AString _Path, Fat32Entry* _Root,Fat32Entry& _Res);

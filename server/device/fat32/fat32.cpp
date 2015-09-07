@@ -117,9 +117,9 @@ public:
                 SysCallReadFromPhisicalAddr::Invoke((uint32_t) name,
                                                     (uint32_t)_Msg.content[FsMsg::M_PATH],
                                                     (uint32_t)_Msg.content[FsMsg::M_PATH_SIZE]);
-                if(fat32->MakeDirectory(name, nullptr,(bool)_Msg.content[FsMsg::M_RECURSIVE],entry)
+                if(fat32->MakeDirectory(GetRealPath(name), nullptr,(bool)_Msg.content[FsMsg::M_RECURSIVE],entry)
                    &&
-                   fat32->GetDirectoryEntry(this->GetRealPath(name),nullptr, entry))
+                   fat32->GetDirectoryEntry(this->GetRealPath(name),nullptr, entry, false))
                 {
                     int id = idGen.GetID();
                     inodeTable.Insert(MakePair(id, entry));
