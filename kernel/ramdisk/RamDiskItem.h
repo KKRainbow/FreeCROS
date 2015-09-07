@@ -37,7 +37,8 @@ public:
         BLOCK,
         CHAR,
         KERNELCHAR,
-        KERNELBLOCK
+        KERNELBLOCK,
+        MOUNTED,
     };
 private:
     typedef lr::sstl::Map<lr::sstl::AString, RamDiskItem *> ItemList;
@@ -47,10 +48,17 @@ private:
     IDType id; //每个文件唯一一个ID
     lr::sstl::AString name;
 
+private:
     IDType AddChild(RamDiskItem *_Child);
 
 protected:
     ItemList children;
+public:
+    Thread *GetThread() const {
+        return thread;
+    }
+
+protected:
     Thread *thread;
     int size = 0;
 public:

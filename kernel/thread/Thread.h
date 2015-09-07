@@ -55,7 +55,9 @@ public:
 
     File *GetFileStruct(int _Fid);
 
-    void RemoveFileStruct(int _Fid);
+    bool RemoveFileStruct(int _Fid);
+
+    int DuplicateFileStruct(int _Fid, int _To = -1);
     /*********************************************************************/
 
 

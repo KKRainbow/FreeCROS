@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <SystemCalls.h>
 #include <UserLog.h>
+#include <fsserver/format.h>
 #include "fat32lib.h"
 #include "stdio.h"
 #include "stl/sstring.h"
@@ -176,6 +177,7 @@ uint32_t Fat32::ReadWriteCluster(Fat32Position _Pos, size_t _Size, void* _Buffer
     //看当前簇能读多少
     uint32_t currClusterSize = bytesPerCluster - _Pos.currentOffset;
     size_t currSize = currClusterSize > _Size ? _Size : (size_t)currClusterSize;
+    flock(this->fp);
     this->SeekToDateCluster(_Pos);
     int res =  0;
     if(rw == READ)
@@ -185,6 +187,7 @@ uint32_t Fat32::ReadWriteCluster(Fat32Position _Pos, size_t _Size, void* _Buffer
     size -= res;
     if (res < currSize || size == 0)
     {
+        funlock(fp);
         return (uint32_t)res;
     }
 
@@ -208,6 +211,7 @@ uint32_t Fat32::ReadWriteCluster(Fat32Position _Pos, size_t _Size, void* _Buffer
         if (size == 0)
             break;
     } while (1);
+    funlock(fp);
     return (uint32_t)_Size - size;
 }
 
@@ -220,14 +224,18 @@ uint32_t Fat32::ReadCluster(Fat32Position _Pos, size_t _Size, void* _Buffer)
 }
 
 void Fat32::WriteFatItem(uint32_t _ClusterNum, uint32_t value) {
+    flock(this->fp);
     fseek(this->fp , bs.sector_size*bs.reserved_sectors + (long)_ClusterNum*4  ,  SEEK_SET);
     fwrite(&value ,  4  ,1,this->fp);
+    funlock(this->fp);
 }
 
 uint32_t Fat32::ReadFatItem(uint32_t _ClusterNum) {
     uint32_t res;
+    flock(this->fp);
     fseek(this->fp , bs.sector_size*bs.reserved_sectors + (long)_ClusterNum*4  ,  SEEK_SET);
     fread(&res ,  4  ,1,this->fp);
+    funlock(this->fp);
     return res;
 }
 
@@ -501,21 +509,6 @@ unsigned char Fat32::Get83FilenameChecksum(char *_Name) {
     for (i = 11; i; i--)
         sum = (unsigned char)(((sum & 1) << 7) + (sum >> 1) + *pFCBName++);
     return sum;
-}
-
-lr::sstl::AString Fat32::BaseName(lr::sstl::AString _Str) {
-    auto iter = _Str.End();
-    --iter;
-    for ( ;(*iter != '/' && iter != _Str.Begin()); --iter);
-    for ( ;(*iter == '/' && iter != _Str.Begin()); --iter);
-    return _Str.Sub(_Str.Begin(), ++iter);
-}
-
-lr::sstl::AString Fat32::DirName(lr::sstl::AString _Str) {
-    auto iter = _Str.End();
-    --iter;
-    for ( ;(*iter != '/' && iter != _Str.Begin()); --iter);
-    return _Str.Sub(++iter, _Str.End());
 }
 
 bool Fat32::MakeDirectory(lr::sstl::AString _Path, Fat32Entry *_Root, bool _Recursive, Fat32Entry &_Res) {

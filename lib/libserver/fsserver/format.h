@@ -3,6 +3,7 @@
 //
 #pragma once
 
+#include <stl/sstl/sstl_wstring.h>
 #include "Type.h"
 #include "thread/Message.h"
 
@@ -32,7 +33,8 @@ struct FsMsg
         M_PATH = 1,
         M_PATH_SIZE,
         M_MODE,
-        M_MODE_SIZE,
         M_RECURSIVE,
     };
 };
+lr::sstl::AString BaseName(lr::sstl::AString _Str);
+lr::sstl::AString DirName(lr::sstl::AString _Str);

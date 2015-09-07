@@ -18,6 +18,7 @@ SINGLETON_CPP(SystemCallEntry) {
     ADD_SYSTEM_CALL(Read);
     ADD_SYSTEM_CALL(Write);
     ADD_SYSTEM_CALL(Seek);
+    ADD_SYSTEM_CALL(Close);
     ADD_SYSTEM_CALL(Signal);
     ADD_SYSTEM_CALL(Kill);
     ADD_SYSTEM_CALL(SignalRestore);
@@ -28,6 +29,8 @@ SINGLETON_CPP(SystemCallEntry) {
     ADD_SYSTEM_CALL(GiveUp);
     ADD_SYSTEM_CALL(MountFs);
     ADD_SYSTEM_CALL(Mkdir);
+    ADD_SYSTEM_CALL(Dup);
+    ADD_SYSTEM_CALL(Dup2);
     Interrupt::Instance()->RegisterIRQ(Call, SYSCALL_IRQ_NUM);
     Interrupt::Instance()->SetDPLOfIRQ(SYSCALL_IRQ_NUM, 3);
 }

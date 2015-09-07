@@ -59,6 +59,7 @@ SYSCALL_METHOD_H(Open,10); //devname
 SYSCALL_METHOD_H(Read,11); //devname
 SYSCALL_METHOD_H(Write,12); //devname
 SYSCALL_METHOD_H(Seek,13); //devname
+SYSCALL_METHOD_H(Close,14); //devname
 
 SYSCALL_METHOD_H(Signal,18); //signum,handler,flag
 SYSCALL_METHOD_H(Kill,19); //pid,signum
@@ -74,3 +75,5 @@ SYSCALL_METHOD_H(GiveUp,26);
 
 SYSCALL_METHOD_H(MountFs,27);
 SYSCALL_METHOD_H(Mkdir,28);
+SYSCALL_METHOD_H(Dup,29); //devname
+SYSCALL_METHOD_H(Dup2,30); //devname

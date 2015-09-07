@@ -2,7 +2,8 @@
 // Created by ssj on 15-8-18.
 //
 #pragma once
-#include "stdio.h"
+
+#include <SpinLock.h>
 
 #define FP_TABLE_SIZE 32
 
@@ -42,6 +43,8 @@ struct FILE
 {
     /** File descriptor. */
     int fd;
+    int lock;
+    SpinLock slock;
 };
 extern FILE fp_table[FP_TABLE_SIZE];
 
@@ -120,6 +123,8 @@ extern "C" int fclose(FILE *stream);
 
 extern "C" int fseek(FILE *stream, long offset, int whence);
 extern "C" long ftell(FILE* stream);
+extern "C" void flock(FILE* stream);
+extern "C" void funlock(FILE* stream);
 /**
  * @}
  */

@@ -3,7 +3,6 @@
 #include"Global.h"
 #include"stl/sstring.h"
 #include"stl/slinkedlist.h"
-#include"stdio.h"
 #include"stdarg.h"
 #include"SpinLock.h"
 

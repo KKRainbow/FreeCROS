@@ -7,6 +7,7 @@
 #define MSG_DEVICE_WRITE_OPERATION 11
 #define MSG_DEVICE_READ_OPERATION 12
 #define MSG_DEVICE_SEEK_OPERATION 13
+#define MSG_DEVICE_MKDIR_OPERATION 14
 
 #define DEFINE_FUNC(Oper) \
 static void Dev##Oper() \
@@ -26,6 +27,7 @@ public:
 	virtual Message Open(Message& _Msg) = 0;
 	virtual Message Read(Message& _Msg) = 0;
 	virtual Message Write(Message& _Msg) = 0;
+	virtual Message Other(Message& _Msg) = 0;
 };
 static DeviceOperation* globalDevOp = nullptr;
 static Message globalMsg;
@@ -33,6 +35,7 @@ static Message globalMsg;
 DEFINE_FUNC(Open)
 DEFINE_FUNC(Read)
 DEFINE_FUNC(Write)
+DEFINE_FUNC(Other)
 
 static void device_loop(DeviceOperation& _Op)
 {
@@ -56,6 +59,9 @@ static void device_loop(DeviceOperation& _Op)
 				break;
 			case MSG_DEVICE_WRITE_OPERATION :
 				pid = SysCallCreateThread::Invoke((uint32_t) DevWrite);
+				break;
+			default:
+				pid = SysCallCreateThread::Invoke((uint32_t) DevOther);
 				break;
 		}
 		i++;

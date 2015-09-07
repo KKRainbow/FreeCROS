@@ -27,6 +27,7 @@ extern "C" FILE * fopen(const char *filename,
     if(fd < 0)return nullptr;
 
     fp->fd = fd;
+    fp->lock = 0;
     return fp;
 }
 
@@ -61,5 +62,27 @@ extern "C" long ftell(FILE* stream)
 
 extern "C" int fclose(FILE *stream)
 {
-    return 0;
+    return SysCallClose::Invoke((uint32_t)stream->fd);
+}
+
+extern "C" void flock(FILE* stream)
+{
+    SpinLock& lock = stream->slock;
+    lock.Lock();
+    while(stream->lock)
+    {
+        lock.Unlock();
+        SysCallGiveUp::Invoke();
+        lock.Lock();
+    }
+    stream->lock = 1;
+    lock.Unlock();
+}
+
+extern "C" void funlock(FILE* stream)
+{
+    SpinLock& lock = stream->slock;
+    lock.Lock();
+    stream->lock = 0;
+    lock.Unlock();
 }

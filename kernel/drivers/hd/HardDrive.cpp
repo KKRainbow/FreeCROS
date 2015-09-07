@@ -142,9 +142,8 @@ void hd_sync()
         }
         if(total)
         {
-//            LOG("Total %d buffers\n",total);
+            LOG("Total %d buffers\n",total);
         }
-        LOG("Total %d buffers,at: %d\n",total, CPUManager::Instance()->GetClockCounter());
     }
 #pragma clang diagnostic pop
 }

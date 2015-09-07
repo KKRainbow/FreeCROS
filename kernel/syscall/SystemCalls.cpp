@@ -1,10 +1,10 @@
 #include <errno.h>
 #include <ramdisk/RamDiskItemDir.h>
+#include <stdio/fileops.h>
 #include"SystemCalls.h"
 #include"memory/AddressSpaceManager.h"
 #include"cpu/CPUManager.h"
 #include"thread/ThreadManager.h"
-#include"ramdisk/RamDisk.h"
 
 SYSCALL_METHOD_CPP(CreateThread) {
     Thread *curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
@@ -165,14 +165,7 @@ SYSCALL_METHOD_CPP(Open)//path
 
     RamDiskItemDir* dir = (RamDiskItemDir*)ri;
     int res = -1;
-    if(dir->IsMounted())
-    {
-        res = dir->Open(path,-1,(char*)_Sec);
-    }
-    else
-    {
-        res = dir->Open();
-    }
+    res = dir->Open();
     //如果错误了就不用进行下面的步骤
     if ( res < 0 )return res;
 
@@ -182,7 +175,6 @@ SYSCALL_METHOD_CPP(Open)//path
     Assert(file != nullptr);
 
     file->f_item = ri;
-    if(dir->IsMounted())file->f_inner = res;
 
     return fid;
 }
@@ -258,7 +250,10 @@ SYSCALL_METHOD_CPP(Write)//path
 SYSCALL_METHOD_CPP(Seek) {
     return ReadWrite(_First, (char *) _Sec, (size_t) _Third, SYSCALL_SEEK);
 }
-
+SYSCALL_METHOD_CPP(Close) {
+    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+    return curr->RemoveFileStruct(_First) ? 0 : -1;
+}
 
 SYSCALL_METHOD_CPP(Signal) //signum,handler,flag
 {
@@ -372,5 +367,16 @@ SYSCALL_METHOD_CPP(Mkdir)
     {
         root = nullptr;
     }
-    return RamDisk::Instance()->MakeDir(path, nullptr, _Sec);
+    return RamDisk::Instance()->MakeDir(path, root, _Sec);
+}
+
+SYSCALL_METHOD_CPP(Dup)
+{
+    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+    return curr->DuplicateFileStruct(_First, -1);
+}
+SYSCALL_METHOD_CPP(Dup2)
+{
+    auto curr = CPUManager::Instance()->GetCurrentCPU()->GetCurrThreadRunning();
+    return curr->DuplicateFileStruct(_First, _Sec);
 }

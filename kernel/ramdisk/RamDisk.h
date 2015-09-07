@@ -36,8 +36,6 @@ private:
     RamDiskItem *GetNewItem(lr::sstl::AString _Name, RamDiskItem::Type _Type);
 
 public:
-    lr::sstl::Pair<lr::sstl::AString, lr::sstl::AString> AnalysePath(lr::sstl::AString _Path);
-
     const static IDType INVALIDATE_ID = -1;
 
     RamDiskItem *GetItemByID(IDType _Id);
@@ -57,4 +55,6 @@ public:
     IDType CreateFile(lr::sstl::AString _Name, RamDiskItem *_Parent = nullptr);
 
     IDType CreateKernelDev(RamDiskItemKernel *_Item);
+
+    lr::sstl::AString GetAbsolutePath(RamDiskItem* _Dir);
 };

@@ -339,6 +339,31 @@ File *Thread::GetFileStruct(int _Fid) {
     }
 }
 
-void Thread::RemoveFileStruct(int _Fid) {
+bool Thread::RemoveFileStruct(int _Fid) {
+    auto file = this->GetFileStruct(_Fid) ;
+    if (!file)
+        return false;
+    //做一些清理工作
     fileTable->Erase(_Fid);
+    return true;
+}
+
+int Thread::DuplicateFileStruct(int _Fid, int _To) {
+    File* fileTo = nullptr;
+    File* fileFrom = this->GetFileStruct(_Fid);
+    if (_To < 0)
+    {
+        _To = this->GetNewFileSlot();
+    }
+    else
+    {
+        //TODO 对该file struct执行关闭操作。
+    }
+    fileTo = this->GetFileStruct(_To);
+    if (!fileFrom || !fileTo)
+    {
+        return -1;
+    }
+    *fileTo = *fileFrom;
+    return _To;
 }

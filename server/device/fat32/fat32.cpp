@@ -39,8 +39,6 @@ public:
         fat32 = new Fat32(fp);
         dir = _Dir;
         SysCallMountFs::Invoke((uint32_t)_Dir, (uint32_t)_Dev);
-        Fat32Entry entry;
-        fat32->MakeDirectory("/makabdafa/a/b/c/d", nullptr,true,entry);
     };
     virtual Message Open(Message &_Msg)
     {
@@ -105,6 +103,38 @@ public:
         msg.content[0] = 0;
         return msg;
     }
+
+
+    virtual Message Other(Message &_Msg)
+    {
+        Message msg;
+        Fat32Entry entry;
+        switch(_Msg.content[0])
+        {
+            case MSG_DEVICE_MKDIR_OPERATION:
+                char name[1024];
+                //name在内核空间，当然要这么取0 0
+                SysCallReadFromPhisicalAddr::Invoke((uint32_t) name,
+                                                    (uint32_t)_Msg.content[FsMsg::M_PATH],
+                                                    (uint32_t)_Msg.content[FsMsg::M_PATH_SIZE]);
+                if(fat32->MakeDirectory(name, nullptr,(bool)_Msg.content[FsMsg::M_RECURSIVE],entry)
+                   &&
+                   fat32->GetDirectoryEntry(this->GetRealPath(name),nullptr, entry))
+                {
+                    int id = idGen.GetID();
+                    inodeTable.Insert(MakePair(id, entry));
+                    msg.content[0] = id;
+                }
+                else
+                {
+                    msg.content[0] = -1;
+                }
+                break;
+            default:
+                msg.content[0] = -1;
+        }
+        return msg;
+    }
 };
 
 
@@ -116,3 +146,4 @@ int fat32()
     SysCallExit::Invoke();
     return 1;
 }
+

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include"Log.h"
 
 SINGLETON_CPP(Log) {

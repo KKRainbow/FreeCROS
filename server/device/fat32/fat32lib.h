@@ -144,8 +144,6 @@ protected:
     lr::sstl::Pair<Fat32Iterator,Fat32Iterator> FindProperIteratorForDirectory(const lr::sstl::AString& _Name,
                                                                                Fat32Entry* _Root);
     bool MakeEntryInDir(Fat32Entry* _Root, Fat32Entry& _Entry);
-    lr::sstl::AString BaseName(lr::sstl::AString _Str);
-    lr::sstl::AString DirName(lr::sstl::AString _Str);
     uint32_t GetStartDataClusterForEntry(Fat32Entry* _Entry, bool _AutoAlloc = true);
 public:
     Fat32(FILE* _Fp);

@@ -18,11 +18,13 @@
 #include"RamDisk.h"
 
 #include"stl/svector.h"
+#include "RamDiskItemMounted.h"
 #include"RamDiskItemChrDev.h"
 #include"RamDiskItemDir.h"
 #include"RamDiskItemFile.h"
 #include"RamDiskItemKernel.h"
 #include <cpu/CPUManager.h>
+#include <fsserver/format.h>
 
 using namespace lr::sstl;
 
@@ -35,19 +37,6 @@ SINGLETON_CPP(RamDisk) {
     this->MakeDir("etc");
     this->MakeDir("home");
 
-}
-
-Pair<AString, AString> RamDisk::AnalysePath(AString _Path) {
-    Vector<AString> tmp;
-    _Path = _Path.Trim('/');
-    _Path.Split(tmp, '/');
-    if ( tmp.Size() == 1 ) {
-        return MakePair("/", tmp[0]);
-    }
-    else {
-        return MakePair(_Path.Sub(0, _Path.Length() - tmp[0].Length()),
-                        tmp[tmp.Size() - 1]);
-    }
 }
 
 RamDiskItem *RamDisk::GetItemByID(IDType _Id) {
@@ -77,10 +66,23 @@ RamDiskItem *RamDisk::GetItemByPath(AString _Path, RamDiskItem *_Root) {
     _Path.Split(names, '/');
     if ( names.Size() == 0 )return nullptr;
     if ( _Root == nullptr )_Root = this->root;
+    _Path = _Path.Trim('/');
+    auto absolutePath = this->GetAbsolutePath(_Root) + "/" + _Path;
     for ( auto &name : names ) {
         _Root = _Root->FindChildByName(name);
         if ( _Root == nullptr )return nullptr;
-        if (_Root->thread != nullptr)return _Root;
+        if(_Root->GetType() == RamDiskItem::DIR)
+        {
+            RamDiskItemDir* dir = (RamDiskItemDir*)_Root;
+            if(dir->IsMounted())
+            {
+                //创建对应的mounted item
+                auto mounted = new RamDiskItemMounted(dir,-1,idgen.GetID(),
+                absolutePath,nullptr);
+                this->itemsMap.Insert(MakePair(mounted->GetID(),mounted));
+                return mounted;
+            }
+        }
     }
     return _Root;
 }
@@ -126,13 +128,13 @@ RamDiskItem *RamDisk::GetNewItem(AString _Name, RamDiskItem::Type _Type) {
 
 IDType RamDisk::MakeDir(lr::sstl::AString _Path, RamDiskItem *_Parent, bool _Recursive) {
     Vector<AString> names;
-    auto anares = this->AnalysePath(_Path);
-    auto pwd = anares.first;
-    auto file = anares.second;
-
+    _Path = _Path.Trim('/');
+    auto file = BaseName(_Path);
+    auto pwd = DirName(_Path);
     if ( _Parent == nullptr )_Parent = this->root;
+    AString absolutePath = this->GetAbsolutePath(_Parent) + "/" + _Path;
     if ( _Recursive == false ) {
-        if ( pwd == "/" ) {
+        if ( pwd == "." ) {
             //当前目录就是要创建目录的地方
             auto id = -1;
             auto newItem = this->GetNewItem(file, RamDiskItem::Type::DIR);
@@ -160,6 +162,20 @@ IDType RamDisk::MakeDir(lr::sstl::AString _Path, RamDiskItem *_Parent, bool _Rec
             else {
                 if ( child->GetType() != RamDiskItem::DIR ) {
                     return -2;
+                }
+                auto dirItem = (RamDiskItemDir*)child;
+                if (dirItem->IsMounted())
+                {
+                    //创建对应的mounted item
+                    LOG("Mkdir get mounted dir\n");
+                    auto mounted = new RamDiskItemMounted(dirItem,-1,idgen.GetID(),
+                                                          absolutePath,nullptr);
+                    if (mounted->Mkdir(0777,_Recursive) > 0)
+                    {
+                        this->itemsMap.Insert(MakePair(mounted->GetID(),mounted));
+                        return mounted->GetID();
+                    }
+                    return -1;
                 }
                 _Parent = child;
             }
@@ -189,4 +205,21 @@ IDType RamDisk::CreateKernelDev(RamDiskItemKernel *_Item) {
     _Item->id = this->idgen.GetID();
     this->itemsMap.Insert(MakePair(_Item->id, _Item));
     return dev->AddChild(_Item);
+}
+
+lr::sstl::AString RamDisk::GetAbsolutePath(RamDiskItem* _Dir) {
+    if ( _Dir->GetType() == RamDiskItem::MOUNTED)
+    {
+        return _Dir->GetName();
+    }
+    if ( _Dir->GetType() == RamDiskItem::DIR)
+    {
+        if (_Dir == this->root)
+        {
+            return AString::Empty;
+        }
+        return this->GetAbsolutePath((RamDiskItemDir*)_Dir->GetParent()) + "/" +
+               _Dir->GetName();
+    }
+    return AString::Empty;
 }
